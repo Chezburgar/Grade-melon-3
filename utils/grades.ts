@@ -322,18 +322,8 @@ const parseGrades = (grades: Gradebook): Grades => {
 			calculateGrade(course);
 		}
 	});
-	let prev;
-	let offset=0;
-	parsedGrades.courses.forEach((course:Course) => {
-		if(course.period!==prev){
-			prev=course.period;
-			course.layoutID=course.period+offset;
-		}
-		else{
-			offset++;
-			course.layoutID=course.period+offset;
-		}
-
+	parsedGrades.courses.forEach((course:Course,index) => {
+		course.layoutID=index;
 	});
 
 	return parsedGrades;

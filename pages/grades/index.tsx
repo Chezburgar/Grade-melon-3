@@ -106,7 +106,7 @@ export default function Grades({
 	};
 
 	return (
-		<motion.div className="p-5 md:p-10 flex-1">
+		<motion.div className="p-5 md:p-10 md:flex-1">
 			<Head>
 				<title>Gradebook - Grade Melon</title>
 			</Head>
@@ -154,7 +154,7 @@ export default function Grades({
 					<Spinner size="xl" color="pink" />
 				</div>
 			) : (
-				<div className="max-w-max">
+				<div className="md:max-w-max">
 					<div className="flex gap-2 mb-5">
 						<button
 							type="button"
@@ -167,10 +167,11 @@ export default function Grades({
 							id="periods"
 							onChange={(e) => update(parseInt(e.target.value))}
 							value={period}
-							className="min-w-min block w-full p-2 text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+							className="block w-full p-2 text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 						>
 							{grades?.periods.map((period) => (
-								<option value={period.index} key={period.index}>
+								<option value={period.index} key={period.index}//
+								>
 									{period.name}
 								</option>
 							))}
@@ -185,11 +186,11 @@ export default function Grades({
 					</div>
 					{view === "card" && (
 						<div
-							className="grid gap-5 2col:grid-cols-2 3col:grid-cols-3 4col:grid-cols-4 items-stretch w-full"
+							className="grid gap-5 2col:grid-cols-2 3col:grid-cols-3 4col:grid-cols-4 justify-items-center mx-1" //so if u decide the margin is fugly, just get rid of mx-1 and put back items-stretch and w-full
 							//style={{ gridTemplateColumns: "repeat(auto-fit, 384px)" }}
 						>
 							{grades?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => (
-								<div className="w-full md:w-96" key={i}>
+								<div className="mx-2 w-full md:w-96" key={i}>
 									<motion.div
 										layout="preserve-aspect"
 										layoutId={`card-${layoutID}`}
