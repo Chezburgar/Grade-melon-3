@@ -146,6 +146,7 @@ function MyApp({ Component, pageProps }) {
 		for(let key in preSets){
 			if(message.toLowerCase().includes(key)){var message=preSets[key];break}
 		}
+		console.log("Verbose Error: ",message)
 		setToasts((toasts) => [...toasts, { title: message, type: "error" }]);
 			setTimeout(() => {
 				setToasts((toasts) => toasts.slice(1));
