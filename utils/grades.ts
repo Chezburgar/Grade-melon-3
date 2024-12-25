@@ -152,20 +152,26 @@ const stripParens = (str: string): string => {
 };
 
 const parsePoints = (points: string) => {
-	let regex = /^(\d+\.?\d*|\.\d+) \/ (\d+\.?\d*|\.\d+)$/;
-	if (points.match(regex)) {
-		let p = points.split(regex);
-		return {
-			grade: (parseFloat(p[1]) / parseFloat(p[2])) * 100,
-			earned: parseFloat(p[1]),
-			possible: parseFloat(p[2]),
-		};
+	let p = points.split("/").map(num=>parseFloat(num));
+	if(p.length==1){
+		return{
+			grade:NaN,
+			earned:NaN,
+			possible:p[0]
+		}
 	}
-	return {
-		grade: NaN,
-		earned: NaN,
-		possible: parseFloat(points),
-	};
+	else if(p.length==2){
+		p[0]=isNaN(p[0]) ? 0 : p[0];
+		p[1]=isNaN(p[1]) ? 0 : p[1];
+	return{
+		grade:(p[0]/p[1])*100,
+		earned:p[0],
+		possible:p[1]
+	}
+}
+	else throw new Error("Invalid points string")
+
+
 };
 
 const parseDate = ({ start, end }: { start: Date; end: Date }): string => {
