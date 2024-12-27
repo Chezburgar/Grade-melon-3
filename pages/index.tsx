@@ -174,7 +174,7 @@ export default function Home({ client }: HomeProps) {
 				</div>
 			</div>
 
-			<div className="gap-8 items-center py-8 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 ">
+			<div className="gap-8 items-center md:pt-5 md:pb-0 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 ">
 				<div className="mt-4 md:mt-0">
 					<motion.h2
 						initial={{ x: 0, opacity: 0 }}
@@ -225,6 +225,37 @@ export default function Home({ client }: HomeProps) {
 					alt="Open Source"
 				/>
 			</div>
+			<div className="pb-4 md:pt-0 sm:pt-4">
+			<motion.h2
+				initial={{ x: 0, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ delay: 1.4, duration: 0.5 }}
+				className="font-bold dark:text-white text-3xl mt-10"
+			>
+				FAQ
+			</motion.h2>
+			<motion.p
+				initial={{ x: 0, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ delay: 1.5, duration: 0.5 }}
+				className="py-3 text-gray-500 w-fit md:w-1/2"
+			>
+				Have questions? Check out our FAQ page for answers to common questions.
+			</motion.p>
+			<motion.div
+				initial={{ x: 0, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ delay: 1.6, duration: 0.5 }}
+			>
+				<Link href="/faq">
+					<button className="focus:outline-none text-white bg-primary-600 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">
+						FAQ
+					</button>
+				</Link>
+			</motion.div>
+			</div>
+
+
 			<motion.h2
 				initial={{ x: 0, opacity: 0 }}
 				animate={{ x: 0, opacity: 1 }}

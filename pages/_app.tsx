@@ -21,7 +21,7 @@ interface Toast {
 	type: "success" | "error" | "warning" | "info";
 }
 
-const noShowNav = ["/login", "/", "/privacy", "/letter"];
+const noShowNav = ["/login", "/", "/privacy", "/letter","/faq"];
 
 function MyApp({ Component, pageProps }) {
 	const router = useRouter();

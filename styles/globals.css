@@ -5,21 +5,7 @@
 @tailwind utilities;
 
 
-/* custom scrollbar */
-@media (min-width: 768px) {
-  ::-webkit-scrollbar
-{
-  width: 8px;
-  height: 8px;
-  background-color: #111827;
-}
 
-::-webkit-scrollbar-thumb
-{
-  border-radius: 4px;
-  background-color: #374151;
-}
-}
 
 /* custom highlight */
 ::selection {
