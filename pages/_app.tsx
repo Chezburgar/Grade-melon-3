@@ -6,6 +6,8 @@ import { Flowbite, Toast, useTheme } from "flowbite-react";
 import Topbar from "../components/TopBar";
 import SideBar from "../components/SideBar";
 import MobileBar from "../components/MobileBar";
+import CustomAd from "../components/customAd";
+
 import { Grades,parseGrades } from "../utils/grades";
 import Head from "next/head";
 import { HiX } from "react-icons/hi";
@@ -14,7 +16,7 @@ import Cookies from "js-cookie";
 import useWindowSize from '../hooks/useWindowSize';
 import { Analytics } from "@vercel/analytics/react";
 import allDistricts from "../lib/districts";
-import Script from "next/script";
+
 
 interface Toast {
 	title: string;
@@ -57,6 +59,7 @@ function MyApp({ Component, pageProps }) {
 				console.log("para me?")
 				console.log(fetchedClient);
 				await setClient(fetchedClient);
+				
 				districts.forEach(district=>{
 					if(district.parentVueUrl==districtURL){Cookies.set("districtURL",JSON.stringify(district),{expires:7})}
 				});
@@ -100,14 +103,14 @@ function MyApp({ Component, pageProps }) {
 
 	useEffect(()=>{
 		if(client!==undefined&&studentInfo==undefined){
-			client.studentInfo().then(info=>{
+			client.studentInfo().then(([info])=>{
 				setStudentInfo(info)
 				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 					'method': 'POST',
 					'headers': { 'Content-Type': 'application/json' },
 					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool})
 				})
-			}).catch(error=>{client.ChildList().then(info=>{
+			}).catch(error=>{client.ChildList().then(([info])=>{
 				setStudentInfo(info);
 				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 					'method': 'POST',
@@ -142,11 +145,11 @@ function MyApp({ Component, pageProps }) {
 	}, [client,districtURL]);
 
 	function createError(message:string){
+		console.log("Verbose Error: ",message)
 		const preSets={"upgraded":"API Token Expired, come back soon?","incorrect":"Username or Password is Incorrect","invalid":"Username or Password is Incorrect","load failed":"Network Error","failed to fetch":"Network Error:Try Again Later","socket":"Network Error"};
 		for(let key in preSets){
 			if(message.toLowerCase().includes(key)){var message=preSets[key];break}
 		}
-		console.log("Verbose Error: ",message)
 		setToasts((toasts) => [...toasts, { title: message, type: "error" }]);
 			setTimeout(() => {
 				setToasts((toasts) => toasts.slice(1));
@@ -301,7 +304,7 @@ const logout = async () => {
 					)}
 				</div>
 			</div>
-			
+		<CustomAd/>
 		</Flowbite>
 	);
 }

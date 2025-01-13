@@ -42,7 +42,7 @@ export default function Attendance({ client,createError}: AttendanceProps) {
 	useEffect(() => {
 		try {
 			if(!client.loadedAttendance){
-			client.attendance().then((res) => {
+			client.attendance().then(([res]) => {
 				setData(res);
 				setLoading(false);
 				let temp = parseBarData(res?.absences);

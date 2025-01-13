@@ -61,7 +61,7 @@ export default function Grades({
 	useEffect(() => {
 		try {
 			if (!grades&&client) {
-				client.gradebook().then((res) => {
+				client.gradebook().then(([res]) => {
 					console.log(typeof index);
 					let parsedGrades = parseGrades(res);
 					setGrades(parsedGrades);
@@ -136,7 +136,7 @@ export default function Grades({
 		setLoading(true);
 		client
 			.gradebook(p)
-			.then((res) => {
+			.then(([res]) => {
 				console.log(res);
 				setGrades(parseGrades(res));
 				setPeriod(p);

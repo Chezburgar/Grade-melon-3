@@ -90,10 +90,10 @@ export default function Documents({ client,createError }: DocumentsProps) {
 
 	useEffect(() => {
 		try {
-			console.log("DEATTHHHHH FUCK")
+			//console.log("DEATTHHHHH FUCK")
 			console.log(documents)
 			if(client.loadedDocuments==undefined){
-			client.documents().then((res) => {
+			client.documents().then(([res]) => {
 				console.log(res);
 				res.forEach((doc) => {
 					doc.file.comment = parseName(doc.file.comment);
