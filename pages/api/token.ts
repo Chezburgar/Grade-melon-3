@@ -1,6 +1,6 @@
 import { getVercelOidcToken } from '@vercel/functions/oidc';
  
-export const GET = async () => {
+export default async function(req,res){
   const result = await fetch('http://173.66.59.204:1000/', {
     method:'POST',
     headers: {
@@ -10,5 +10,5 @@ export const GET = async () => {
   });
   const jsonResult=await result.json()
  
-  return jsonResult
+  res.json(jsonResult)
 };
