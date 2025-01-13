@@ -8,6 +8,7 @@ export const GET = async () => {
     },
 
   });
+  const jsonResult=await result.json()
  
-  return Response.json(await result.json());
+  return jsonResult
 };
