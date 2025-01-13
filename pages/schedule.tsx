@@ -20,7 +20,6 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 		setTerm(parseInt(e.target.value))
 	}
 	useEffect(() => {
-		fetch('/api/token')
 		try {
 			if(!client.loadedSchedule){
 			setLoading(true);
