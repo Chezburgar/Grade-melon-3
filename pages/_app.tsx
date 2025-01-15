@@ -56,6 +56,8 @@ function MyApp({ Component, pageProps }) {
 			.then(async (res) => {
 				const gradebook=res[1];
 				const fetchedClient=res[0];
+				//@ts-ignore
+				Cookies.set("token",res[2].token,{expires:5/(60*24)})
 				console.log("para me?")
 				console.log(fetchedClient);
 				await setClient(fetchedClient);

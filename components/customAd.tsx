@@ -1,5 +1,6 @@
 import React, { useState, useEffect,useRef } from "react";
 import {useInView} from "../hooks/isVisible";
+import Cookies from "js-cookie";
 
 /*
 if i wanted to be cheeky and fast, i could get the images of the ads and their names as getStaticProps (use revalidate so it updates every hour) so that only the quick textual data needs be fetched
@@ -11,7 +12,7 @@ getStaticProps once an hour or so, that way, 0 fetches need to occur to load the
 
 */
 
-const adServer="ads.grademelon.org" //idk
+const adServer="http://173.66.59.204:1000/" //idk
 
 
 export default function CustomAd(){
@@ -28,28 +29,32 @@ function handleClick(){
 }
 //should i use oicd or just do sum custom auth tokens via the synergyProxy. validate credenetials. only send ads to logged in people. idk. i mean yeah i guess. why not.
 
-async function increment(){
-    //intentionally obtuse and slow.
-    const result=await (await fetch("/api/getToken")).json()
-    const token=result.token;
+function increment(){
+    const token=Cookies.get("token");
     fetch(adServer+"/increment",{
         'method':"POST",
-        'headers':{Authorization: `Bearer ${token}`},
-        'body':JSON.stringify({type:ad.type,adId:ad.adId,advertiserId:ad.advertiserId})
+        'body':JSON.stringify({type:ad.type,adId:ad.adId,advertiserId:ad.advertiserId,token:token,bypass:5421})
 
     })
 
 }
 
+async function getAd(){
+        const response=await fetch(adServer+"/serve",{
+            method:"GET"
+        });
+        return await response.json()
 
+    
+}
 
 
 useEffect(()=>{
     if(ad==undefined){
-        fetch(adServer+"/serve",{
-            method:"GET"
-
+        getAd().then(res=>{
+            setAd(res);
         })
+
     }
 
 
@@ -67,9 +72,12 @@ useEffect(()=>{
 
 
     return(
+        <>
+        {ad ? (
         <div className="flex justify-center mb-2 mx-4">
-            <img ref={adRef} className="border-2 max-h-96" src={} onClick={handleClick}/>
-        </div>
+            <img ref={adRef} className="border-2 max-h-96" src={ad.image} onClick={handleClick}/>
+        </div>) : (<div></div>)}
+        </>
 
     )
 }
