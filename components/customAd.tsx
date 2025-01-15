@@ -25,15 +25,17 @@ export default function CustomAd(){
 
 
 function handleClick(){
-    console.log("i handle clicks")
+    if(ad.link){
+    increment("click");
+    window.open(ad?.link)};
 }
 //should i use oicd or just do sum custom auth tokens via the synergyProxy. validate credenetials. only send ads to logged in people. idk. i mean yeah i guess. why not.
 
-function increment(){
+function increment(type){
     const token=Cookies.get("token");
     fetch(adServer+"/increment",{
         'method':"POST",
-        'body':JSON.stringify({type:ad.type,adId:ad.adId,advertiserId:ad.advertiserId,token:token,bypass:5421})
+        'body':JSON.stringify({type:type,adId:ad.adId,advertiserId:ad.advertiserId,token:token,bypass:5421})
 
     })
 
@@ -63,10 +65,11 @@ useEffect(()=>{
 
 
 useEffect(()=>{
-    if(visbility&&Infinity>=timestamp+1000*60){
-        increment();
+    if(visbility&&Infinity>=timestamp+1000*45){
+        increment("view");
+        setTime(Date.now());
     }
-    else{console.log("smthn hinky goin on",timestamp,visbility)}
+    else{console.log(timestamp,visbility)}
 
 },[visbility])
 
