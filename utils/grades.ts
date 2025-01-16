@@ -329,7 +329,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 		}
 	});
 	parsedGrades.courses.forEach((course:Course,index) => {
-		course.layoutID=course.period;
+		course.layoutID=index;
 	});
 
 	return parsedGrades;
