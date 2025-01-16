@@ -369,24 +369,24 @@ export default function Grades({
 				<motion.div
 					className="max-w-max"
 					layout
-					layoutId={`card-${course?.period}`}
+					layoutId={`card-${course?.layoutID}`}
 				>
 					<motion.h1
-						layoutId={`name-${course?.period}`}
+						layoutId={`name-${course?.layoutID}`}
 						layout
 						className="flex flex-wrap text-xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1"
 					>
 						{course?.name}
 					</motion.h1>
 					<motion.p
-						layoutId={`teacher-${course?.period}`}
+						layoutId={`teacher-${course?.layoutID}`}
 						layout
 						className="text-md tracking-tight mb-2.5 text-gray-900 dark:text-white"
 					>
 						{course?.teacher.name}
 					</motion.p>
 					<motion.div
-						layoutId={`grade-${course.period}`}
+						layoutId={`grade-${course.layoutID}`}
 						layout="preserve-aspect"
 						className="text-xl md:text-xl mb-2.5 dark:text-white"
 					>
