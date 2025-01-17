@@ -332,6 +332,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 		course.layoutID=index;
 	});
 
+
 	return parsedGrades;
 };
 

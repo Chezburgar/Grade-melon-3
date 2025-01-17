@@ -57,6 +57,8 @@ function MyApp({ Component, pageProps }) {
 				const gradebook=res[1];
 				const fetchedClient=res[0];
 				//@ts-ignore
+				gradebook.gradingScale=res[2].gradingScale
+				//@ts-ignore
 				Cookies.set("token",res[2].token,{expires:5/(60*24)})
 				console.log("para me?")
 				console.log(fetchedClient);

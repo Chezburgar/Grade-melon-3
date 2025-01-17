@@ -55,7 +55,8 @@ export default function Grades({
 			if (!grades && client) {
 				//setLoading(true);
 				try {
-					client.gradebook().then(([res]) => {
+					client.gradebook().then(([res,extra]) => {
+						res.gradingScale=extra?.gradingScale
 						let parsedGrades = parseGrades(res);
 						console.log("checker")
 						console.log(res);
@@ -82,7 +83,8 @@ export default function Grades({
 		setLoading(true);
 		client
 			.gradebook(p)
-			.then(([res]) => {
+			.then(([res,extra]) => {
+				res.gradingScale=extra?.gradingScale
 				console.log(res);
 				setGrades(parseGrades(res));
 				setLoading(false);

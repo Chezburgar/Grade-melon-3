@@ -3,6 +3,8 @@ import {useInView} from "../hooks/isVisible";
 import Cookies from "js-cookie";
 
 /*
+
+
 if i wanted to be cheeky and fast, i could get the images of the ads and their names as getStaticProps (use revalidate so it updates every hour) so that only the quick textual data needs be fetched
 from the ads server at load time, is that worthwhile? the cost is that advertisers seeking to upload their ads wouldn't see them on demand
 
@@ -37,7 +39,7 @@ function increment(type){
         'method':"POST",
         'body':JSON.stringify({type:type,adId:ad.adId,advertiserId:ad.advertiserId,token:token,bypass:5421})
 
-    })
+    }).catch(error=>console.log(error))
 
 }
 
@@ -55,7 +57,7 @@ useEffect(()=>{
     if(ad==undefined){
         getAd().then(res=>{
             setAd(res);
-        })
+        }).catch(error=>console.log(error))
 
     }
 
