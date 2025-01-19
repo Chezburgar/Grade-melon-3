@@ -190,7 +190,7 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 								href="https://klinn.works/"
 								className="underline decoration-2 pl-1"
 							>
-								Find internships, research programs, competitions and more Attendance with Klinn!
+								Find internships, research programs, competitions and more with Klinn!
 							</Link>
 							<button onClick={closePartner}>
 								<RiCloseCircleLine className="inline-block" size="1.1rem" />
