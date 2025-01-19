@@ -34,6 +34,7 @@ function MyApp({ Component, pageProps }) {
 	const [grades, setGrades] = useState<Grades>();
 	const [period, setPeriod] = useState<number>();
 	const [loading, setLoading] = useState(false);
+	const [referal,setReferal]=useState(false);
 	const [districts, setDistricts] = useState(allDistricts);
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
@@ -96,7 +97,30 @@ function MyApp({ Component, pageProps }) {
 		return false;
 	};
 
+	useEffect(() => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const referrer = urlParams.get('ref')
+		if (referrer === 'klinn') {
+			setReferal(true);
+	}
+	  }, []);
 
+
+	useEffect(()=>{
+		//replace when the updated logic from adsplatform is finished
+		if(client && referal){
+			try{
+				fetch("https://studentvuelib.up.railway.app/refferals",{
+				  'method':'POST',
+				  'headers': { 'Content-Type': 'application/json' },
+				  'body': JSON.stringify({'validation':'f7c3c1ce7613fce0b595a3eaf48f1ad8'})
+	  
+				})
+			  }catch(error){console.log("idk")}
+		}
+
+
+	},[client])
 
 	useEffect(()=>{
 		if(client!==undefined&&studentInfo==undefined){
