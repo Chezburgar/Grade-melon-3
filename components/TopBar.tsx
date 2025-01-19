@@ -5,6 +5,7 @@ import { FiLogOut } from "react-icons/fi";
 import { BsQuestionLg } from "react-icons/bs";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { MdOutlinePrivacyTip } from "react-icons/md";
+import Cookies from "js-cookie";
 import dynamic from "next/dynamic";
 
 interface TopBarProps {
@@ -17,11 +18,15 @@ const DarkModeToggle = dynamic(() => import('../components/Toggle'), {
 	ssr: false,
   });
 
+
+
+
 export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 	const [dropdown, setDropdown] = useState(false);
 	const [advertisePWA, setAdvertisePWA] = useState(false);
 	const [advertiseDiscord, setAdvertiseDiscord] = useState(false);
 	const [advertiseBrowser,setAdvertiseBrowser]=useState(false);
+	const [partner,setPartner]=useState(false);
 	const [closed,setClosed]=useState(false);
 
 	useEffect(() => {
@@ -39,6 +44,13 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 				setAdvertiseDiscord(true);
 				//localStorage.setItem("advertisePWA", "true");
 			}
+
+			if (Cookies.get("partner") == undefined) {
+				setPartner(true);
+			}
+
+
+
 			if (navigator.userAgent.includes('Instagram') === true) {
 				setAdvertiseBrowser(true);
 				
@@ -54,103 +66,34 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 		localStorage.setItem("advertisePWA", "false");
 	};
 
+
+	const closePartner = () => {
+		setPartner(false);
+		Cookies.set("partner","false",{expires:2})
+	};
+
 	const closeAdvertiseDiscord = () => {
 		setAdvertiseDiscord(false);
 		localStorage.setItem("advertiseDiscord", "false");
 	};
 
 
-	
 	return (
-		<div>
-
-			<div className="fixed top-0 w-full z-10">
-
-				{!advertiseBrowser && advertisePWA && client && (
-			<div>
-					<div className="align-top w-full bg-primary-600 px-4 py-3 text-white">
-						<p className="text-center text-sm font-medium flex gap-2 justify-center">
-							<span>
-								Want to use Grade Melon as an app?  
-								<Link
-									onClick={() => setAdvertisePWA(false)}
-									className="underline pl-1"
-									href="/faq?refer=app"
-								>
-									Check out how &rarr;
-								</Link>
-							
-								
-
-								
-							</span>
-							<button className="" onClick={closeAdvertisePWA}>
-								<RiCloseCircleLine className="inline-block" size="1.1rem" />
-							</button>
-						</p>
-					</div>
-		
-			
-				</div>
-				)}
-							{!advertiseBrowser&& !advertisePWA && advertiseDiscord && client &&(
-			<div className="w-full bg-primary-600 px-4 py-3 text-white relative y-0">
-						<p className="text-center text-sm font-medium flex gap-2 justify-center">
-							<span>
-								Want to contribute?
-								<Link
-									onClick={() => setAdvertiseDiscord(false)}
-									className="underline pl-1"
-									href="https://discord.gg/nwRs8WcQGc"
-								>
-									Join the Discord! &rarr;
-								</Link> 
-						
-							
-					
-
-								
-							</span>
-							<button className="" onClick={closeAdvertiseDiscord}>
-								<RiCloseCircleLine className="inline-block" size="1.1rem" />
-							</button>
-						</p>
-					</div>)}
-					
-					{advertiseBrowser && !closed && (
-			<div className="w-full bg-primary-600 px-4 py-3 text-white relative y-0">
-						<p className="text-center text-sm font-medium flex gap-2 justify-center">
-							<span>
-								You&apos;re viewing in Instagram!
-								<p
-									className="underline pl-1"
-								>
-									Try it in your browser!
-								</p> 
-						
-							
-					
-
-								
-							</span>
-							<button className="" onClick={()=>setClosed(true)}>
-								<RiCloseCircleLine className="inline-block" size="1.1rem" />
-							</button>
-						</p>
-					</div>)}
-				<nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800">
-					<div className=" flex flex-wrap justify-between items-center">
-						<Link href={client ? "/grades" : "/"} className="flex items-center">
-							<img
-								src="/assets/logo.png"
-								className="mr-3 h-6 sm:h-9"
-								alt="Grade Melon Logo"
-							/>
-							<span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
-								Grade Melon
-							</span>
-						</Link>
-						<div className="flex items-center md:order-2 gap-2">
+		<div className="fixed top-0 w-full">
+			{/* Main nav - always visible */}
+			<nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800 relative z-20">
+				<div className="flex flex-wrap justify-between items-center">
+					<Link href={client ? "/grades" : "/"} className="flex items-center">
+						<img
+							src="/assets/logo.png"
+							className="mr-3 h-6 sm:h-9"
+							alt="Grade Melon Logo"
+						/>
+						<span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
+							Grade Melon
+						</span>
+					</Link>
+					<div className="flex items-center md:order-2 gap-2">
 							<div>
 								<DarkModeToggle />
 							</div>
@@ -236,6 +179,81 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 						</div>
 					</div>
 				</nav>
+
+			<div className="absolute top-0 left-0 w-full z-30">
+				{!advertiseBrowser && partner && (
+					<div className="w-full bg-primary-11 px-4 py-3 text-white bg-opacity-90">
+						<p className="text-center text-sm font-medium flex gap-2 justify-center items-center">
+							<img src="/assets/partner.webp" alt="" />
+							<Link
+								onClick={closePartner}
+								href="https://klinn.works/"
+								className="underline decoration-2 pl-1"
+							>
+								Find internships, research programs, competitions and more Attendance with Klinn!
+							</Link>
+							<button onClick={closePartner}>
+								<RiCloseCircleLine className="inline-block" size="1.1rem" />
+							</button>
+						</p>
+					</div>
+				)}
+
+				{!advertiseBrowser && !partner && advertisePWA && client && (
+					<div className="w-full bg-primary-600 px-4 py-3 text-white bg-opacity-90">
+						<p className="text-center text-sm font-medium flex gap-2 justify-center">
+							<span>
+								Want to use Grade Melon as an app?
+								<Link
+									onClick={() => setAdvertisePWA(false)}
+									className="underline decoration-2 pl-1"
+									href="/faq?refer=app"
+								>
+									Check out how!
+								</Link>
+							</span>
+							<button onClick={closeAdvertisePWA}>
+								<RiCloseCircleLine className="inline-block" size="1.1rem" />
+							</button>
+						</p>
+					</div>
+				)}
+
+				{!advertiseBrowser && !advertisePWA && advertiseDiscord && client && (
+					<div className="w-full bg-primary-600 px-4 py-3 text-white bg-opacity-90">
+						<p className="text-center text-sm font-medium flex gap-2 justify-center ">
+							<span>
+								Want to contribute?
+								<Link
+									onClick={() => setAdvertiseDiscord(false)}
+									className="underline decoration-2 pl-1"
+									href="https://discord.gg/nwRs8WcQGc"
+								>
+									Join the Discord!
+								</Link>
+							</span>
+							<button onClick={closeAdvertiseDiscord}>
+								<RiCloseCircleLine className="inline-block" size="1.1rem" />
+							</button>
+						</p>
+					</div>
+				)}
+
+				{advertiseBrowser && !closed && (
+					<div className="w-full bg-primary-600 px-4 py-3 text-white bg-opacity-90 ">
+						<p className="text-center text-sm font-medium flex gap-2 justify-center">
+							<span>
+								You&apos;re viewing in Instagram!
+								<p className="underline decoration-2 pl-1">
+									Try it in your browser!
+								</p>
+							</span>
+							<button onClick={() => setClosed(true)}>
+								<RiCloseCircleLine className="inline-block" size="1.1rem" />
+							</button>
+						</p>
+					</div>
+				)}
 			</div>
 		</div>
 	);
