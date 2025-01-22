@@ -69,7 +69,7 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 
 	const closePartner = () => {
 		setPartner(false);
-		Cookies.set("partner","false",{expires:2})
+		Cookies.set("partner","false",{expires:14})
 	};
 
 	const closeAdvertiseDiscord = () => {
@@ -79,9 +79,9 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 
 
 	return (
-		<div className="fixed top-0 w-full">
+		<div className="fixed top-0 w-full z-50">
 			{/* Main nav - always visible */}
-			<nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800 relative z-20">
+			<nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800 relative z-10">
 				<div className="flex flex-wrap justify-between items-center">
 					<Link href={client ? "/grades" : "/"} className="flex items-center">
 						<img
@@ -128,7 +128,7 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 									</button>
 
 									{dropdown && (
-										<div className="top-10 right-4 absolute z-50 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
+										<div className="top-10 right-4 absolute z-30 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
 											<div className="py-3 px-4">
 												<span className="block text-sm text-gray-900 truncate dark:text-white">
 													{studentInfo?.student.name}
@@ -180,7 +180,7 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 					</div>
 				</nav>
 
-			<div className="absolute top-0 left-0 w-full z-30">
+			<div className="absolute top-0 left-0 w-full z-40">
 				{!advertiseBrowser && partner && (
 					<div className="w-full bg-primary-11 px-4 py-3 text-white bg-opacity-90">
 						<p className="text-center text-sm font-medium flex gap-2 justify-center items-center">
