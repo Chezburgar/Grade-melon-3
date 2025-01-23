@@ -46,7 +46,7 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 			}
 
 			if (Cookies.get("partner") == undefined) {
-				setPartner(true);
+				//setPartner(true);
 			}
 
 
