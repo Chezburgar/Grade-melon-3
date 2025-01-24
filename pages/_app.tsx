@@ -223,7 +223,7 @@ const logout = async () => {
             }}
           />
 			</Head>
-			<div className="absolute p-5 z-20">
+			<div className="fixed p-5 z-[60]">
 				{toasts.map(({ title, type }, i) => (
 					<div className="mb-5 z-50" key={i}>
 						<Toast>
