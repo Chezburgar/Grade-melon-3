@@ -21,7 +21,8 @@ interface Assignment {
 
 
 interface gradingScale{
-	[key:string]:[number,number];
+	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},
+	[key:string]:[number,number] | {percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number}
 }
 
 
@@ -91,6 +92,13 @@ const letterGradeColor = (letterGrade: string) => {
 };
 
 const letterGrade = (grade: number,gradingScale:gradingScale): string => {
+	const rounding=gradingScale.rounding;
+if(rounding.percent){
+	grade=Number(grade.toFixed(rounding.percentPlaces))
+
+}
+
+
 if(!gradingScale){
 	if (grade >= 89.5) {
 		return "A";
