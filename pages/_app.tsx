@@ -36,6 +36,7 @@ function MyApp({ Component, pageProps }) {
 	const [grades, setGrades] = useState<Grades>();
 	const [period, setPeriod] = useState<number>();
 	const [loading, setLoading] = useState(false);
+	const [referal,setReferal]=useState(false);
 	const [districts, setDistricts] = useState(allDistricts);
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
@@ -103,7 +104,30 @@ function MyApp({ Component, pageProps }) {
 		return false;
 	};
 
+	useEffect(() => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const referrer = urlParams.get('ref')
+		if (referrer === 'klinn') {
+			setReferal(true);
+	}
+	  }, []);
 
+
+	useEffect(()=>{
+		//replace when the updated logic from adsplatform is finished
+		if(client && referal){
+			try{
+				fetch("https://studentvuelib.up.railway.app/refferals",{
+				  'method':'POST',
+				  'headers': { 'Content-Type': 'application/json' },
+				  'body': JSON.stringify({'validation':'f7c3c1ce7613fce0b595a3eaf48f1ad8'})
+	  
+				})
+			  }catch(error){console.log("idk")}
+		}
+
+
+	},[client])
 
 	useEffect(()=>{
 		if(client!==undefined&&studentInfo==undefined){
@@ -149,6 +173,7 @@ function MyApp({ Component, pageProps }) {
 	}, [client,districtURL]);
 
 	function createError(message:string){
+		console.log("Verbose Error: ",message)
 		console.log("Verbose Error: ",message)
 		const preSets={"upgraded":"API Token Expired, come back soon?","incorrect":"Username or Password is Incorrect","invalid":"Username or Password is Incorrect","load failed":"Network Error","failed to fetch":"Network Error:Try Again Later","socket":"Network Error"};
 		for(let key in preSets){
@@ -205,7 +230,7 @@ const logout = async () => {
             }}
           />
 			</Head>
-			<div className="absolute p-5 z-20">
+			<div className="fixed p-5 z-[60]">
 				{toasts.map(({ title, type }, i) => (
 					<div className="mb-5 z-50" key={i}>
 						<Toast>
