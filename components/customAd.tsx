@@ -14,7 +14,7 @@ getStaticProps once an hour or so, that way, 0 fetches need to occur to load the
 
 */
 
-const adServer="http://173.66.59.204:1000/" //idk
+    const adServer="ads.grademelon.org"
 
 
 export default function CustomAd(){
@@ -27,9 +27,9 @@ export default function CustomAd(){
 
 
 function handleClick(){
-    if(ad.link){
+    if(ad.url){
     increment("click");
-    window.open(ad?.link)};
+    window.open(ad?.url)};
 }
 //should i use oicd or just do sum custom auth tokens via the synergyProxy. validate credenetials. only send ads to logged in people. idk. i mean yeah i guess. why not.
 
@@ -37,6 +37,7 @@ function increment(type){
     const token=Cookies.get("token");
     fetch(adServer+"/increment",{
         'method':"POST",
+        'headers':{'content-type':'application/json'},
         'body':JSON.stringify({type:type,adId:ad.adId,advertiserId:ad.advertiserId,token:token,bypass:5421})
 
     }).catch(error=>console.log(error))
@@ -56,7 +57,7 @@ async function getAd(){
 useEffect(()=>{
     if(ad==undefined){
         getAd().then(res=>{
-            setAd(res);
+            setAd(res.ad);
         }).catch(error=>console.log(error))
 
     }
