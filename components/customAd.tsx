@@ -14,7 +14,7 @@ getStaticProps once an hour or so, that way, 0 fetches need to occur to load the
 
 */
 
-    const adServer="ads.grademelon.org"
+    const adServer="https://ads.grademelon.org"
 
 
 export default function CustomAd(){
