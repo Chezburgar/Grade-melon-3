@@ -23,7 +23,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 		try {
 			if(!client.loadedSchedule){
 			setLoading(true);
-			client.schedule(term).then((res) => {
+			client.schedule(term).then(([res]) => {
 				client.loadedSchedule=res;
 				console.log(res);
 				setSchedule(res);

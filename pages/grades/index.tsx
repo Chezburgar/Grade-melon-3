@@ -12,6 +12,7 @@ import {
 } from "../../utils/grades";
 import { Modal } from "flowbite-react";
 import { motion } from "framer-motion";
+import CustomAd from "../../components/customAd";
 
 interface GradesProps {
 	client: any;
@@ -20,6 +21,10 @@ interface GradesProps {
 	period: number;
 	setPeriod: (period: number) => void;
 	createError:(message:string)=>void;
+	ad:any;
+	setAd:(ad:any)=>void;
+	setTime:(time:number)=>void;
+	timestamp:number;
 }
 
 export default function Grades({
@@ -28,7 +33,11 @@ export default function Grades({
 	setGrades,
 	period,
 	setPeriod,
-	createError
+	createError,
+	ad,
+	setAd,
+	setTime,
+	timestamp
 }: GradesProps) {
 	const router = useRouter();
 	const [loading, setLoading] = useState(grades ? false : true);
@@ -191,7 +200,18 @@ export default function Grades({
 							className="grid gap-5 2col:grid-cols-2 3col:grid-cols-3 4col:grid-cols-4 justify-items-center mx-1" //so if u decide the margin is fugly, just get rid of mx-1 and put back items-stretch and w-full
 							//style={{ gridTemplateColumns: "repeat(auto-fit, 384px)" }}
 						>
-							{grades?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => (
+							{(()=>{
+								const temp=structuredClone(grades);
+								if(temp?.courses){
+									//@ts-ignore
+									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
+
+								}
+								
+								return (grades?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => {
+								if(name=="ad goes here"){return (<div key={i}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
+
+								return(
 								<div className="mx-2 w-full md:w-96" key={i}>
 									<motion.div
 										layout="preserve-aspect"
@@ -242,7 +262,8 @@ export default function Grades({
 										</div>
 									</motion.div>
 								</div>
-							))}
+							)}
+							))})()}
 						</div>
 					)}
 					{view === "table" && (

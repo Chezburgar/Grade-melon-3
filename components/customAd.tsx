@@ -14,14 +14,23 @@ getStaticProps once an hour or so, that way, 0 fetches need to occur to load the
 
 */
 
-    const adServer="https://ads.grademelon.org"
+    const adServer="https://adverts.grademelon.org"
 
 
-export default function CustomAd(){
+interface props{
+    ad:any;
+    timestamp:number;
+    setAd:(ad:any)=>void;
+    setTime:(time:number)=>void;
+}
+
+export default function CustomAd({ad,timestamp,setAd,setTime}:props){
     const adRef=useRef(null);
     const visbility=useInView(adRef,{threshold:0.1})
-    const [timestamp,setTime]=useState(0)
+    /*
+    const [timestamp,setTime]=useState(0);
     const [ad,setAd]=useState(undefined);
+    */
 
 
 
@@ -68,7 +77,7 @@ useEffect(()=>{
 
 
 useEffect(()=>{
-    if(visbility&&Infinity>=timestamp+1000*45){
+    if(visbility&&Date.now()>=timestamp+1000*45){
         increment("view");
         setTime(Date.now());
     }
@@ -80,9 +89,9 @@ useEffect(()=>{
     return(
         <>
         {ad ? (
-        <div className="flex justify-center mb-2 mx-4">
+        <div className="flex justify-center mx-4">
             <img ref={adRef} className="border-2 max-h-96" src={ad.image} onClick={handleClick}/>
-        </div>) : (<div></div>)}
+        </div>) : (<></>)}
         </>
 
     )

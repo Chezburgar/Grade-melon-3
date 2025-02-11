@@ -115,6 +115,7 @@ if(!gradingScale){
 	}}
 else{
 	for(const letterGrade in gradingScale){
+		if(letterGrade=="rounding"){continue}
 		if(grade>100){return letterGrade}
 		if(grade>=gradingScale[letterGrade][0]&&grade<=gradingScale[letterGrade][1]){
 			
@@ -340,7 +341,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 		course.layoutID=index;
 	});
 
-
+	
 	return parsedGrades;
 };
 

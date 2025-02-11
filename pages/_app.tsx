@@ -38,6 +38,8 @@ function MyApp({ Component, pageProps }) {
 	const [loading, setLoading] = useState(false);
 	const [referal,setReferal]=useState(false);
 	const [districts, setDistricts] = useState(allDistricts);
+	const [timestamp,setTime]=useState(0);
+    const [ad,setAd]=useState(undefined);
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
 
@@ -273,6 +275,11 @@ const logout = async () => {
 								districts={districts}
 								setDistricts={setDistricts}
 								isMediumOrLarger={isMediumOrLarger}
+								timestamp={timestamp}
+								setTime={setTime}
+								ad={ad}
+								setAd={setAd}
+
 							/>
 						</AnimateSharedLayout>
 					)}
@@ -298,6 +305,11 @@ const logout = async () => {
 										districts={districts}
 										setDistricts={setDistricts}
 										isMediumOrLarger={isMediumOrLarger}
+										timestamp={timestamp}
+										setTime={setTime}
+										ad={ad}
+										setAd={setAd}
+										
 									/>
 								</AnimateSharedLayout>
 							</div>
@@ -323,6 +335,10 @@ const logout = async () => {
 										districts={districts}
 										setDistricts={setDistricts}
 										isMediumOrLarger={isMediumOrLarger}
+										timestamp={timestamp}
+										setTime={setTime}
+										ad={ad}
+										setAd={setAd}
 									/>
 								</AnimateSharedLayout>
 								<div className="px-4 fixed bottom-5 w-full">
@@ -333,7 +349,6 @@ const logout = async () => {
 					)}
 				</div>
 			</div>
-		<CustomAd/>
 		</Flowbite>
 	);
 }
