@@ -208,7 +208,7 @@ export default function Grades({
 
 								}
 								
-								return (grades?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => {
+								return (temp?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => {
 								if(name=="ad goes here"){return (<div key={i}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
 
 								return(
@@ -219,7 +219,7 @@ export default function Grades({
 										className="h-full flex flex-col justify-between gap-2 md:gap-5 p-4 sm:p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700"
 									>
 										<div className="">
-											<Link href={`/grades/${i}`} legacyBehavior>
+											<Link href={`/grades/${layoutID}`} legacyBehavior>
 												<div className="hover:cursor-pointer">
 													<h5 className="md:text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
 														<p className="font-bold">
@@ -253,7 +253,7 @@ export default function Grades({
 													{gradingScale ? grade.letter:""}
 													{gradingScale ? (!isNaN(grade.raw) && ` (${grade.raw}%)`) : (!isNaN(grade.raw) ? `${grade.raw}%`:"N/A")}
 												</motion.span>
-												<Link href={`/grades/${i}`} legacyBehavior>
+												<Link href={`/grades/${layoutID}`} legacyBehavior>
 													<button className="rounded-lg bg-primary-500 px-5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
 														View
 													</button>
