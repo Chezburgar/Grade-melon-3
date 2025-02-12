@@ -116,6 +116,12 @@ export default function Grades({
 		setGrades(updateGPA(grades, i, e.target.checked));
 	};
 
+
+	useEffect(()=>{
+		console.log("surely there is a better way to force re-renders on changes to ad")
+
+	},[ad])
+
 	return (
 		<motion.div className="p-5 md:p-10 md:flex-1">
 			<Head>
@@ -203,13 +209,15 @@ export default function Grades({
 							{(()=>{
 								const temp=structuredClone(grades);
 								if(temp?.courses){
+									console.log("is my life real?")
 									//@ts-ignore
 									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
 
 								}
-								
+							
 								return (temp?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => {
-								if(name=="ad goes here"){return (<div key={i}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
+								if(name=="ad goes here"&&ad!==false){return (<div key={i}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
+								else if(name=="ad goes here"&&ad===false){return}
 
 								return(
 								<div className="mx-2 w-full md:w-96" key={i}>
