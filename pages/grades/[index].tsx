@@ -495,7 +495,9 @@ export default function Grades({
 									
 									return(temp?.assignments.map(
 									({ name, date, grade, category, points }, i) => {
-										
+										var trueIndex;
+										if(i>Math.floor(course.assignments.length/2)){trueIndex=i-1}
+										else{trueIndex=i};
 										if(name=="this is where the ad should go"){return <tr className={`bg-${
 											i % 2 == 0 ? "white" : "gray-50"
 										} border-b dark:bg-gray-${
@@ -516,7 +518,7 @@ export default function Grades({
 											</td>
 											<td
 												className="py-4 md:px-6 px-3 text-center md:text-left hover:text-black dark:hover:text-white cursor-pointer"
-												onClick={() => OpenModal(i)}
+												onClick={() => OpenModal(trueIndex)}
 											>
 												{name}
 											</td>
@@ -526,14 +528,14 @@ export default function Grades({
 												>
 													<GradeField
 														onChange={(e) =>
-															updateGrade(e.target.value, i, "earned")
+															updateGrade(e.target.value, trueIndex, "earned")
 														}
 														value={points.earned}
 													/>
 													/
 													<GradeField
 														onChange={(e) =>
-															updateGrade(e.target.value, i, "possible")
+															updateGrade(e.target.value, trueIndex, "possible")
 														}
 														value={points.possible}
 													/>
@@ -544,7 +546,7 @@ export default function Grades({
 													value={course?.categories.findIndex(
 														(c) => category === c.name
 													)}
-													onChange={(e) => updateCat(e.target.value, i)}
+													onChange={(e) => updateCat(e.target.value, trueIndex)}
 													name={isMediumOrLarger ? category : abbreviate(category)}
 												>
 													{course?.categories.map((category, x) => (
