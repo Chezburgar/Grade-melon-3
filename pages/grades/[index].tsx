@@ -70,7 +70,7 @@ export default function Grades({
 	const assignmentTitle = useRef(null);
 	useEffect(() => {
 		try {
-			if (!grades&&client) {
+			if (!grades&&client&&ad!==undefined) {
 				client.gradebook().then(([res,extras]) => {
 					res.gradingScale=extras?.gradingScale
 					console.log(typeof index);
@@ -488,14 +488,14 @@ export default function Grades({
 							<tbody>
 								{(()=>{
 									let temp=structuredClone(course);
-									if(temp?.assignments&&ad!==false){
+									if(temp?.assignments&&ad){
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false})
 									}
 
 									
 									return(temp?.assignments.map(
 									({ name, date, grade, category, points }, i) => {
-										var trueIndex;
+										var trueIndex:number;
 										if(i>Math.floor(course.assignments.length/2)){trueIndex=i-1}
 										else{trueIndex=i};
 										if(name=="this is where the ad should go"){return <tr className={`bg-${

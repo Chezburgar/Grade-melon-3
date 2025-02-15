@@ -106,7 +106,27 @@ function MyApp({ Component, pageProps }) {
 		return false;
 	};
 
+	const adServer="https://adverts.grademelon.org"
+
+	async function getAd(){
+        const response=await fetch(adServer+"/serve",{
+            method:"GET"
+        });
+        return await response.json()
+
+    
+}
+
 	useEffect(() => {
+		if(ad==undefined){
+			getAd().then(res=>{
+				setAd(res.ad);
+			}).catch(error=>console.log(error))
+	
+		}
+
+
+
 		const urlParams = new URLSearchParams(window.location.search);
 		const referrer = urlParams.get('ref')
 		if (referrer === 'klinn') {

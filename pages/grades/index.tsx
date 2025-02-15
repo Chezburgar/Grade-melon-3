@@ -208,7 +208,7 @@ export default function Grades({
 						>
 							{(()=>{
 								const temp=structuredClone(grades);
-								if(temp?.courses){
+								if(temp?.courses&&ad){
 									console.log("is my life real?")
 									//@ts-ignore
 									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
@@ -216,9 +216,7 @@ export default function Grades({
 								}
 							
 								return (temp?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => {
-								if(name=="ad goes here"&&ad!==false){return (<div key={i}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
-								else if(name=="ad goes here"&&ad===false){return}
-
+								if(name=="ad goes here"){return (<div key={i}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
 								return(
 								<div className="mx-2 w-full md:w-96" key={i}>
 									<motion.div
