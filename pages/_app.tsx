@@ -119,7 +119,7 @@ function MyApp({ Component, pageProps }) {
 			  }catch(error){console.log("idk")}
 		}
 
-
+//just make a deploy
 	},[client])
 
 	useEffect(()=>{
