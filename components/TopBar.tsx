@@ -200,17 +200,6 @@ try{
 											</ul>
 											<ul className="py-1" aria-labelledby="user-menu-button">
 												<li>
-													<Link
-														href="/privacy"
-														onClick={() => setDropdown(false)}
-														className="flex gap-2 items-center cursor-pointer py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-													>
-														<MdOutlinePrivacyTip /> Privacy Policy
-													</Link>
-												</li>
-											</ul>
-											<ul className="py-1" aria-labelledby="user-menu-button">
-												<li>
 													<a
 														onClick={() => {
 															setDropdown(false);
