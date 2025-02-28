@@ -237,7 +237,7 @@ const logout = async () => {
 			<Analytics/>
 			<Head>
 				<title>Grade Melon</title>
-
+	{ad	&& <link rel="preload" as="image" href={ad.url} />}	
 				<meta name="monetag" content="60496f145aa140bed68b191bae702c75"></meta>
          <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YWWBKH03T"></script>
 
