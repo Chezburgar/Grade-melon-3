@@ -104,7 +104,7 @@ function MyApp({ Component, pageProps }) {
 			setReferal(true);
 	}
 	  }, []);
-
+//fast deploy
 
 	useEffect(()=>{
 		//replace when the updated logic from adsplatform is finished
