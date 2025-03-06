@@ -54,12 +54,19 @@ function increment(type){
 }
 
 async function getAd(){
-        const response=await fetch(adServer+"/serve",{
-            method:"GET"
-        });
-        return await response.json()
+    if(localStorage.getItem("infoCache")!=undefined){
+        var schoolName:string=JSON.parse(localStorage.getItem("infoCache")).info.currentSchool;
+    }
+    else{
+        var schoolName="default/ALL";
+    }
 
-    
+    const response=await fetch(adServer+"/serve?school="+encodeURIComponent(schoolName),{
+        method:"GET"
+    });
+    return await response.json()
+
+
 }
 
 
