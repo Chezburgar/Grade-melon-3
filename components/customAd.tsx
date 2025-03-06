@@ -47,7 +47,7 @@ function increment(type){
     fetch(adServer+"/increment",{
         'method':"POST",
         'headers':{'content-type':'application/json'},
-        'body':JSON.stringify({type:type,adId:ad.adId,advertiserId:ad.advertiserId,token:token,bypass:5421})
+        'body':JSON.stringify({type:type,adId:ad.adId,advertiserId:ad.advertiserId,token:token})
 
     }).catch(error=>console.log(error))
 
@@ -77,7 +77,7 @@ useEffect(()=>{
 
 
 useEffect(()=>{
-    if(visbility&&Date.now()>=timestamp+1000*45){
+    if(visbility&&Date.now()>=0){ //decided to disable the timestamp thing. it was greedy.
         increment("view");
         setTime(Date.now());
     }
