@@ -1,4 +1,3 @@
-import { type } from "os";
 import React, { useState, useRef } from "react";
 
 interface CategoryFieldProps {

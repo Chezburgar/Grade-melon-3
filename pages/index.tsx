@@ -256,34 +256,7 @@ export default function Home({ client }: HomeProps) {
 			</div>
 
 
-			<motion.h2
-				initial={{ x: 0, opacity: 0 }}
-				animate={{ x: 0, opacity: 1 }}
-				transition={{ delay: 1.4, duration: 0.5 }}
-				className="font-bold dark:text-white text-3xl mt-10"
-			>
-				Privacy Policy
-			</motion.h2>
-			<motion.p
-				initial={{ x: 0, opacity: 0 }}
-				animate={{ x: 0, opacity: 1 }}
-				transition={{ delay: 1.5, duration: 0.5 }}
-				className="py-3 text-gray-500 w-fit md:w-1/2"
-			>
-				Here at Grade Melon, we take your privacy very seriously. Here is our
-				full privacy policy.
-			</motion.p>
-			<motion.div
-				initial={{ x: 0, opacity: 0 }}
-				animate={{ x: 0, opacity: 1 }}
-				transition={{ delay: 1.6, duration: 0.5 }}
-			>
-				<Link href="/privacy">
-					<button className="focus:outline-none text-white bg-primary-600 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">
-						Privacy Policy
-					</button>
-				</Link>
-			</motion.div>
+			
 			<motion.h2
 				initial={{ x: 0, opacity: 0 }}
 				animate={{ x: 0, opacity: 1 }}

@@ -12,6 +12,7 @@ import {
 } from "../../utils/grades";
 import { Modal } from "flowbite-react";
 import { motion } from "framer-motion";
+import CustomAd from "../../components/customAd";
 
 interface GradesProps {
 	client: any;
@@ -20,6 +21,10 @@ interface GradesProps {
 	period: number;
 	setPeriod: (period: number) => void;
 	createError:(message:string)=>void;
+	ad:any;
+	setAd:(ad:any)=>void;
+	setTime:(time:number)=>void;
+	timestamp:number;
 }
 
 export default function Grades({
@@ -28,7 +33,11 @@ export default function Grades({
 	setGrades,
 	period,
 	setPeriod,
-	createError
+	createError,
+	ad,
+	setAd,
+	setTime,
+	timestamp
 }: GradesProps) {
 	const router = useRouter();
 	const [loading, setLoading] = useState(grades ? false : true);
@@ -55,7 +64,8 @@ export default function Grades({
 			if (!grades && client) {
 				//setLoading(true);
 				try {
-					client.gradebook().then((res) => {
+					client.gradebook().then(([res,extra]) => {
+						res.gradingScale=extra?.gradingScale
 						let parsedGrades = parseGrades(res);
 						console.log("checker")
 						console.log(res);
@@ -82,7 +92,8 @@ export default function Grades({
 		setLoading(true);
 		client
 			.gradebook(p)
-			.then((res) => {
+			.then(([res,extra]) => {
+				res.gradingScale=extra?.gradingScale
 				console.log(res);
 				setGrades(parseGrades(res));
 				setLoading(false);
@@ -104,6 +115,12 @@ export default function Grades({
 	const changeWeights = (e, i: number) => {
 		setGrades(updateGPA(grades, i, e.target.checked));
 	};
+
+
+	useEffect(()=>{
+		console.log("surely there is a better way to force re-renders on changes to ad")
+
+	},[ad])
 
 	return (
 		<motion.div className="p-5 md:p-10 md:flex-1">
@@ -189,7 +206,18 @@ export default function Grades({
 							className="grid gap-5 2col:grid-cols-2 3col:grid-cols-3 4col:grid-cols-4 justify-items-center mx-1" //so if u decide the margin is fugly, just get rid of mx-1 and put back items-stretch and w-full
 							//style={{ gridTemplateColumns: "repeat(auto-fit, 384px)" }}
 						>
-							{grades?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => (
+							{(()=>{
+								const temp=structuredClone(grades);
+								if(temp?.courses&&ad){
+									console.log("is my life real?")
+									//@ts-ignore
+									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
+
+								}
+							
+								return (temp?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => {
+								if(name=="ad goes here"){return (<div key={i}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
+								return(
 								<div className="mx-2 w-full md:w-96" key={i}>
 									<motion.div
 										layout="preserve-aspect"
@@ -197,7 +225,7 @@ export default function Grades({
 										className="h-full flex flex-col justify-between gap-2 md:gap-5 p-4 sm:p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700"
 									>
 										<div className="">
-											<Link href={`/grades/${i}`} legacyBehavior>
+											<Link href={`/grades/${layoutID}`} legacyBehavior>
 												<div className="hover:cursor-pointer">
 													<h5 className="md:text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
 														<p className="font-bold">
@@ -231,7 +259,7 @@ export default function Grades({
 													{gradingScale ? grade.letter:""}
 													{gradingScale ? (!isNaN(grade.raw) && ` (${grade.raw}%)`) : (!isNaN(grade.raw) ? `${grade.raw}%`:"N/A")}
 												</motion.span>
-												<Link href={`/grades/${i}`} legacyBehavior>
+												<Link href={`/grades/${layoutID}`} legacyBehavior>
 													<button className="rounded-lg bg-primary-500 px-5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
 														View
 													</button>
@@ -240,7 +268,8 @@ export default function Grades({
 										</div>
 									</motion.div>
 								</div>
-							))}
+							)}
+							))})()}
 						</div>
 					)}
 					{view === "table" && (

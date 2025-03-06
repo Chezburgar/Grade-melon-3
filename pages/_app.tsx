@@ -6,6 +6,8 @@ import { Flowbite, Toast, useTheme } from "flowbite-react";
 import Topbar from "../components/TopBar";
 import SideBar from "../components/SideBar";
 import MobileBar from "../components/MobileBar";
+import CustomAd from "../components/customAd";
+
 import { Grades,parseGrades } from "../utils/grades";
 import Head from "next/head";
 import { HiX } from "react-icons/hi";
@@ -14,7 +16,7 @@ import Cookies from "js-cookie";
 import useWindowSize from '../hooks/useWindowSize';
 import { Analytics } from "@vercel/analytics/react";
 import allDistricts from "../lib/districts";
-import Script from "next/script";
+
 
 interface Toast {
 	title: string;
@@ -36,6 +38,8 @@ function MyApp({ Component, pageProps }) {
 	const [loading, setLoading] = useState(false);
 	const [referal,setReferal]=useState(false);
 	const [districts, setDistricts] = useState(allDistricts);
+	const [timestamp,setTime]=useState(0);
+    const [ad,setAd]=useState(undefined);
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
 
@@ -55,9 +59,14 @@ function MyApp({ Component, pageProps }) {
 			.then(async (res) => {
 				const gradebook=res[1];
 				const fetchedClient=res[0];
+				//@ts-ignore
+				gradebook.gradingScale=res[2].gradingScale
+				//@ts-ignore
+				Cookies.set("token",res[2].token,{expires:5/(60*24)})
 				console.log("para me?")
 				console.log(fetchedClient);
 				await setClient(fetchedClient);
+				
 				districts.forEach(district=>{
 					if(district.parentVueUrl==districtURL){Cookies.set("districtURL",JSON.stringify(district),{expires:7})}
 				});
@@ -97,7 +106,27 @@ function MyApp({ Component, pageProps }) {
 		return false;
 	};
 
+	const adServer="https://adverts.grademelon.org"
+
+	async function getAd(){
+        const response=await fetch(adServer+"/serve",{
+            method:"GET"
+        });
+        return await response.json()
+
+    
+}
+
 	useEffect(() => {
+		if(ad==undefined){
+			getAd().then(res=>{
+				setAd(res.ad);
+			}).catch(error=>console.log(error))
+	
+		}
+
+
+
 		const urlParams = new URLSearchParams(window.location.search);
 		const referrer = urlParams.get('ref')
 		if (referrer === 'klinn') {
@@ -124,14 +153,14 @@ function MyApp({ Component, pageProps }) {
 
 	useEffect(()=>{
 		if(client!==undefined&&studentInfo==undefined){
-			client.studentInfo().then(info=>{
+			client.studentInfo().then(([info])=>{
 				setStudentInfo(info)
 				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 					'method': 'POST',
 					'headers': { 'Content-Type': 'application/json' },
 					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool})
 				})
-			}).catch(error=>{client.ChildList().then(info=>{
+			}).catch(error=>{client.ChildList().then(([info])=>{
 				setStudentInfo(info);
 				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 					'method': 'POST',
@@ -167,11 +196,11 @@ function MyApp({ Component, pageProps }) {
 
 	function createError(message:string){
 		console.log("Verbose Error: ",message)
+		console.log("Verbose Error: ",message)
 		const preSets={"upgraded":"API Token Expired, come back soon?","incorrect":"Username or Password is Incorrect","invalid":"Username or Password is Incorrect","load failed":"Network Error","failed to fetch":"Network Error:Try Again Later","socket":"Network Error"};
 		for(let key in preSets){
 			if(message.toLowerCase().includes(key)){var message=preSets[key];break}
 		}
-	
 		setToasts((toasts) => [...toasts, { title: message, type: "error" }]);
 			setTimeout(() => {
 				setToasts((toasts) => toasts.slice(1));
@@ -208,7 +237,7 @@ const logout = async () => {
 			<Analytics/>
 			<Head>
 				<title>Grade Melon</title>
-
+	{ad	&& <link rel="preload" as="image" href={ad.image} />}	
 				<meta name="monetag" content="60496f145aa140bed68b191bae702c75"></meta>
          <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YWWBKH03T"></script>
 
@@ -266,6 +295,11 @@ const logout = async () => {
 								districts={districts}
 								setDistricts={setDistricts}
 								isMediumOrLarger={isMediumOrLarger}
+								timestamp={timestamp}
+								setTime={setTime}
+								ad={ad}
+								setAd={setAd}
+
 							/>
 						</AnimateSharedLayout>
 					)}
@@ -291,6 +325,11 @@ const logout = async () => {
 										districts={districts}
 										setDistricts={setDistricts}
 										isMediumOrLarger={isMediumOrLarger}
+										timestamp={timestamp}
+										setTime={setTime}
+										ad={ad}
+										setAd={setAd}
+										
 									/>
 								</AnimateSharedLayout>
 							</div>
@@ -316,6 +355,10 @@ const logout = async () => {
 										districts={districts}
 										setDistricts={setDistricts}
 										isMediumOrLarger={isMediumOrLarger}
+										timestamp={timestamp}
+										setTime={setTime}
+										ad={ad}
+										setAd={setAd}
 									/>
 								</AnimateSharedLayout>
 								<div className="px-4 fixed bottom-5 w-full">
@@ -326,7 +369,6 @@ const logout = async () => {
 					)}
 				</div>
 			</div>
-			
 		</Flowbite>
 	);
 }

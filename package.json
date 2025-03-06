@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"@vercel/analytics": "^1.3.1",
+		"@vercel/functions": "^1.5.2",
 		"autoprefixer": "^10.4.12",
 		"chart.js": "^3.9.1",
 		"flowbite": "^1.5.3",
@@ -22,7 +23,7 @@
 		"postcss": "^8.4.17",
 		"react-chartjs-2": "^4.3.1",
 		"react-icons": "^4.4.0",
-		"studentvue": "github:Jshap06/studentvue.js",
+		"studentvue": "github:Jshap06/studentvue.js#testing",
 		"touch-cli": "^0.0.1"
 	},
 	"devDependencies": {

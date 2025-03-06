@@ -22,6 +22,7 @@ import { TbRefresh } from "react-icons/tb";
 import { HiOutlineDocumentAdd } from "react-icons/hi";
 import { HiOutlineTrash } from "react-icons/hi";
 import { BsGraphUp } from "react-icons/bs";
+import CustomAd from "../../components/customAd";
 
 interface GradesProps {
 	client: any;
@@ -31,10 +32,15 @@ interface GradesProps {
 	setPeriod: (period: number) => void;
 	isMediumOrLarger:boolean;
 	createError:(message:string)=>void;
+	ad:any;
+	setAd:(ad:any)=>void;
+	setTime:(time:number)=>void;
+	timestamp:number;
 }
 
 interface OptimizeProps {
 	[key: string]: number;
+	
 }
 
 export default function Grades({
@@ -44,7 +50,11 @@ export default function Grades({
 	period,
 	setPeriod,
 	isMediumOrLarger,
-	createError
+	createError,
+	ad,
+	setAd,
+	setTime,
+	timestamp
 }: GradesProps) {
 	const router = useRouter();
 	const { index }: { index?: string } = router.query;
@@ -60,8 +70,9 @@ export default function Grades({
 	const assignmentTitle = useRef(null);
 	useEffect(() => {
 		try {
-			if (!grades&&client) {
-				client.gradebook().then((res) => {
+			if (!grades&&client&&ad!==undefined) {
+				client.gradebook().then(([res,extras]) => {
+					res.gradingScale=extras?.gradingScale
 					console.log(typeof index);
 					let parsedGrades = parseGrades(res);
 					setGrades(parsedGrades);
@@ -136,7 +147,8 @@ export default function Grades({
 		setLoading(true);
 		client
 			.gradebook(p)
-			.then((res) => {
+			.then(([res,extra]) => {
+				res.gradingScale=extra?.gradingScale
 				console.log(res);
 				setGrades(parseGrades(res));
 				setPeriod(p);
@@ -241,7 +253,7 @@ export default function Grades({
 												updateOptimize(e.target.value, "desiredGrade")
 											}
 											className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-											placeholder={course.gradingScale ? String(course.gradingScale[Object.keys(course.gradingScale)[0]][0]): "90"}
+											placeholder={course.gradingScale ? String(course.gradingScale[Object.keys(course.gradingScale)[1]][0]): "90"}
 										/>
 									</div>
 								</div>
@@ -474,8 +486,25 @@ export default function Grades({
 								</tr>
 							</thead>
 							<tbody>
-								{course?.assignments.map(
-									({ name, date, grade, category, points }, i) => (
+								{(()=>{
+									let temp=structuredClone(course);
+									if(temp?.assignments&&ad){
+										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false})
+									}
+
+									
+									return(temp?.assignments.map(
+									({ name, date, grade, category, points }, i) => {
+										var trueIndex:number;
+										if(i>Math.floor(course.assignments.length/2)){trueIndex=i-1}
+										else{trueIndex=i};
+										if(name=="this is where the ad should go"){return <tr className={`bg-${
+											i % 2 == 0 ? "white" : "gray-50"
+										} border-b dark:bg-gray-${
+											i % 2 == 0 ? 900 : 800
+										} dark:border-gray-700`} key={i}><td className="p-3" colSpan={4}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></td></tr>}
+
+										return(
 										<tr
 											className={`bg-${
 												i % 2 == 0 ? "white" : "gray-50"
@@ -489,7 +518,7 @@ export default function Grades({
 											</td>
 											<td
 												className="py-4 md:px-6 px-3 text-center md:text-left hover:text-black dark:hover:text-white cursor-pointer"
-												onClick={() => OpenModal(i)}
+												onClick={() => OpenModal(trueIndex)}
 											>
 												{name}
 											</td>
@@ -499,14 +528,14 @@ export default function Grades({
 												>
 													<GradeField
 														onChange={(e) =>
-															updateGrade(e.target.value, i, "earned")
+															updateGrade(e.target.value, trueIndex, "earned")
 														}
 														value={points.earned}
 													/>
 													/
 													<GradeField
 														onChange={(e) =>
-															updateGrade(e.target.value, i, "possible")
+															updateGrade(e.target.value, trueIndex, "possible")
 														}
 														value={points.possible}
 													/>
@@ -517,7 +546,7 @@ export default function Grades({
 													value={course?.categories.findIndex(
 														(c) => category === c.name
 													)}
-													onChange={(e) => updateCat(e.target.value, i)}
+													onChange={(e) => updateCat(e.target.value, trueIndex)}
 													name={isMediumOrLarger ? category : abbreviate(category)}
 												>
 													{course?.categories.map((category, x) => (
@@ -528,8 +557,8 @@ export default function Grades({
 												</CategoryField>
 											</td>
 										</tr>
-									)
-								)}
+									)}
+			))})()}
 							</tbody>
 						</table>
 					</div>
