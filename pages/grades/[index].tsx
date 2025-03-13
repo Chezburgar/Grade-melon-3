@@ -87,6 +87,29 @@ export default function Grades({
 		}
 	}, [client]);
 
+
+	useEffect(()=>{
+		const deleteLast=(event)=>{
+			if (event.ctrlKey && event.key === "z") {
+				event.preventDefault(); // Prevent default undo behavior if needed
+				let temp=grades.courses[parseInt(index as string)];
+		
+
+			if(temp.assignments[0].custom==true){
+				del(0);
+			}
+		}
+		}
+		
+		if(grades?.courses[parseInt(index as string)]?.assignments?.length>1){
+			window.addEventListener("keydown", deleteLast);
+		}
+		return () => {
+			window.removeEventListener("keydown", deleteLast);
+		};
+
+	},[grades])
+
 	const updateGrade = (val: string, assignmentId: number, update: string) => {
 		let temp = grades;
 		temp.courses[parseInt(index as string)] = updateCourse(
@@ -487,7 +510,7 @@ export default function Grades({
 							</thead>
 							<tbody>
 								{(()=>{
-									let temp=structuredClone(course);
+									let temp=structuredClone(grades.courses[parseInt(index as string)]);	
 									if(temp?.assignments&&ad){
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false})
 									}
