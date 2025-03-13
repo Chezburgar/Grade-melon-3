@@ -90,6 +90,7 @@ try{
 	  }catch(error){console.log(error)}};
 
 	useEffect(()=>{
+		/*
 		if (Cookies.get("partner") == undefined&&["/faq","/"].includes(router.pathname)) {
 			setPartner(true);
 			opacityRef.current=200
@@ -100,7 +101,7 @@ try{
 		else{setPartner(false)}
 
 
-
+*/
 	},[router])
 
 
