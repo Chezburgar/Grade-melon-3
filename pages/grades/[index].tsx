@@ -519,7 +519,7 @@ export default function Grades({
 									return(temp?.assignments.map(
 									({ name, date, grade, category, points }, i) => {
 										var trueIndex:number;
-										if(i>Math.floor(course.assignments.length/2)){trueIndex=i-1}
+										if(i>Math.floor(course.assignments.length/2)&&ad){trueIndex=i-1}
 										else{trueIndex=i};
 										if(name=="this is where the ad should go"){return <tr className={`bg-${
 											i % 2 == 0 ? "white" : "gray-50"
