@@ -208,7 +208,7 @@ export default function Grades({
 						>
 							{(()=>{
 								const temp=structuredClone(grades);
-								if(temp?.courses&&ad){
+								if(temp?.courses&&ad&&client.username!="10016976"){ //disalbe for [name redacted] cuz i aint buildin a subscription service rn gang
 									console.log("is my life real?")
 									//@ts-ignore
 									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
