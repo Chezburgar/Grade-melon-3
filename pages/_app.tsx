@@ -333,6 +333,7 @@ const logout = async () => {
 								setTime={setTime}
 								ad={ad}
 								setAd={setAd}
+								width={width}
 
 							/>
 						</AnimateSharedLayout>
@@ -363,6 +364,7 @@ const logout = async () => {
 										setTime={setTime}
 										ad={ad}
 										setAd={setAd}
+										width={width}
 										
 									/>
 								</AnimateSharedLayout>
@@ -393,6 +395,7 @@ const logout = async () => {
 										setTime={setTime}
 										ad={ad}
 										setAd={setAd}
+										width={width}
 									/>
 								</AnimateSharedLayout>
 								<div className="px-4 fixed bottom-5 w-full">

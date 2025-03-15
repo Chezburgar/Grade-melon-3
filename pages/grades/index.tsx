@@ -25,6 +25,7 @@ interface GradesProps {
 	setAd:(ad:any)=>void;
 	setTime:(time:number)=>void;
 	timestamp:number;
+	width:any;
 }
 
 export default function Grades({
@@ -37,7 +38,8 @@ export default function Grades({
 	ad,
 	setAd,
 	setTime,
-	timestamp
+	timestamp,
+	width
 }: GradesProps) {
 	const router = useRouter();
 	const [loading, setLoading] = useState(grades ? false : true);
@@ -45,6 +47,7 @@ export default function Grades({
 	//const [period, setPeriod] = useState<number>();
 	const [gpaModal, setGpaModal] = useState(false);
 	const view = (router.query.view as string) || defaultView;
+	const isMediumOrLarger = width >= 768;
 
 	useEffect(() => {
 		if (localStorage.getItem("defaultView") !== null) {
@@ -208,7 +211,7 @@ export default function Grades({
 						>
 							{(()=>{
 								const temp=structuredClone(grades);
-								if(temp?.courses&&ad&&client.username!="10016976"){ //disalbe for [name redacted] cuz i aint buildin a subscription service rn gang
+								if(temp?.courses&&ad&&client.username!="10016976"&&!isMediumOrLarger){ //disalbe for [name redacted] cuz i aint buildin a subscription service rn gang
 									console.log("is my life real?")
 									//@ts-ignore
 									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
@@ -216,13 +219,13 @@ export default function Grades({
 								}
 							
 								return (temp?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => {
-								if(name=="ad goes here"){return (<div key={i}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
+								if(name=="ad goes here"){return (<div key={i} className="flex shrink justify-center max-h-64"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
 								return(
-								<div className="mx-2 w-full md:w-96" key={i}>
+								<div className="mx-2 flex justify-center w-full md:w-96" key={i}>
 									<motion.div
 										layout="preserve-aspect"
 										layoutId={`card-${layoutID}`}
-										className="h-full flex flex-col justify-between gap-2 md:gap-5 p-4 sm:p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700"
+										className="h-full flex flex-col justify-between w-full gap-2 md:gap-5 p-4 sm:p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700"
 									>
 										<div className="">
 											<Link href={`/grades/${layoutID}`} legacyBehavior>
@@ -327,6 +330,7 @@ export default function Grades({
 							</table>
 						</div>
 					)}
+					{isMediumOrLarger && <div className="mt-6"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>}
 				</div>
 			)}
 		</motion.div>

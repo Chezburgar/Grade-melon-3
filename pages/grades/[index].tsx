@@ -36,6 +36,7 @@ interface GradesProps {
 	setAd:(ad:any)=>void;
 	setTime:(time:number)=>void;
 	timestamp:number;
+	width:any;
 }
 
 interface OptimizeProps {
@@ -54,7 +55,8 @@ export default function Grades({
 	ad,
 	setAd,
 	setTime,
-	timestamp
+	timestamp,
+	width
 }: GradesProps) {
 	const router = useRouter();
 	const { index }: { index?: string } = router.query;
@@ -68,6 +70,7 @@ export default function Grades({
 	const [isEditing, setIsEditing]=useState(false);
 	const [title,setTitle]=useState(undefined);
 	const assignmentTitle = useRef(null);
+	
 	useEffect(() => {
 		try {
 			if (!grades&&client&&ad!==undefined) {
@@ -490,6 +493,7 @@ export default function Grades({
 						</button>
 					</div>
 					<div className="m-5" />
+					<div className="flex">
 					<div className="mx-auto overflow-x-auto shadow-md rounded-lg border max-w-max border-gray-200 dark:border-gray-700">
 						<table className="text-sm text-left text-gray-500 dark:text-gray-400">
 							<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -511,7 +515,7 @@ export default function Grades({
 							<tbody>
 								{(()=>{
 									let temp=structuredClone(grades.courses[parseInt(index as string)]);	
-									if(temp?.assignments&&ad&&client.username!="10016976"){ //disabled for [name-redacted]
+									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280){ //disabled for [name-redacted]
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false})
 									}
 
@@ -525,7 +529,7 @@ export default function Grades({
 											i % 2 == 0 ? "white" : "gray-50"
 										} border-b dark:bg-gray-${
 											i % 2 == 0 ? 900 : 800
-										} dark:border-gray-700`} key={i}><td className="p-3" colSpan={4}><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></td></tr>}
+										} dark:border-gray-700`} key={i}><td className="p-3 " colSpan={4}><div className="flex shrink justify-center max-h-64"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div></td></tr>}
 
 										return(
 										<tr
@@ -584,6 +588,9 @@ export default function Grades({
 			))})()}
 							</tbody>
 						</table>
+					</div>
+					{<div className="hidden xl:block shrink"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/> </div>
+					}
 					</div>
 				</motion.div>
 			)}
