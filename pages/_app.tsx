@@ -191,7 +191,7 @@ fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 					'method': 'POST',
 					'headers': { 'Content-Type': 'application/json' },
-					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool})
+					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool,url:districtURL})
 				})
 			}).catch(error=>{client.ChildList().then(([info])=>{
 				setStudentInfo(info);
@@ -199,7 +199,7 @@ fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 					'method': 'POST',
 					'headers': { 'Content-Type': 'application/json' },
-					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool})
+					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool,url:districtURL})
 				})
 
 			}).catch()
