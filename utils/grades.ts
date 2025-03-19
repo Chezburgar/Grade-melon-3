@@ -521,12 +521,12 @@ const addAssignment = (course: Course): Course => {
 const calculateGPA = (grades: Grades): Grades => {
 	grades.gpa =
 		grades.courses.reduce(
-			(a, b) => a + letterGPA(letterGrade(b.grade.raw,b.gradingScale), false,isDouble(b.name)),
+			(a, b) => a + letterGPA(letterGrade(b.grade.raw,b.gradingScale), false),
 			0
 		) / grades.courses.length;
 	grades.wgpa =
 		grades.courses.reduce(
-			(a, b) => a + letterGPA(letterGrade(b.grade.raw,b.gradingScale), b.weighted,isDouble(b.name)),
+			(a, b) => a + letterGPA(letterGrade(b.grade.raw,b.gradingScale), b.weighted),
 			0
 		) / grades.courses.length;
 
