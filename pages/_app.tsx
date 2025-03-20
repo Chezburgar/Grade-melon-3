@@ -169,7 +169,7 @@ function MyApp({ Component, pageProps }) {
 fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 	'method': 'POST',
 	'headers': { 'Content-Type': 'application/json' },
-	'body': JSON.stringify({ 'username': client.username,'schoolName':cache.info.currentSchool})
+	'body': JSON.stringify({ 'username': client.username,'schoolName':cache.info.currentSchool,url:districtURL})
 })
 
 					return
@@ -185,7 +185,7 @@ fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 			client.studentInfo().then(([info])=>{
 				console.log("im so so so tired")
 				setStudentInfo(info)
-				localStorage.setItem("infoCache",JSON.stringify({user:client.username,info:info}))
+				localStorage.setItem("infoCache",JSON.stringify({user:client.username,info:info,url:districtURL}))
 
 
 				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
