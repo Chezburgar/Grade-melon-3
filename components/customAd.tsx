@@ -84,7 +84,7 @@ useEffect(()=>{
 
 
 useEffect(()=>{
-    if(visbility&&timestamp()>=0){ //decided to disable the timestamp thing. it was greedy.
+    if(visbility&&timestamp>=0){ //decided to disable the timestamp thing. it was greedy.
         increment("view");
         setTime(Date.now());
     }
