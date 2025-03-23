@@ -43,6 +43,8 @@ function MyApp({ Component, pageProps }) {
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
 
+	const baseUrls=["https://studentvuelib.up.railway.app","https://studentvuelib2.up.railway.app","https://studentvuelib3.up.railway.app"]
+	const rand=Math.floor(Math.random()*4)
 	const login = async (
 		username: string,
 		password: string,
@@ -55,7 +57,7 @@ function MyApp({ Component, pageProps }) {
 			username: username,
 			password: password,
 			encrypted:encrypted ||false
-		})
+		},baseUrls[rand])
 			.then(async (res) => {
 				const gradebook=res[1];
 				const fetchedClient=res[0];

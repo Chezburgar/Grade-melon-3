@@ -84,16 +84,12 @@ useEffect(()=>{
 
 
 useEffect(()=>{
-    if(visbility&&Date.now()>=0){ //decided to disable the timestamp thing. it was greedy.
-        if(localStorage.getItem("dayViews")==null){localStorage.setItem('dayViews','{time:0,views:0}')} //using localStorage cuz I'm pretty sure chromebooks aren't preserving my cookies
-        else if(Math.floor(Date.now()-(1000*60*60*new Date().getTimezoneOffset()))!=JSON.parse(localStorage.getItem("dayViews")).time){localStorage.setItem('dayViews','{time:0,views:0}')}
-        if(JSON.parse(localStorage.getItem('dayViews')).views<=5){ //cap each device at 5 views
+    if(visbility&&timestamp==0){ 
+   
         increment("view");
         setTime(Date.now());
-        let temp=JSON.parse(localStorage.getItem('dayViews'));temp.views++;
-        localStorage.setItem('dayViews',JSON.stringify(temp))
+
         }
-    }
     else{console.log(timestamp,visbility)}
 
 },[visbility])
