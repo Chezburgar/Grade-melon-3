@@ -515,7 +515,7 @@ export default function Grades({
 							<tbody>
 								{(()=>{
 									let temp=structuredClone(grades.courses[parseInt(index as string)]);	
-									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280){ //disabled for [name-redacted]
+									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){ //disabled for [name-redacted]
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false})
 									}
 
