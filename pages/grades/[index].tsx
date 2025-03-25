@@ -514,16 +514,21 @@ export default function Grades({
 							</thead>
 							<tbody>
 								{(()=>{
+									var stopBreakingTheIndexSystems;
 									let temp=structuredClone(grades.courses[parseInt(index as string)]);	
-									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){ //disabled for [name-redacted]
+									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){
+										stopBreakingTheIndexSystems=true; //disabled for [name-redacted]
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false})
+									}
+									else{
+										stopBreakingTheIndexSystems=false
 									}
 
 									
 									return(temp?.assignments.map(
 									({ name, date, grade, category, points }, i) => {
 										var trueIndex:number;
-										if(i>Math.floor(course.assignments.length/2)&&ad&&client.username!="10016976"&&width<1280){trueIndex=i-1}
+										if(i>Math.floor(course.assignments.length/2)&&ad&&client.username!="10016976"&&width<1280&&stopBreakingTheIndexSystems){trueIndex=i-1}
 										else{trueIndex=i};
 										if(name=="this is where the ad should go"){return <tr className={`bg-${
 											i % 2 == 0 ? "white" : "gray-50"
