@@ -113,12 +113,14 @@ function MyApp({ Component, pageProps }) {
 	async function getAd(){
 		if(localStorage.getItem("infoCache")!=undefined){
 			var schoolName:string=JSON.parse(localStorage.getItem("infoCache")).info.currentSchool;
+			var grade:string=JSON.parse(localStorage.getItem("infoCache")).info.grade;
 		}
 		else{
 			var schoolName="default/ALL";
+			var grade="default/ALL"
 		}
 
-        const response=await fetch(adServer+"/serve?school="+encodeURIComponent(schoolName),{
+        const response=await fetch(adServer+"/serve?school="+encodeURIComponent(schoolName)+"&"+"grade="+encodeURIComponent(grade),{
             method:"GET"
         });
         return await response.json()
