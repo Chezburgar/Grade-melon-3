@@ -526,7 +526,7 @@ export default function Grades({
 
 									
 									return(temp?.assignments.map(
-									({ name, date, grade, category, points }, i) => {
+									({ name, date, grade, category, points, custom}, i) => {
 										var trueIndex:number;
 										if(i>Math.floor(course.assignments.length/2)&&ad&&client.username!="10016976"&&width<1280&&stopBreakingTheIndexSystems){trueIndex=i-1}
 										else{trueIndex=i};
@@ -549,7 +549,7 @@ export default function Grades({
 												{date.due.toLocaleDateString()}
 											</td>
 											<td
-												className="py-4 md:px-6 px-3 text-center md:text-left hover:text-black dark:hover:text-white cursor-pointer"
+												className={`py-4 md:px-6 px-3 text-center ${Boolean(custom) && "text-primary-500"} md:text-left hover:text-black dark:hover:text-white cursor-pointer`}
 												onClick={() => OpenModal(trueIndex)}
 											>
 												{name}
