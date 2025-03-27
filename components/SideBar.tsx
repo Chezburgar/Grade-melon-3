@@ -12,17 +12,30 @@ import { BsTable } from "react-icons/bs";
 import { TbLayoutGrid } from "react-icons/tb";
 import { BsQuestionLg } from "react-icons/bs";
 import Link from "next/link";
+import CustomAd from "./customAd"
 
 interface NavProps {
 	studentInfo: any;
 	logout: () => void;
+	ad:any;
+	setAd:(ad:any)=>void;
+	setTime:(time:number)=>void;
+	timestamp:number;
+
+	
+
 }
 
-export default function SideBar({ studentInfo, logout }: NavProps) {
+export default function SideBar({ studentInfo, logout,	ad,
+	setAd,
+	setTime,
+	timestamp
+	 }: NavProps) {
 	const router = useRouter();
 
 	return (
-		<div className="w-fit h-full py-10 pl-10 sticky top-16 hidden md:block">
+		<div className="flex w-fit flex-col items-center">
+		<div className="w-fit h-full py-10 pl-10 sticky top-16 hidden md:block max-w-min">
 			<aside className="w-64" aria-label="Sidebar">
 				<div className="overflow-y-auto py-4 px-3 bg-white rounded-lg dark:bg-gray-800 shadow-md border border-gray-200 dark:border-gray-700">
 					<ul className="space-y-2">
@@ -110,6 +123,10 @@ export default function SideBar({ studentInfo, logout }: NavProps) {
 					)}
 				</div>
 			</aside>
+			{router.pathname.includes("grades/") &&
+		<div className="mt-4 flex shrink max-w-70 hidden md:block"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>
+	 }
+		</div>
 		</div>
 	);
 }

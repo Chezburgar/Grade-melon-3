@@ -594,7 +594,7 @@ export default function Grades({
 							</tbody>
 						</table>
 					</div>
-					{<div className="hidden lg:block shrink"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/> </div>
+					{false && <div className="hidden lg:block shrink"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/> </div>
 					}
 					</div>
 				</motion.div>

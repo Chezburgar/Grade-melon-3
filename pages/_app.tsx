@@ -346,7 +346,10 @@ const logout = async () => {
 					{client && isMediumOrLarger && (
 						<div className="pb-16 md:pb-0">
 							<div className="flex overflow-x-auto">
-								<SideBar studentInfo={studentInfo} logout={logout} />
+								<SideBar 										timestamp={timestamp}
+										setTime={setTime}
+										ad={ad}
+										setAd={setAd} studentInfo={studentInfo} logout={logout}/>
 								<AnimateSharedLayout>
 									<Component
 										{...pageProps}

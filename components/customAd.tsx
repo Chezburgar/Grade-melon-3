@@ -27,6 +27,7 @@ interface props{
 export default function CustomAd({ad,timestamp,setAd,setTime}:props){
     const adRef=useRef(null);
     const visbility=useInView(adRef,{threshold:0.1})
+    console.log("does it fukin have a brain")
     /*
     const [timestamp,setTime]=useState(0);
     const [ad,setAd]=useState(undefined);
