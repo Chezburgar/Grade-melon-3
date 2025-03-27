@@ -26,7 +26,7 @@ interface props{
 
 export default function CustomAd({ad,timestamp,setAd,setTime}:props){
     const adRef=useRef(null);
-    const visbility=useInView(adRef,{threshold:0.1})
+    const visbility=useInView(adRef,{threshold:0.4})
     console.log("does it fukin have a brain")
     /*
     const [timestamp,setTime]=useState(0);
@@ -85,7 +85,7 @@ useEffect(()=>{
 
 
 useEffect(()=>{
-    if(visbility&&timestamp==0){ 
+    if(visbility&&Date.now()-timestamp>=1000*60*5){ 
    
         increment("view");
         setTime(Date.now());
