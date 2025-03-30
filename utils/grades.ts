@@ -250,7 +250,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 				0
 			) / grades.courses.length,
 		courses: grades.courses.map(({ title, period, room, staff, marks }, i) => ({
-			name: stripParens(title),
+			name: ReplaceUnderscores(stripParens(title)),
 			period: period ? period : i + 1,
 			layoutID:null,
 			room: room,
@@ -344,6 +344,12 @@ const parseGrades = (grades: Gradebook): Grades => {
 	
 	return parsedGrades;
 };
+
+
+function ReplaceUnderscores(name:string){
+	return name.replaceAll("_"," ")
+
+}
 
 let solutions = [];
 const recur = (

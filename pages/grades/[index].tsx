@@ -514,16 +514,21 @@ export default function Grades({
 							</thead>
 							<tbody>
 								{(()=>{
+									var stopBreakingTheIndexSystems;
 									let temp=structuredClone(grades.courses[parseInt(index as string)]);	
-									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280){ //disabled for [name-redacted]
+									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){
+										stopBreakingTheIndexSystems=true; //disabled for [name-redacted]
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false})
+									}
+									else{
+										stopBreakingTheIndexSystems=false
 									}
 
 									
 									return(temp?.assignments.map(
-									({ name, date, grade, category, points }, i) => {
+									({ name, date, grade, category, points, custom}, i) => {
 										var trueIndex:number;
-										if(i>Math.floor(course.assignments.length/2)&&ad&&client.username!="10016976"&&width<1280){trueIndex=i-1}
+										if(i>Math.floor(course.assignments.length/2)&&ad&&client.username!="10016976"&&width<1280&&stopBreakingTheIndexSystems){trueIndex=i-1}
 										else{trueIndex=i};
 										if(name=="this is where the ad should go"){return <tr className={`bg-${
 											i % 2 == 0 ? "white" : "gray-50"
@@ -544,7 +549,7 @@ export default function Grades({
 												{date.due.toLocaleDateString()}
 											</td>
 											<td
-												className="py-4 md:px-6 px-3 text-center md:text-left hover:text-black dark:hover:text-white cursor-pointer"
+												className={`py-4 md:px-6 px-3 text-center ${Boolean(custom) && "text-primary-500"} md:text-left hover:text-black dark:hover:text-white cursor-pointer`}
 												onClick={() => OpenModal(trueIndex)}
 											>
 												{name}
@@ -589,7 +594,7 @@ export default function Grades({
 							</tbody>
 						</table>
 					</div>
-					{<div className="hidden xl:block shrink"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/> </div>
+					{false && <div className="hidden lg:block shrink"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/> </div>
 					}
 					</div>
 				</motion.div>

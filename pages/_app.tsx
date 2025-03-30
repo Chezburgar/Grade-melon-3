@@ -43,6 +43,8 @@ function MyApp({ Component, pageProps }) {
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
 
+	const baseUrls=["https://studentvuelib.up.railway.app","https://studentvuelib2.up.railway.app","https://studentvuelib3.up.railway.app"]
+	const rand=Math.floor(Math.random()*4)
 	const login = async (
 		username: string,
 		password: string,
@@ -55,7 +57,7 @@ function MyApp({ Component, pageProps }) {
 			username: username,
 			password: password,
 			encrypted:encrypted ||false
-		})
+		},baseUrls[rand])
 			.then(async (res) => {
 				const gradebook=res[1];
 				const fetchedClient=res[0];
@@ -111,12 +113,14 @@ function MyApp({ Component, pageProps }) {
 	async function getAd(){
 		if(localStorage.getItem("infoCache")!=undefined){
 			var schoolName:string=JSON.parse(localStorage.getItem("infoCache")).info.currentSchool;
+			var grade:string=JSON.parse(localStorage.getItem("infoCache")).info.grade;
 		}
 		else{
 			var schoolName="default/ALL";
+			var grade="default/ALL"
 		}
 
-        const response=await fetch(adServer+"/serve?school="+encodeURIComponent(schoolName),{
+        const response=await fetch(adServer+"/serve?school="+encodeURIComponent(schoolName)+"&"+"grade="+encodeURIComponent(grade),{
             method:"GET"
         });
         return await response.json()
@@ -342,7 +346,10 @@ const logout = async () => {
 					{client && isMediumOrLarger && (
 						<div className="pb-16 md:pb-0">
 							<div className="flex overflow-x-auto">
-								<SideBar studentInfo={studentInfo} logout={logout} />
+								<SideBar 										timestamp={timestamp}
+										setTime={setTime}
+										ad={ad}
+										setAd={setAd} studentInfo={studentInfo} logout={logout}/>
 								<AnimateSharedLayout>
 									<Component
 										{...pageProps}
