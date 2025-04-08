@@ -163,7 +163,7 @@ function MyApp({ Component, pageProps }) {
 
 	useEffect(()=>{
 		if(client!==undefined&&studentInfo==undefined){
-			if(localStorage.getItem("infoCache")!=undefined&&false){
+			if(localStorage.getItem("infoCache")!=undefined){
 				const cache=JSON.parse(localStorage.getItem("infoCache"));
 				if(cache.user==client.username){
 					setStudentInfo(cache.info);
