@@ -39,8 +39,12 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 
 	useEffect(() => {
 		if (!window.matchMedia("(display-mode: standalone)").matches) {
-			if (localStorage.getItem("advertisePWA") === null) {
+			if (localStorage.getItem("advertisePWA") === null&&(Number(localStorage.getItem('pwaCount'))<10||localStorage.getItem('pwaCount')==null)) {
 				setAdvertisePWA(true);
+				if(localStorage.getItem('pwaCount')==null){localStorage.setItem('pwaCount','0')}
+				else{
+					localStorage.setItem('pwaCount',(Number(localStorage.getItem('pwaCount'))+1).toString())
+				}
 				//localStorage.setItem("advertisePWA", "true");
 			}
 			console.log("This is not running as standalone.");
@@ -48,8 +52,14 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 	}, []);
 
 	useEffect(() => {
-			if (localStorage.getItem("advertiseDiscord") === null) {
+		let m=localStorage.getItem("advertiseDiscord")
+		let n=localStorage.getItem("disCount");
+			if (m=== null&&(Number(n)<10||n==null)) {
 				setAdvertiseDiscord(true);
+				if(n==null){localStorage.setItem('disCount','0')}
+				else{
+					localStorage.setItem('disCount',(Number(n)+1).toString())
+				}
 				//localStorage.setItem("advertisePWA", "true");
 			}
 
