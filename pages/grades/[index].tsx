@@ -518,7 +518,7 @@ export default function Grades({
 									let temp=structuredClone(grades.courses[parseInt(index as string)]);	
 									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){
 										stopBreakingTheIndexSystems=true; //disabled for [name-redacted]
-										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false})
+										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false,included:false})
 									}
 									else{
 										stopBreakingTheIndexSystems=false
@@ -526,7 +526,7 @@ export default function Grades({
 
 									
 									return(temp?.assignments.map(
-									({ name, date, grade, category, points, custom}, i) => {
+									({ name, date, grade, category, points, custom,included}, i) => {
 										var trueIndex:number;
 										if(i>Math.floor(course.assignments.length/2)&&ad&&client.username!="10016976"&&width<1280&&stopBreakingTheIndexSystems){trueIndex=i-1}
 										else{trueIndex=i};
@@ -549,7 +549,7 @@ export default function Grades({
 												{date.due.toLocaleDateString()}
 											</td>
 											<td
-												className={`py-4 md:px-6 px-3 text-center ${Boolean(custom) && "text-primary-500"} md:text-left hover:text-black dark:hover:text-white cursor-pointer`}
+												className={`py-4 md:px-6 px-3 text-center ${Boolean(custom) && "text-primary-500"} ${!included && "text-[#4d462d]"} md:text-left hover:text-${included ? 'black' : 'gray'} dark:hover:text-${included ? "white" : "gray"} cursor-pointer`}
 												onClick={() => OpenModal(trueIndex)}
 											>
 												{name}

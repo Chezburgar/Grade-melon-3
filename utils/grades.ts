@@ -3,6 +3,7 @@ import { Gradebook } from "studentvue";
 interface Assignment {
 	name: string;
 	custom?:boolean;
+	included:boolean;
 	grade: {
 		letter: string;
 		raw: number;
@@ -288,25 +289,26 @@ const parseGrades = (grades: Gradebook): Grades => {
   : [
       {
         name: "Default5421",
-        weight: 1, // assuming 100% weight
+        weight: 1, // assuming 100% weight   
         grade: {
-          letter: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type})=>{if(!isNaN(parsePoints(points).earned)){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type})=>{if(!isNaN(parsePoints(points).earned)){pointsP+=parsePoints(points).possible}});return(gradingScale ? letterGrade((pointsEarned/pointsP)*100,gradingScale):String((pointsEarned/pointsP)*100))})(), // or whatever default value you'd like
-          raw: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type})=>{if(!isNaN(parsePoints(points).earned)){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type})=>{if(!isNaN(parsePoints(points).earned)){pointsP+=parsePoints(points).possible}});return(parseFloat(((pointsEarned/pointsP)*100).toFixed(2)))})(),
-          color: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type})=>{if(!isNaN(parsePoints(points).earned)){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type})=>{if(!isNaN(parsePoints(points).earned)){pointsP+=parsePoints(points).possible}});return(letterGradeColor(letterGrade((pointsEarned/pointsP)*100,gradingScale)))})()
+          letter: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(gradingScale ? letterGrade((pointsEarned/pointsP)*100,gradingScale):String((pointsEarned/pointsP)*100))})(), // or whatever default value you'd like
+          raw: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(parseFloat(((pointsEarned/pointsP)*100).toFixed(2)))})(),
+          color: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGradeColor(letterGrade((pointsEarned/pointsP)*100,gradingScale)))})()
         },
         points: {
-          earned: (()=>{let pointsE=0;marks[0].assignments.forEach(({name,date,points,type})=>{if(!isNaN(parsePoints(points).earned)){pointsE+=parsePoints(points).earned}});return(pointsE)})(),
-          possible: (()=>{let pointsP=0;marks[0].assignments.forEach(({name,date,points,type})=>{if(!isNaN(parsePoints(points).earned)){pointsP+=parsePoints(points).possible}});return(pointsP)})(),
+          earned: (()=>{let pointsE=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsE+=parsePoints(points).earned}});return(pointsE)})(),
+          possible: (()=>{let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(pointsP)})(),
         },
       },
     ],
 
-			assignments: marks[0].assignments.map(({ name, date, points, type }) => ({
+			assignments: marks[0].assignments.map(({ name, date, points, type,notes }) => ({
+				included:notes!="(Not For Grading)",
 				name: parseAssignmentName(name),
 				grade: {
 					letter: gradingScale ? letterGrade(parsePoints(points).grade,gradingScale) : String(parsePoints(points).grade),
 					raw: parseFloat(parsePoints(points).grade.toFixed(2)),
-					color: letterGradeColor(letterGrade(parsePoints(points).grade,gradingScale)),
+					color: notes!="(Not For Grading)" ? letterGradeColor(letterGrade(parsePoints(points).grade,gradingScale)) : "mud" ,
 				},
 				points: {
 					earned: parsePoints(points).earned,
@@ -449,15 +451,18 @@ const calculateCategory = (course: Course, categoryId: number): Course => {
 			(assignment) =>
 				assignment.category === course.categories[categoryId].name &&
 				!isNaN(assignment.points.possible) &&
-				!isNaN(assignment.points.earned)
+				!isNaN(assignment.points.earned) && assignment.included
 		)
 		.reduce((a, b) => a + b.points.earned, 0);
+
+
 	course.categories[categoryId].points.possible = course.assignments
 		.filter(
 			(assignment) =>
 				assignment.category === course.categories[categoryId].name &&
 				!isNaN(assignment.points.possible) &&
-				!isNaN(assignment.points.earned)
+				!isNaN(assignment.points.earned) &&
+				assignment.included
 		)
 		.reduce((a, b) => a + b.points.possible, 0);
 	course.categories[categoryId].grade.raw = parseFloat(
@@ -505,6 +510,7 @@ const calculateGrade = (course: Course): Course => {
 const addAssignment = (course: Course): Course => {
 	course.assignments.unshift({
 		name: "New Assignment",
+		included:true,
 		custom:true,
 		grade: {
 			letter: "N/A",
@@ -574,6 +580,7 @@ const updateCourse = (
 	update: string,
 	val: number
 ): Course => {
+	if(!course.assignments[assignmentId].included){return course;}
 	if (update === "earned") {
 		if (val < 0) val = 0;
 		course.assignments[assignmentId].points.earned = val;
