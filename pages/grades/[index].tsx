@@ -556,7 +556,7 @@ export default function Grades({
 											</td>
 											<td className="py-4 md:px-6 pl-3 pr-2 text-center md:text-left">
 												<div
-													className={`flex items-center gap-2 text-${grade.color}-400`}
+													className={`flex items-center gap-2 ${included ? `text-${grade.color}-400` : 'text-[#4d462d]'}`}
 												>
 													<GradeField
 														onChange={(e) =>
