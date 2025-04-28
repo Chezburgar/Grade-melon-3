@@ -35,7 +35,7 @@ export default function GradeField({ value, onChange }: GradeFieldProps) {
 					type="number"
 					value={valasString}
 					onChange={onUpdate}
-					className="w-12 inline-block bg-gray-50 border border-gray-300 text-gray-900 sm:text-xs rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+					className="w-12 inline-block bg-gray-50 border-none bg-transparent p-0 text-gray-900 sm:text-xs rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 				/>
 			)}
 		</div>
