@@ -11,6 +11,7 @@ export default function GradeField({ value, onChange }: GradeFieldProps) {
 	const ref = useRef(null);
 
 	const onFocus = async () => {
+		console.log("am I even being clicked gang?")
 		setValasString(value.toString());
 		await setFocus(true);
 		await ref.current.focus();
@@ -21,14 +22,23 @@ export default function GradeField({ value, onChange }: GradeFieldProps) {
 		await onChange(e);
 	};
 
+
+
 	return (
 		<div
 			onClick={onFocus}
-			onBlur={() => setFocus(false)}
+			onBlur={() => {
+				setTimeout(()=>{
+					setFocus(false)
+				},100);
+				
+			}}
 			className="cursor-pointer"
 		>
 			{!focus ? (
-				!isNaN(value) ? value : "NG"
+				<p className="p-2 w-auto">
+				{!isNaN(value) ? value : "NG"}
+				</p>
 			) : (
 				<input
 					ref={ref}

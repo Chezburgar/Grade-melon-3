@@ -564,7 +564,7 @@ export default function Grades({
 														}
 														value={points.earned}
 													/>
-													/
+													<p className="">/</p>
 													<GradeField
 														onChange={(e) =>
 															updateGrade(e.target.value, trueIndex, "possible")
