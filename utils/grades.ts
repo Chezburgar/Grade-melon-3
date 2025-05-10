@@ -148,6 +148,7 @@ const isWeighted = (name: string): boolean => {
 	if (name.includes("Hon")) return true;
 	if (name.includes("IB")) return true;
 	if (name.includes("Mag")) return true;
+	if (name.includes("Adv")) return true;
 	else return false;
 };
 
