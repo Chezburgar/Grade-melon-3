@@ -190,7 +190,7 @@ export default function Home({ client }: HomeProps) {
 						transition={{ delay: 1.2, duration: 0.5 }}
 						className="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400"
 					>
-						Grade Melon is completely open source! You can find the source code
+						Grade Melon is almost completely open source! You can find the source code
 						on our Github. We are commited to maintain transparency with our
 						users.
 					</motion.p>
@@ -225,6 +225,53 @@ export default function Home({ client }: HomeProps) {
 					alt="Open Source"
 				/>
 			</div>
+
+
+
+
+<div className="pb-4 sm:pt-4">
+			<motion.h2
+				initial={{ x: 0, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ delay: 1.4, duration: 0.5 }}
+				className="font-bold dark:text-white text-3xl mt-10"
+			>
+				Advertising
+			</motion.h2>
+			<motion.p
+				initial={{ x: 0, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ delay: 1.5, duration: 0.5 }}
+				className="py-3 text-gray-500 w-fit md:w-1/2"
+			>
+				Want to advertise on Grademelon? Visit <a>https://adverts.grademelon.org</a> to learn more
+			</motion.p>
+			<motion.div
+				initial={{ x: 0, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ delay: 1.6, duration: 0.5 }}
+			>
+				<Link href="https://adverts.grademelon.org/">
+					<button className="focus:outline-none text-white bg-primary-600 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">
+						Ads
+					</button>
+				</Link>
+			</motion.div>
+			</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			<div className="pb-4 md:pt-0 sm:pt-4">
 			<motion.h2
 				initial={{ x: 0, opacity: 0 }}
@@ -254,6 +301,20 @@ export default function Home({ client }: HomeProps) {
 				</Link>
 			</motion.div>
 			</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+			
 
 
 			
