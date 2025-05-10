@@ -48,16 +48,36 @@ const chartOptions = {
 };
 
 const getColor = (label: string) => {
-	if (label.includes("Absent")) return "#FF7F7F";
+	if (label.includes("Absent")||label.includes("Absence")) return "#FF7F7F";
 	if (label.includes("Exc")) return "#FFEC1F";
 	if (label.includes("Illness")) return "#ADD8E6";
 	if (label.includes("Activities")) return "#50C878";
 	if (label.includes("Supervision")) return "#50C878";
-	if (label.includes("Tardy")) return "#FA8A20";
+	if (label.includes("Tardy")||label.includes("TDY")) return "#FA8A20";
 	return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 };
 
+
+
+
+
+
+function preSort(absences){
+	absences.forEach(({periods},i)=>{
+		console.log("cagch me filtering")
+		absences[i].periods=periods.filter((period)=>{console.log(period, period.name!="Not Included");return period.name!="Not Included"})
+
+	})
+	console.log(absences)
+	return absences
+}
+
+
+
+
+
 const parsePeriods = (absences: Absense[]): string[] => {
+
 	if (!absences) return [];
 	let periodLabels: string[] = [];
 
@@ -68,6 +88,7 @@ const parsePeriods = (absences: Absense[]): string[] => {
 			}
 		});
 	});
+	console.log("balzz")
 
 	return periodLabels.sort();
 };
@@ -78,6 +99,7 @@ const parseBarData = (
 	labels: string[];
 	datasets: any[];
 } => {
+ 
 	if (!absences) return { labels: [], datasets: [] };
 	let labels = parsePeriods(absences);
 
@@ -114,5 +136,5 @@ const parseBarData = (
 	};
 };
 
-export { parsePeriods, parseBarData, chartOptions };
+export { parsePeriods, parseBarData, chartOptions, preSort};
 export type { Attendance, Absense };

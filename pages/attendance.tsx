@@ -17,6 +17,7 @@ import {
 	parseBarData,
 	chartOptions,
 	parsePeriods,
+	preSort
 } from "../utils/attendance";
 
 ChartJS.register(
@@ -43,6 +44,7 @@ export default function Attendance({ client,createError}: AttendanceProps) {
 		try {
 			if(!client.loadedAttendance){
 			client.attendance().then(([res]) => {
+				res.absences=preSort(res.absences)
 				setData(res);
 				setLoading(false);
 				let temp = parseBarData(res?.absences);
