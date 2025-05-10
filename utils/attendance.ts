@@ -51,7 +51,7 @@ const getColor = (label: string) => {
 	if (label.includes("Absent")||label.includes("Absence")) return "#FF7F7F";
 	if (label.includes("Exc")) return "#FFEC1F";
 	if (label.includes("Illness")) return "#ADD8E6";
-	if (label.includes("Activities")) return "#50C878";
+	if (label.includes("Activities")||label.includes("Activity")) return "#50C878";
 	if (label.includes("Supervision")) return "#50C878";
 	if (label.includes("Tardy")||label.includes("TDY")) return "#FA8A20";
 	return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
