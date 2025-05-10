@@ -30,7 +30,7 @@ export default function GradeField({ value, onChange }: GradeFieldProps) {
 			onBlur={() => {
 				setTimeout(()=>{
 					setFocus(false)
-				},10);
+				},100);
 				
 			}}
 			className="cursor-pointer"
