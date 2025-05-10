@@ -33,7 +33,8 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 				console.log("schedule is here",res);
 				setSchedule(res);
 				setLoading(false);
-			}).catch(err=>{createError(err.message)});}else{setSchedule(client.loadedSchedule);setLoading(false)}
+				if(res.today===false){setToday(false);setTerm(res.termIndex)}
+			}).catch(err=>{createError(err.message);console.log(err)});}else{setSchedule(client.loadedSchedule);setLoading(false)}
 		} catch {
 			if (localStorage.getItem("remember") === "false") {
 				console.log("womp womp")
@@ -58,7 +59,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 						onChange={(e) => (update(e))}
 						className="h-11 mb-5 block w-full p-2 text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 					>
-						<option key={0} value={"today"}>Today</option>
+						{schedule.today && <option key={0} value={"today"}>Today</option>}
 						{schedule?.terms.map((term) => (
 							<option key={term.termIndex+1} value={term.termIndex}>
 								{term.termName}
