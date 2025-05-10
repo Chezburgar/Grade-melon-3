@@ -69,7 +69,7 @@ function MyApp({ Component, pageProps }) {
 				await setClient(fetchedClient);
 				
 				districts.forEach(district=>{
-					if(district.parentVueUrl==districtURL){Cookies.set("districtURL",JSON.stringify(district),{expires:7})}
+					if(district.parentVueUrl==districtURL){Cookies.set("districtURL",JSON.stringify(district),{expires:14})}
 				});
 				if (save) {
 					localStorage.setItem("remember", "true");
@@ -254,7 +254,7 @@ const logout = async () => {
 	setStudentInfo(undefined);
 	
 	if(localStorage.getItem("remember")=="false"){Cookies.remove("username")}
-	Cookies.remove("districtURL");
+	//Cookies.remove("districtURL");
 
 };
 
