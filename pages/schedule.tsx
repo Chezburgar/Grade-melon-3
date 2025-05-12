@@ -14,7 +14,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 	const [loading, setLoading] = useState(true);
 	const [schedule, setSchedule] = useState<any>();
 	const [term, setTerm] = useState<any>();
-	const [today,setToday]=useState<boolean>();
+	const [today,setToday]=useState<boolean>(true);
 
 	function update(e){
 		console.log(e.target.value)
@@ -37,7 +37,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 				setLoading(false);
 			
 			}).catch(err=>{createError(err.message);console.log(err,term,today)});}else{console.log(today,term);setSchedule(client.loadedSchedule);
-				if(client.loadedSchedule.today===false){setToday(false);setTerm(client.loadedSchedule.termIndex)}else{setToday(true)}
+				if(client.loadedSchedule.today===false){setToday(false);setTerm(client.loadedSchedule.termIndex)}else{setToday(true);}
 				setLoading(false)}
 		} catch {
 			if (localStorage.getItem("remember") === "false") {
