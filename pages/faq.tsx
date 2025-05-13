@@ -137,7 +137,6 @@ export default function FAQ() {
 					Grade Melon was originally created by Tinu Vanapamula, but in spring of 2024, Synergy made changes that broke Grade Melon. As a graduating senior, Tinu had other priorities.
 					<br></br>
 					My name is Jonathan Shapiro. I&#39;m a student at Whitman, and in summer 2024, I took it upon myself to restore the project.
-					<br></br>
 					By September, I had things working again, and I&#39;ve been working on expanding and improving it ever since.
 						<br></br>
 						<br></br>
