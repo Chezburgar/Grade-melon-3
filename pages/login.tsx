@@ -43,6 +43,16 @@ export default function Login({
 	
 	const [trouble, setTrouble] = useState(false);
 
+
+	useEffect(()=>{
+		if(districts[districts.findIndex((d) => d.parentVueUrl === districtURL)
+									]?.address.includes(" GA ")){
+								createError("Grademelon is unavailable in Georgia")
+									}
+
+	},[districtURL])
+
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		let success = await login(username, password, checkbox);
@@ -84,7 +94,6 @@ export default function Login({
 			<Head>
 				<title>Login</title>
 			</Head>
-			<Script src="//servedby.eleavers.com/ads/ads.php?t=MzExNjc7MjEyNDQ7c3F1YXJlLnNxdWFyZV9ib3g=&index=1"/>
 			<Modal show={showModal} onClose={() => setShowModal(false)}>
 				<Modal.Header>Choose School District</Modal.Header>
 				<Modal.Body>
@@ -161,6 +170,8 @@ export default function Login({
 								<input
 									type="text"
 									value={username}
+									disabled={districts[districts.findIndex((d) => d.parentVueUrl === districtURL)
+									]?.address.includes(" GA ")}
 									onChange={(e) => setUsername(e.target.value)}
 									className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder="123456"
@@ -176,6 +187,8 @@ export default function Login({
 								</label>
 								<input
 									type="password"
+									disabled={districts[districts.findIndex((d) => d.parentVueUrl === districtURL)
+									]?.address.includes(" GA ")}
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
 									placeholder="••••••••"
@@ -222,7 +235,8 @@ export default function Login({
 							</button>
 							<button
 								onClick={handleSubmit}
-								disabled={loading}
+								disabled={loading||districts[districts.findIndex((d) => d.parentVueUrl === districtURL)
+									]?.address.includes(" GA ")}
 								type="submit"
 								className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 p-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
 							>
