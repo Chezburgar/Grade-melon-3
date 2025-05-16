@@ -252,7 +252,15 @@ export default function Grades({
 							<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
 								{course?.assignments[
 									modalDetails
-								]?.date.due.toLocaleDateString()}course							</p>
+								]?.date.due.toLocaleDateString()}							</p>
+								{Boolean(course?.assignments[
+									modalDetails
+								]?.notes) && <>
+								<p className="font-bold text-black dark:text-white">Notes</p>
+							<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+								{course?.assignments[
+									modalDetails
+								]?.notes}							</p></>}
 							<p className="font-bold text-black dark:text-white">Category</p>
 							<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
 								{course?.assignments[modalDetails]?.category}
@@ -518,7 +526,7 @@ export default function Grades({
 									let temp=structuredClone(grades.courses[parseInt(index as string)]);	
 									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){
 										stopBreakingTheIndexSystems=true; //disabled for [name-redacted]
-										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false,included:false})
+										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false,included:false,notes:""})
 									}
 									else{
 										stopBreakingTheIndexSystems=false

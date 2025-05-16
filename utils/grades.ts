@@ -4,6 +4,7 @@ interface Assignment {
 	name: string;
 	custom?:boolean;
 	included:boolean;
+	notes:string;
 	grade: {
 		letter: string;
 		raw: number;
@@ -305,6 +306,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 
 			assignments: marks[0].assignments.map(({ name, date, points, type,notes }) => ({
 				included:notes!="(Not For Grading)",
+				notes:notes,
 				name: parseAssignmentName(name),
 				grade: {
 					letter: gradingScale ? letterGrade(parsePoints(points).grade,gradingScale) : String(parsePoints(points).grade),
@@ -512,6 +514,7 @@ const addAssignment = (course: Course): Course => {
 	course.assignments.unshift({
 		name: "New Assignment",
 		included:true,
+		notes:"",
 		custom:true,
 		grade: {
 			letter: "N/A",
