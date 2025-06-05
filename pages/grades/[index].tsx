@@ -21,8 +21,11 @@ import { motion } from "framer-motion";
 import { TbRefresh } from "react-icons/tb";
 import { HiOutlineDocumentAdd } from "react-icons/hi";
 import { HiOutlineTrash } from "react-icons/hi";
+import { BsGearWideConnected } from "react-icons/bs";
 import { BsGraphUp } from "react-icons/bs";
 import CustomAd from "../../components/customAd";
+import SettingsModal from "../../components/settingsModal"
+
 
 interface GradesProps {
 	client: any;
@@ -37,6 +40,8 @@ interface GradesProps {
 	setTime:(time:number)=>void;
 	timestamp:number;
 	width:any;
+	courseSettings:any;
+	setCourseSettings:any;
 }
 
 interface OptimizeProps {
@@ -56,7 +61,7 @@ export default function Grades({
 	setAd,
 	setTime,
 	timestamp,
-	width
+	width,courseSettings,setCourseSettings
 }: GradesProps) {
 	const router = useRouter();
 	const { index }: { index?: string } = router.query;
@@ -69,7 +74,9 @@ export default function Grades({
 	const [solutions, setSolution] = useState<[number[], number][]>([]);
 	const [isEditing, setIsEditing]=useState(false);
 	const [title,setTitle]=useState(undefined);
+	const [showSettingsModal,setShowSettingsModal]=useState(false);
 	const assignmentTitle = useRef(null);
+
 	
 	useEffect(() => {
 		try {
@@ -366,6 +373,17 @@ export default function Grades({
 						</div>
 					)}
 				</Modal.Body>
+				<SettingsModal
+					client={client}
+					grades={grades}
+					setGrades={setGrades}
+					index={index}
+					courseSettings={courseSettings}
+					setCourseSettings={setCourseSettings}
+					showModal={showSettingsModal}
+					setShowModal={setShowSettingsModal}
+				
+				/>
 				<Modal.Footer>
 					{modalType === "assignment" && (
 						<div className="flex gap-2">
@@ -420,10 +438,25 @@ export default function Grades({
 					<motion.h1
 						layoutId={`name-${course?.layoutID}`}
 						layout
-						className="flex flex-wrap text-xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1"
+						className="flex flex-wrap justify-between text-xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1"
 					>
 						{course?.name}
+							<BsGearWideConnected
+								className="sm:text-2xl md:text-3xl hover:text-gray-600"
+								style={{alignSelf:"end"}}
+								onClick={()=>setShowSettingsModal(true)}
+					
+					/>
 					</motion.h1>
+					<div
+					className=""
+			 
+					>
+				
+
+						</div>
+
+
 					<motion.p
 						layoutId={`teacher-${course?.layoutID}`}
 						layout

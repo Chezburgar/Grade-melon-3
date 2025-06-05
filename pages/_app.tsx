@@ -31,6 +31,7 @@ function MyApp({ Component, pageProps }) {
 		undefined
 	);
 	const [client, setClient] = useState(undefined);
+	const [courseSettings,setCourseSettings]=useState({})
 	const [studentInfo, setStudentInfo] = useState(undefined);
 	const [toasts, setToasts] = useState<Toast[]>([]);
 	const [grades, setGrades] = useState<Grades>();
@@ -52,6 +53,11 @@ function MyApp({ Component, pageProps }) {
 		encrypted?:boolean
 	) => {
 		await setLoading(true);
+
+		const encryptedPass=getCourseSettings(username,password,encrypted,url);
+
+
+
 		await StudentVue.login(url || districtURL, {
 			username: username,
 			password: password,
@@ -74,16 +80,14 @@ function MyApp({ Component, pageProps }) {
 				if (save) {
 					localStorage.setItem("remember", "true");
 					Cookies.set("username",username,{expires:7,secure:false,sameSite:"Lax"})
+					let myTemp;
 					if(!encrypted){
-						await fetch("https://studentvuelib.up.railway.app" + "/encryptPassword", {
-							'method': 'POST',
-							'headers': { 'Content-Type': 'application/json' },
-							'body': JSON.stringify({ 'password': password })
-						}).then(async(response)=>{
-							const result=await response.json()
-							Cookies.set("password",result.encryptedPassword,{expires:7})
-						})}
-						
+						myTemp=await encryptedPass;
+					}
+					else{myTemp=password}
+				Cookies.set("password",myTemp,{expires:7})
+
+
 				} else {
 					localStorage.setItem("remember", "false");
 					Cookies.remove("username");
@@ -109,6 +113,39 @@ function MyApp({ Component, pageProps }) {
 
 	const adServer="https://adverts.grademelon.org"
 
+
+
+	async function getCourseSettings(username,password,encrypted,url){
+				if(!encrypted){
+						const result =await(await fetch("https://studentvuelib.up.railway.app" + "/encryptPassword", {
+							'method': 'POST',
+							'headers': { 'Content-Type': 'application/json' },
+							'body': JSON.stringify({ 'password': password })
+						})).json()
+						password=result.encryptedPassword
+
+	}
+				const settingsFetch=await (await fetch('https://studentvuelib-clean.up.railway.app/getSettings',{
+					'method':'POST',
+					'headers':{'Content-Type':'application/json'},
+					'body':JSON.stringify({username:username,'password':password,url:url})
+						
+
+				})).json()
+
+
+				if(settingsFetch.status){
+					setCourseSettings(settingsFetch.settings)
+				}
+				else{
+					setCourseSettings(false)
+				}
+
+				return password
+			}
+
+
+
 	async function getAd(){
 		if(localStorage.getItem("infoCache")!=undefined){
 			var schoolName:string=JSON.parse(localStorage.getItem("infoCache")).info.currentSchool;
@@ -127,7 +164,7 @@ function MyApp({ Component, pageProps }) {
     
 }
 
-	useEffect(() => {
+	useEffect(() => { //ad fetch
 		if(ad==undefined){
 			getAd().then(res=>{
 				setAd(res.ad);
@@ -136,32 +173,13 @@ function MyApp({ Component, pageProps }) {
 		}
 
 
-
-		const urlParams = new URLSearchParams(window.location.search);
-		const referrer = urlParams.get('ref')
-		if (referrer === 'klinn') {
-			setReferal(true);
-	}
+ 
 	  }, []);
-//fast deploy
+ 
 
-	useEffect(()=>{
-		//replace when the updated logic from adsplatform is finished
-		if(client && referal){
-			try{
-				fetch("https://studentvuelib.up.railway.app/refferals",{
-				  'method':'POST',
-				  'headers': { 'Content-Type': 'application/json' },
-				  'body': JSON.stringify({'validation':'f7c3c1ce7613fce0b595a3eaf48f1ad8'})
-	  
-				})
-			  }catch(error){console.log("idk")}
-		}
+ 
 
-//just make a deploy
-	},[client])
-
-	useEffect(()=>{
+	useEffect(()=>{ //Hook responsible for fetching studentInfo
 		if(client!==undefined&&studentInfo==undefined){
 			if(localStorage.getItem("infoCache")!=undefined){
 				const cache=JSON.parse(localStorage.getItem("infoCache"));
@@ -337,6 +355,8 @@ const logout = async () => {
 								ad={ad}
 								setAd={setAd}
 								width={width}
+								courseSettings={courseSettings}
+								setCourseSettings={setCourseSettings}
 
 							/>
 						</AnimateSharedLayout>
@@ -371,7 +391,8 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
-										
+										courseSettings={courseSettings}
+										setCourseSettings={setCourseSettings}
 									/>
 								</AnimateSharedLayout>
 							</div>
@@ -402,6 +423,8 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
+										courseSettings={courseSettings}
+										setCourseSettings={setCourseSettings}
 									/>
 								</AnimateSharedLayout>
 								<div className="px-4 fixed bottom-5 w-full">

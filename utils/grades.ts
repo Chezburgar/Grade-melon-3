@@ -74,8 +74,8 @@ interface Grades {
 	}[];
 }
 
-
-const letterGradeColor = (letterGrade: string) => {
+//should rebuild this to also take in a list from custom grading scales and to go by descending order 
+function letterGradeColor(letterGrade: string){
 	try{
 	if (letterGrade.includes("A")&&letterGrade!=="N/A") {
 		return "green";
@@ -93,7 +93,7 @@ const letterGradeColor = (letterGrade: string) => {
 }catch(error){return "gray"}
 };
 
-const letterGrade = (grade: number,gradingScale:gradingScale): string => {
+function letterGrade(grade: number,gradingScale:gradingScale):string{
 	const rounding=gradingScale.rounding;
 if(rounding.percent){
 	grade=Number(grade.toFixed(rounding.percentPlaces))
