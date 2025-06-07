@@ -31,7 +31,7 @@ function MyApp({ Component, pageProps }) {
 		undefined
 	);
 	const [client, setClient] = useState(undefined);
-	const [courseSettings,setCourseSettings]=useState({})
+	 
 	const [studentInfo, setStudentInfo] = useState(undefined);
 	const [toasts, setToasts] = useState<Toast[]>([]);
 	const [grades, setGrades] = useState<Grades>();
@@ -62,7 +62,7 @@ function MyApp({ Component, pageProps }) {
 			username: username,
 			password: password,
 			encrypted:encrypted ||false
-		},"https://studentvuelib.up.railway.app")
+		},"https://studentvuelib-clean.up.railway.app")
 			.then(async (res) => {
 				const gradebook=res[1];
 				const fetchedClient=res[0];
@@ -125,6 +125,7 @@ function MyApp({ Component, pageProps }) {
 						password=result.encryptedPassword
 
 	}
+	/*
 				const settingsFetch=await (await fetch('https://studentvuelib-clean.up.railway.app/getSettings',{
 					'method':'POST',
 					'headers':{'Content-Type':'application/json'},
@@ -140,7 +141,7 @@ function MyApp({ Component, pageProps }) {
 				else{
 					setCourseSettings(false)
 				}
-
+*/
 				return password
 			}
 
@@ -355,8 +356,7 @@ const logout = async () => {
 								ad={ad}
 								setAd={setAd}
 								width={width}
-								courseSettings={courseSettings}
-								setCourseSettings={setCourseSettings}
+						 
 
 							/>
 						</AnimateSharedLayout>
@@ -391,8 +391,7 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
-										courseSettings={courseSettings}
-										setCourseSettings={setCourseSettings}
+							 
 									/>
 								</AnimateSharedLayout>
 							</div>
@@ -423,8 +422,7 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
-										courseSettings={courseSettings}
-										setCourseSettings={setCourseSettings}
+	 
 									/>
 								</AnimateSharedLayout>
 								<div className="px-4 fixed bottom-5 w-full">

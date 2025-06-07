@@ -619,6 +619,21 @@ const updateCourse = (
 	return course;
 };
 
+
+function reCalculateCourse(course:Course){
+
+	for(let assignment of course.assignments){
+		assignment.grade.letter=letterGrade(assignment.grade.raw,course.gradingScale)
+		assignment.grade.color=letterGradeColor(assignment.grade.letter)
+	}
+	for(let i=0;i<course.categories.length;i++){
+		course=calculateCategory(course,i)
+	}
+
+	course=calculateGrade(course)
+	return course
+}
+
 function abbreviate(category) {
     category = category.toUpperCase();
     var separator;
@@ -650,6 +665,7 @@ export {
 	genTable,
 	calculateGPA,
 	updateGPA,
-	abbreviate
+	abbreviate,
+	reCalculateCourse
 };
 export type { Grades, Assignment, Course };

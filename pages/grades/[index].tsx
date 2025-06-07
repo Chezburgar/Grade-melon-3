@@ -288,7 +288,7 @@ export default function Grades({
 										<input
 											type="number"
 											min={1}
-											max={100}
+											max={100}           
 											value={optimizeProps?.desiredGrade}
 											onChange={(e) =>
 												updateOptimize(e.target.value, "desiredGrade")
@@ -378,8 +378,7 @@ export default function Grades({
 					grades={grades}
 					setGrades={setGrades}
 					index={index}
-					courseSettings={courseSettings}
-					setCourseSettings={setCourseSettings}
+  
 					showModal={showSettingsModal}
 					setShowModal={setShowSettingsModal}
 				

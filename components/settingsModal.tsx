@@ -23,25 +23,19 @@ gpa and final exam stuff can happen laterrrrrrrr
 
 
 /*
-What you almost deffinitely wanna do, is rewrite the grades.ts utiltiy to 
-accept the final options json we use for the grades settings and to react accordingly 
+Okay, at this point, what's up is thus:
+need to add rounding part of modal,
+need to add the checks and shit for the save function
 
-But then jesus how many places are we storing all this stuff?
-Well, we can absolutely fetch and send the settings with the intial gradebook send, just tag it on
-to the extraData attribute,
+need to unify the format and pick a primary one for the gradingScale object
 
-instead of returning empty settings, for empty settings return the defaults from the 
-existing system we have now
+unify accross: on courses attribute, in grades.ts, and on backend,
 
+need to implement settings fetch in initial gradebook fetch via extraData
 
-if we do that, then we have no need for the unified useState object to store the grading scales
-we could entirely use the gradingScale attribute attatched to each individual course, and also 
-one attatched the the client, also recieved by the intial gradebook fetch or mutated in 
-the settings modal 
+need to implement fallback if gradebook settings fetch fails
 
-
-
-But, none of this realy has implications on the front end design 
+need to implement save-settings fetch
 
 
 */
@@ -49,14 +43,78 @@ But, none of this realy has implications on the front end design
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades}){
     	const course = grades?.courses[parseInt(index)];
         const courseSettings=undefined
-        const [letterScale,setLetterScale]=useState<any>({"A": [89.5,100],"B": [ 79.5,89.49],"C": [69.5, 79.49],"D": [ 59.5, 69.49],"E": [  0, 59.49 ]})
-       
-       
+        const [letterScale,setLetterScale]=useState<any>([["A",[89.5,100]],["B",[ 79.5,89.49]],["C",[69.5, 79.49]],["D", [ 59.5, 69.49]],["E",[0, 59.49 ]]])
+        const [active,setActive]=useState([false,''])
+ 
+
+function mutate(e,letter,bound){
+    setLetterScale((prev)=>{
+        let temp=structuredClone(prev)
+        temp[letter][bound]=(e.target.value)
+        return temp
+    })
+}
+
+//lazy
+function mutate2(e,letter,bound){
+    console.log(e,letter,bound,letterScale)
+    setLetterScale((prev)=>{
+        let temp=structuredClone(prev)
+        temp[letter][1][bound]=parseFloat(e.target.value)
+        console.log("i hate u",temp)
+        return temp
+    })
+}
+
+function deleteLetter(letter){
+    let temp=structuredClone(letterScale)
+    temp=temp.slice(0,letter).concat(temp.slice(letter+1))
+    setLetterScale(temp)
+
+}
+
+function addLetter(){
+    let temp=structuredClone(letterScale)
+    temp=temp.concat([["X",[0,0]]])
+    setLetterScale(temp)
+
+}
+
+function saveNew(){
 
 
 
+}
 
 
+function validate(){
+    let temp=structuredClone(letterScale)
+    for(var i=0;i<temp.length;i++){
+        temp[i][1].sort()
+
+    }
+    const raw=temp.map(letter=>letter[1]).flat().sort()
+    for(var i=raw.length-1;i>0;i++){
+        if(temp.findIndex(letter=>letter[1].includes(raw[i]))!=temp.findIndex(letter=>letter[1].includes(raw[i-1]))){
+            return false
+        }
+
+    }
+
+    if(hasDuplicatesSorted(raw)){return false}
+
+    //doesnt check for them being a continous function type shit, but I'd need the rounding info for that to know what constitutes a discrete increment 
+
+    return true;
+}
+
+//helper function, most efficient
+function hasDuplicatesSorted(arr) {
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] === arr[i - 1]) return true;
+  }
+  return false;
+}
 
 
 
@@ -66,7 +124,7 @@ useEffect(()=>{
             return
         }
     
-    setLetterScale({"A": [89.5,100],"B": [ 79.5,89.49],"C": [69.5, 79.49],"D": [ 59.5, 69.49],"E": [  0, 59.49 ]})
+  //  setLetterScale({"A": [89.5,100],"B": [ 79.5,89.49],"C": [69.5, 79.49],"D": [ 59.5, 69.49],"E": [  0, 59.49 ]})
        
 
 
@@ -88,86 +146,165 @@ Grade Calculation Settings
 </Modal.Header>
 
 
-<Modal.Body>
+<Modal.Body
+className="w-full"
+>
   <h1 className="mb-4 text-xl font-bold text-white">Letter Scale</h1>
 
-  {/* Grade‑scale table */}
-  <div className="overflow-x-auto rounded-lg border border-gray-600">
-    {/* 4‑column grid: Letter | Upper | Lower | Delete */}
-    <div
-      className="
-        grid
-        grid-cols-[4rem_repeat(2,6rem)_min-content]
-        md:grid-cols-[5rem_repeat(2,8rem)_min-content]
-        gap-x-4 gap-y-3
-        p-3
-        mx-auto
-        w-fit
-      "
-    >
-      {/* header row */}
-      <p className="font-semibold text-white md:text-xl">Letter</p>
-      <p className="font-semibold text-white md:text-xl">Upper Bound</p>
-      <p className="font-semibold text-white md:text-xl">Lower Bound</p>
-      {/* empty cell to align header row with delete column */}
-      <span />
+  <div className="w-full flex justify-center overflow-x-auto rounded-lg border border-gray-600">
+    <table className="flex-1 mx-auto min-w-max text-left">
+      {/* ── header ─────────────────────────────────────────── */}
+      <thead>
+        <tr className="text-white md:text-xl bg-slate-700">
+          <th className="px-4 py-2 font-semibold">Letter</th>
+          <th className="px-4 py-2 font-semibold">Lower</th>
+          <th className="px-4 py-2 font-semibold">Upper</th>
+          {/* empty heading to keep the delete column aligned */}
+          <th className="px-4 py-2" />
+        </tr>
+      </thead>
 
-      {/* data rows */}
-      {Object.keys(letterScale).map((letter) => (
-        <React.Fragment key={letter}>
-          {/* letter cell */}
-          <p className="w-12 rounded-lg bg-gray-800 p-1.5 text-center font-bold text-white md:text-lg">
-            {letter}
-          </p>
-
-          {/* upper‑bound input */}
-          <input
-            type="number"
-            value={letterScale[letter][0]}
-            className="w-16 rounded-lg bg-gray-800 p-1.5 font-bold text-white md:w-24 md:text-lg"
-          />
-
-          {/* lower‑bound input */}
-          <input
-            type="number"
-            value={letterScale[letter][1]}
-            className="w-16 rounded-lg bg-gray-800 p-1.5 font-bold text-white md:w-24 md:text-lg"
-          />
-
-          {/* delete button */}
-          <button
-            onClick={() => {/* delete logic here */}}
-            className="
-              flex
-              items-center
-              gap-1
-              rounded-lg
-              bg-primary-500
-              px-2.5
-              py-2.5
-              text-xs
-              font-medium
-              text-white
-              hover:bg-primary-600
-              focus:outline-none
-              focus:ring-4
-              focus:ring-primary-300
-              dark:bg-primary-600
-              dark:hover:bg-primary-700
-              dark:focus:ring-primary-800
-              sm:text-sm
-            "
+      {/* ── body ───────────────────────────────────────────── */}
+      <tbody>
+        {letterScale.map((letter,i) => (
+          <tr
+            key={`${i}--23`}
+            className={i % 2 === 0 ? "bg-gray-900" : "bg-gray-800"}
           >
-            <HiOutlineTrash size="1.2rem" />
-          </button>
-        </React.Fragment>
-      ))}
-    </div>
+            {/* letter cell */}
+            <td className="px-4 py-2">
+              <input 
+              type="text"
+               key={`${i}-0`}
+              value={active[0]==`${i}-0` ? active[1] : letter[0]}
+              onChange={(e)=>{
+                    setActive([`${i}-0`,e.target.value])
+
+
+
+              }}    
+
+
+              onBlur={
+                (e)=>{
+                    setActive([false,''])
+                    mutate(e,i,0)}
+              }
+              style={{borderWidth:0}}
+              className="w-12 text-center font-bold bg-transparent text-white md:text-lg  ">
+                
+              </input>
+            </td>
+
+            {/* upper‑bound input */}
+            <td className="px-4 py-2">
+              <input
+                type="number"
+                key={`${i}-1`}
+                value={   active[0]==`${i}-1` ? active[1] : letter[1][0]}
+                onBlur={(e) => {
+                               setActive([false,''])
+                  mutate2(e,i,0)
+                }}
+
+                 onChange={(e)=>{
+                        setActive([`${i}-1`,e.target.value])
+
+
+
+              }}    
+                className="
+                  w-16 md:w-24
+                  rounded-lg
+                  bg-transparent
+                  p-1.5
+                  font-bold
+                  text-white
+                  text-right
+                  outline-none
+                  border border-gray-300  focus:ring-primary-600 focus:border-primary-600   dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500
+                "
+              />
+            </td>
+
+            {/* lower‑bound input */}
+            <td className="px-4 py-2">
+              <input
+                type="number"
+                value={   active[0]==`${i}-2` ? active[1] : letter[1][1]}
+                 key={`${i}-2`}
+                onBlur={(e) => {
+                               setActive([false,''])
+                    mutate2(e,i,1)
+                }}
+
+                 onChange={(e)=>{
+                        setActive([`${i}-2`,e.target.value])
+
+
+
+              }}    
+                className="
+                  w-16 md:w-24
+                  rounded-lg
+                  bg-transparent
+                  p-1.5
+                  font-bold
+                  text-white
+                  text-right
+                  outline-none
+                  border border-gray-300  focus:ring-primary-600 focus:border-primary-600   dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500
+                "
+              />
+            </td>
+
+            {/* delete button */}
+            <td className="px-4 py-2">
+              <button
+                onClick={() => {
+                  deleteLetter(i)
+                }}
+                className="
+                  flex items-center gap-1
+                  rounded-lg bg-primary-500
+                  px-2.5 py-2.5
+                  text-xs font-medium text-white
+                  hover:bg-primary-600
+                  focus:outline-none focus:ring-4 focus:ring-primary-300
+                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  sm:text-sm
+                "
+              >
+                <HiOutlineTrash size="1.2rem" />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   </div>
+    <button className="p-1 px-2 mt-2 bg-primary-600 text-white rounded-lg" onClick={addLetter}>Add+</button>
 </Modal.Body>
 
 
 
+<Modal.Footer>
+<div className="w-full flex justify-start gap-5">
+      <button className="text-white bg-primary-600 p-2 px-3 rounded-lg">Save</button>
+      <button className="text-white bg-gray-800 p-2 px-3 rounded-lg"
+      onClick={()=>{
+//not yet cuz the structure doesn't match yet, but, setLetterGrade(course.gradingScale)
+        setShowModal(false)
+
+      }}
+      >Cancel</button>
+      
+
+
+</div>
+
+
+</Modal.Footer>
 
 
 </Modal>
