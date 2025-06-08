@@ -45,7 +45,8 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const courseSettings=undefined
         const [letterScale,setLetterScale]=useState<any>([["A",[89.5,100]],["B",[ 79.5,89.49]],["C",[69.5, 79.49]],["D", [ 59.5, 69.49]],["E",[0, 59.49 ]]])
         const [active,setActive]=useState([false,''])
- 
+        const [rounding,setRounding]=useState(false)
+        const [decimalPlaces,setDecimalPlaces]=useState<number>(0)
 
 function mutate(e,letter,bound){
     setLetterScale((prev)=>{
@@ -81,7 +82,7 @@ function addLetter(){
 }
 
 function saveNew(){
-
+    
 
 
 }
@@ -103,7 +104,7 @@ function validate(){
 
     if(hasDuplicatesSorted(raw)){return false}
 
-    //doesnt check for them being a continous function type shit, but I'd need the rounding info for that to know what constitutes a discrete increment 
+ 
 
     return true;
 }
@@ -284,6 +285,26 @@ className="w-full"
     </table>
   </div>
     <button className="p-1 px-2 mt-2 bg-primary-600 text-white rounded-lg" onClick={addLetter}>Add+</button>
+
+{/*
+    <h1 className="text-xl text-white font-bold mt-10">Rounding Rules</h1>
+
+    <div className="border rounded-lg border-gray-600 flex flex-col gap-4 bg-gray-800">
+        <div style={{alignItems:"center"}} className="mx-2 flex gap-2">
+        <input
+        checked={rounding}
+        onChange={()=>setRounding(!rounding)}
+        type="checkbox"
+        />
+        <p className="text-white">Rounding on?</p>
+        </div>
+        <div>
+        <p className="text-white mx-2">Decimal Places</p>
+         <input type="number" className="bg-transparent max-w-fit mb-2 mx-2 rounded-lg text-gray-300" value={decimalPlaces} onChange={(e)=>setDecimalPlaces(parseInt(e.target.value))}></input>
+         </div>
+    </div>
+
+    */}
 </Modal.Body>
 
 

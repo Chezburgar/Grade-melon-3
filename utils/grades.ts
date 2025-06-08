@@ -94,11 +94,15 @@ function letterGradeColor(letterGrade: string){
 };
 
 function letterGrade(grade: number,gradingScale:gradingScale):string{
+
+	//deprecating rounding unless someone complains chat
+	/*
 	const rounding=gradingScale.rounding;
 if(rounding.percent){
 	grade=Number(grade.toFixed(rounding.percentPlaces))
 
 }
+	*/
 
 
 if(!gradingScale){
