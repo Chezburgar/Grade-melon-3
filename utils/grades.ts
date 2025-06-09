@@ -23,8 +23,8 @@ interface Assignment {
 
 
 interface gradingScale{
-	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},
-	[key:string]:[number,number] | {percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number}
+	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},letterScale:
+	[string,[number,number]][]  
 }
 
 
@@ -62,6 +62,7 @@ interface Course {
 
 interface Grades {
 	courses: Course[];
+	gradingScales:{[key:string]:gradingScale}
 	gpa: number;
 	wgpa: number;
 	period: {
@@ -120,12 +121,11 @@ if(!gradingScale){
 		return "N/A";
 	}}
 else{
-	for(const letterGrade in gradingScale){
-		if(letterGrade=="rounding"){continue}
-		if(grade>100){return letterGrade}
-		if(grade>=gradingScale[letterGrade][0]&&grade<=gradingScale[letterGrade][1]){
+	for(let letter of gradingScale.letterScale){
+		if(grade>100){return gradingScale.letterScale.at(-1)[0]}
+		if(grade>=letter[1][0]&&grade<=letter[1][1]){
 			
-			return letterGrade
+			return letter[0]
 		}
 	}
 	return "N/A"
@@ -239,11 +239,12 @@ const parseGrades = (grades: Gradebook): Grades => {
 		}
 	}
 	let parsedGrades:Grades = {
+		gradingScales:gradingScale,
 		gpa:
 			grades.courses.reduce(
 				(a, b) =>
 					a +
-					letterGPA(letterGrade(b.marks[0].calculatedScore.raw,gradingScale), false),
+					letterGPA(letterGrade(b.marks[0].calculatedScore.raw,gradingScale[b.title+b.period] ? gradingScale[b.title + b.period] : gradingScale.default), false),
 				0
 			) / grades.courses.length,
 		wgpa:
@@ -251,22 +252,24 @@ const parseGrades = (grades: Gradebook): Grades => {
 				(a, b) =>
 					a +
 					letterGPA(
-						letterGrade(b.marks[0].calculatedScore.raw,gradingScale),
+						letterGrade(b.marks[0].calculatedScore.raw,gradingScale[b.title+b.period] ? gradingScale[b.title + b.period] : gradingScale.default),
 						isWeighted(b.title)
 					),
 				0
 			) / grades.courses.length,
-		courses: grades.courses.map(({ title, period, room, staff, marks }, i) => ({
+		courses: grades.courses.map(({ title, period, room, staff, marks }, i) => {
+			const scale=gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] ? gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] : gradingScale.default
+			return({
 			name: ReplaceUnderscores(stripParens(title)),
 			period: period ? period : i + 1,
 			layoutID:null,
 			room: room,
 			weighted: isWeighted(title),
-			gradingScale:gradingScale,
+			gradingScale:scale,
 			grade: {
-				letter: gradingScale ? (marks[0].calculatedScore.string!=="N/A" ? letterGrade(marks[0].calculatedScore.raw,gradingScale) : "N/A") : (marks[0].calculatedScore.string!=="N/A" ? String(marks[0].calculatedScore.raw) : "N/A"),
+				letter: (marks[0].calculatedScore.string!=="N/A" ? letterGrade(marks[0].calculatedScore.raw,scale) : "N/A"),
 				raw: marks[0].calculatedScore.string!=="N/A" ? marks[0].calculatedScore.raw : NaN,
-				color: marks[0].calculatedScore.string!=="N/A" ? letterGradeColor(letterGrade(marks[0].calculatedScore.raw,gradingScale)) : letterGradeColor("N/A"),
+				color: marks[0].calculatedScore.string!=="N/A" ? letterGradeColor(letterGrade(marks[0].calculatedScore.raw,scale)) : letterGradeColor("N/A"),
 			},
 			teacher: {
 				name: staff.name,
@@ -278,12 +281,12 @@ const parseGrades = (grades: Gradebook): Grades => {
         name: type,
         weight: parseFloat(weight.standard) / 100,
         grade: {
-          letter: gradingScale ? letterGrade((points.current / points.possible) * 100,gradingScale) : String((points.current/points.possible)*100),
+          letter: letterGrade((points.current / points.possible) * 100,scale),
           raw: parseFloat(
             ((points.current / points.possible) * 100).toFixed(2)
           ),
           color: letterGradeColor(
-            letterGrade((points.current / points.possible) * 100,gradingScale)
+            letterGrade((points.current / points.possible) * 100,scale)
           ),
         },
         points: {
@@ -297,9 +300,9 @@ const parseGrades = (grades: Gradebook): Grades => {
         name: "Default5421",
         weight: 1, // assuming 100% weight   
         grade: {
-          letter: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(gradingScale ? letterGrade((pointsEarned/pointsP)*100,gradingScale):String((pointsEarned/pointsP)*100))})(), // or whatever default value you'd like
+          letter: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGrade((pointsEarned/pointsP)*100,scale))})(), // or whatever default value you'd like
           raw: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(parseFloat(((pointsEarned/pointsP)*100).toFixed(2)))})(),
-          color: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGradeColor(letterGrade((pointsEarned/pointsP)*100,gradingScale)))})()
+          color: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGradeColor(letterGrade((pointsEarned/pointsP)*100,scale)))})()
         },
         points: {
           earned: (()=>{let pointsE=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsE+=parsePoints(points).earned}});return(pointsE)})(),
@@ -313,9 +316,9 @@ const parseGrades = (grades: Gradebook): Grades => {
 				notes:notes,
 				name: parseAssignmentName(name),
 				grade: {
-					letter: gradingScale ? letterGrade(parsePoints(points).grade,gradingScale) : String(parsePoints(points).grade),
+					letter:  letterGrade(parsePoints(points).grade,scale), 
 					raw: parseFloat(parsePoints(points).grade.toFixed(2)),
-					color: notes!="(Not For Grading)" ? letterGradeColor(letterGrade(parsePoints(points).grade,gradingScale)) : "mud" ,
+					color: notes!="(Not For Grading)" ? letterGradeColor(letterGrade(parsePoints(points).grade,scale)) : "mud" ,
 				},
 				points: {
 					earned: parsePoints(points).earned,
@@ -327,7 +330,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 				},
 				category: marks[0].weightedCategories.length ? type : "Default5421",
 			})),
-		})),
+		})}),
 		period: {
 			name: grades.reportingPeriod.current.name,
 			index: grades.reportingPeriod.current.index,
@@ -625,7 +628,7 @@ const updateCourse = (
 
 
 function reCalculateCourse(course:Course){
-
+ 
 	for(let assignment of course.assignments){
 		assignment.grade.letter=letterGrade(assignment.grade.raw,course.gradingScale)
 		assignment.grade.color=letterGradeColor(assignment.grade.letter)

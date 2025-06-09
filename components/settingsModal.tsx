@@ -1,6 +1,7 @@
 import React,{useState,useEffect} from "react";
 import {Modal} from "flowbite-react"
 import { HiOutlineTrash } from "react-icons/hi";
+import { reCalculateCourse,parseGrades } from "../utils/grades";
 
 
 /*
@@ -40,10 +41,10 @@ need to implement save-settings fetch
 
 */
 
-export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades}){
+export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError}){
     	const course = grades?.courses[parseInt(index)];
         const courseSettings=undefined
-        const [letterScale,setLetterScale]=useState<any>([["A",[89.5,100]],["B",[ 79.5,89.49]],["C",[69.5, 79.49]],["D", [ 59.5, 69.49]],["E",[0, 59.49 ]]])
+        const [letterScale,setLetterScale]=useState<any>(grades?.courses[parseInt(index)].gradingScale?.letterScale || undefined)
         const [active,setActive]=useState([false,''])
         const [rounding,setRounding]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState<number>(0)
@@ -81,28 +82,71 @@ function addLetter(){
 
 }
 
-function saveNew(){
+async function saveNew(){
+  
+    if(validate()){
+        
+        const newScale={rounding:undefined,letterScale:letterScale}
+        const augmentedScale=structuredClone(grades)
+        augmentedScale.gradingScales[course.name+course.period+course.teacher.name]=newScale;
+
     
+    const result = await (await fetch("https://studentvuelib-clean.up.railway.app/setSettings",{
+            'method':'POST',
+            'headers':{'Content-Type':'application/json'},
+            'body':JSON.stringify({url:client.district,userHash:client.username,encrypted:client.encrypted,passHash:(client.password),settings:augmentedScale.gradingScales})
+        })).json()
+    if(result.status){
+        console.log("success")
+           for(var i=0;i<letterScale.length;i++){
+        letterScale[i][1].sort((a,b)=>a-b)
+
+    }
+        letterScale.sort((a,b)=>a[1][1]-b[1][1])
+        augmentedScale.courses[index].gradingScale=newScale;
+        augmentedScale.courses[index]=reCalculateCourse(augmentedScale.courses[index])
+        setGrades(augmentedScale)
+        setShowModal(false)
+
+
+    }
+    else{
+        console.log(result)
+        createError("Failed to sync settings with server, try again?")
+    }
+
+
+    }
+    else{
+        console.log
+        createError("Malformed Scale")
+    }
 
 
 }
 
 
 function validate(){
+    console.log("spongebob my boy what the fuck is up")
     let temp=structuredClone(letterScale)
     for(var i=0;i<temp.length;i++){
         temp[i][1].sort()
 
     }
-    const raw=temp.map(letter=>letter[1]).flat().sort()
-    for(var i=raw.length-1;i>0;i++){
+
+    //consisteny of order
+    const raw=temp.map(letter=>letter[1]).flat().sort((a, b) => a - b)
+    for(var i=raw.length-1;i>1;i-=2){
         if(temp.findIndex(letter=>letter[1].includes(raw[i]))!=temp.findIndex(letter=>letter[1].includes(raw[i-1]))){
+            console.log("failed consitency of order",i,raw,temp.findIndex(letter=>letter[1].includes(raw[i])),temp.findIndex(letter=>letter[1].includes(raw[i-1])))
+ 
             return false
         }
 
     }
 
-    if(hasDuplicatesSorted(raw)){return false}
+    //duplicate check
+    if(hasDuplicatesSorted(raw)){console.log("failed duplicate check");return false}
 
  
 
@@ -120,19 +164,14 @@ function hasDuplicatesSorted(arr) {
 
 
 useEffect(()=>{
-    if(letterScale==undefined&&courseSettings&&false){
-            //blah
-            return
-        }
-    
-  //  setLetterScale({"A": [89.5,100],"B": [ 79.5,89.49],"C": [69.5, 79.49],"D": [ 59.5, 69.49],"E": [  0, 59.49 ]})
-       
-
+   
 
     
-},[])
+},[grades])
 
 return(
+<div>
+{letterScale ? (
 <Modal 
 show={showModal}
 onClose={()=>setShowModal(false)}
@@ -311,7 +350,7 @@ className="w-full"
 
 <Modal.Footer>
 <div className="w-full flex justify-start gap-5">
-      <button className="text-white bg-primary-600 p-2 px-3 rounded-lg">Save</button>
+      <button className="text-white bg-primary-600 p-2 px-3 rounded-lg" onClick={saveNew}>Save</button>
       <button className="text-white bg-gray-800 p-2 px-3 rounded-lg"
       onClick={()=>{
 //not yet cuz the structure doesn't match yet, but, setLetterGrade(course.gradingScale)
@@ -328,11 +367,12 @@ className="w-full"
 </Modal.Footer>
 
 
-</Modal>
+</Modal>)
+: "loading"}
 
 
 
-
+</div>
 
 
 )

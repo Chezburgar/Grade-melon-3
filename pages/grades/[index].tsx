@@ -76,6 +76,7 @@ export default function Grades({
 	const [title,setTitle]=useState(undefined);
 	const [showSettingsModal,setShowSettingsModal]=useState(false);
 	const assignmentTitle = useRef(null);
+	
 
 	
 	useEffect(() => {
@@ -378,7 +379,7 @@ export default function Grades({
 					grades={grades}
 					setGrades={setGrades}
 					index={index}
-  
+					createError={createError}
 					showModal={showSettingsModal}
 					setShowModal={setShowSettingsModal}
 				
