@@ -1,8 +1,8 @@
 import React,{useState,useEffect} from "react";
 import {Modal} from "flowbite-react"
 import { HiOutlineTrash } from "react-icons/hi";
-import { reCalculateCourse,parseGrades } from "../utils/grades";
-
+import { reCalculateCourse,parseGrades,letterGradeColor} from "../utils/grades";
+import {colorShit} from "./colors"
 
 /*
 
@@ -49,6 +49,11 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [rounding,setRounding]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState<number>(0)
 
+
+
+
+
+
 function mutate(e,letter,bound){
     setLetterScale((prev)=>{
         let temp=structuredClone(prev)
@@ -86,9 +91,9 @@ async function saveNew(){
   
     if(validate()){
         
-        const newScale={rounding:undefined,letterScale:letterScale}
+        const newScale={rounding:undefined,letterScale:letterScale.toSorted((a,b)=>a[1]-b[1])}
         const augmentedScale=structuredClone(grades)
-        augmentedScale.gradingScales[course.name+course.period+course.teacher.name]=newScale;
+        augmentedScale.gradingScales[course.name+course.period+course.teacher.name]=newScale
 
     
     const result = await (await fetch("https://studentvuelib-clean.up.railway.app/setSettings",{
@@ -99,11 +104,10 @@ async function saveNew(){
     if(result.status){
         console.log("success")
            for(var i=0;i<letterScale.length;i++){
-        letterScale[i][1].sort((a,b)=>a-b)
 
     }
-        letterScale.sort((a,b)=>a[1][1]-b[1][1])
-        augmentedScale.courses[index].gradingScale=newScale;
+  
+        augmentedScale.courses[index].gradingScale=newScale; //gotta reverse the orientation rq trust
         augmentedScale.courses[index]=reCalculateCourse(augmentedScale.courses[index])
         setGrades(augmentedScale)
         setShowModal(false)
@@ -213,6 +217,7 @@ className="w-full"
           >
             {/* letter cell */}
             <td className="px-4 py-2">
+              <div style={{alignItems:"center"}} className="flex">
               <input 
               type="text"
                key={`${i}-0`}
@@ -234,6 +239,26 @@ className="w-full"
               className="w-12 text-center font-bold bg-transparent text-white md:text-lg  ">
                 
               </input>
+              <input
+              className="w-6 bg-transparent"
+              type="color"
+              key={`${i}-0.5`}
+              value={active[0]==`${i}-0.5` ? active[1] : (letter[2] || colorShit[letterGradeColor(letter[0])])}
+                    onChange={(e)=>{
+                    setActive([`${i}-0.5`,e.target.value])
+
+
+
+              }}    
+
+              onBlur={(e)=>{
+                setActive([false,''])
+                mutate(e,i,2)
+              }}
+              >
+              
+              </input>
+              </div>
             </td>
 
             {/* upper‑bound input */}

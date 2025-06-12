@@ -44,6 +44,7 @@ function MyApp({ Component, pageProps }) {
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
 
+	const apiUrl="https://studentvuelib-clean.up.railway.app"
 
 	const login = async (
 		username: string,
@@ -62,7 +63,7 @@ function MyApp({ Component, pageProps }) {
 			username: username,
 			password: password,
 			encrypted:encrypted ||false
-		},"https://studentvuelib-clean.up.railway.app")
+		},apiUrl)
 			.then(async (res) => {
 				const gradebook=res[1];
 				const fetchedClient=res[0];

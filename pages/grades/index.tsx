@@ -257,6 +257,7 @@ export default function Grades({
 												<motion.span
 													layoutId={`grade-${layoutID}`}
 													layout="preserve-aspect"
+													style={{color:grade.color.includes("#") && grade.color}}
 													className={`text-xl md:text-3xl font-bold text-${grade.color}-400`}
 												>
 													{gradingScale ? grade.letter:""}
@@ -318,7 +319,9 @@ export default function Grades({
 												</td>
 												<td className="py-4 px-6">{teacher.name}</td>
 												<td className="py-4 px-6">
-													<span className={`font-bold text-${grade.color}-400`}>
+													<span 
+													style={{color:grade.color.includes("#") && grade.color}}
+													className={`font-bold text-${grade.color}-400`}>
 														{grade.letter}
 														{!isNaN(grade.raw) && ` (${grade.raw}%)`}
 													</span>

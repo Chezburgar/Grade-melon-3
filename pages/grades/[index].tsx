@@ -243,7 +243,8 @@ export default function Grades({
 						<div id="assignment-details">
 							<p className="font-bold text-black dark:text-white">Grade</p>
 							<p
-								className={`text-base leading-relaxed text-${course?.assignments[modalDetails]?.grade.color}-400`}
+							style={{color:course?.assignments[modalDetails]?.grade.color.includes('#') && course?.assignments[modalDetails]?.grade.color}}
+								className={`text-base leading-relaxed` +  `text-${course?.assignments[modalDetails]?.grade.color}-400`}
 							>
 								{course?.assignments[modalDetails]?.grade.letter}
 								{!isNaN(course?.assignments[modalDetails]?.grade.raw) &&
@@ -474,9 +475,9 @@ export default function Grades({
 					</motion.div>
 					<div className="mt-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
 						<div
-							className={`bg-${course?.grade.color}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
+							className={ `text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
 							style={{
-								width: `${course?.grade.raw < 100 ? course?.grade.raw : 100}%`,
+								width: `${course?.grade.raw < 100 ? course?.grade.raw : 100}%`,backgroundColor:(course?.grade.color.includes("#") && `${course?.grade.color}`)
 							}}
 						>
 							<p>Total</p>
@@ -488,8 +489,9 @@ export default function Grades({
 							className="mt-2 md:mt-3 w-full bg-gray-200 rounded-full dark:bg-gray-700 relative"
 						>
 							<div
-								className={`bg-${grade.color}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
-								style={{ width: `${grade.raw < 100 ? grade.raw : 100}%` }}
+
+								className={`bg-${grade.color}-400` +  ` text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
+								style={{ width: `${grade.raw < 100 ? grade.raw : 100}%`,backgroundColor:(grade.color.includes("#") && grade.color)}}
 							>
 								<p className="absolute">
 									{name} ({!isNaN(grade.raw) ? `${grade.raw}%` : "N/A"}) -{" "}
@@ -597,6 +599,7 @@ export default function Grades({
 											</td>
 											<td className="py-4 md:px-6 pl-3 pr-2 text-center md:text-left">
 												<div
+													style={{color:included && (grade.color.includes('#') && grade.color)}}
 													className={`flex items-center gap-2 ${included ? `text-${grade.color}-400` : 'text-[#4d462d]'}`}
 												>
 													<GradeField
