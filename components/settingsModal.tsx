@@ -1,8 +1,10 @@
 import React,{useState,useEffect} from "react";
 import {Modal} from "flowbite-react"
 import { HiOutlineTrash } from "react-icons/hi";
-import { reCalculateCourse,parseGrades,letterGradeColor} from "../utils/grades";
+import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
+import {gradingScale} from "../utils/grades"
+import { count } from "console";
 
 /*
 
@@ -42,12 +44,11 @@ need to implement save-settings fetch
 */
 
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError}){
-    	const course = grades?.courses[parseInt(index)];
-        const courseSettings=undefined
-        const [letterScale,setLetterScale]=useState<any>(grades?.courses[parseInt(index)].gradingScale?.letterScale || undefined)
-        const [active,setActive]=useState([false,''])
-        const [rounding,setRounding]=useState(false)
-        const [decimalPlaces,setDecimalPlaces]=useState<number>(0)
+    	  const course = index==-1 ? {name:"default",teacher:{name:""},period:""} : grades?.courses[parseInt(index)];
+        const [letterScale,setLetterScale]=useState<gradingScale["letterScale"] | undefined>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.letterScale || undefined) : grades?.gradingScales.default.letterScale)
+        const [active,setActive]=useState<[string,string]>(['',''])
+     //   const [rounding,setRounding]=useState(false)
+   //     const [decimalPlaces,setDecimalPlaces]=useState<number>(0)
 
 
 
@@ -87,29 +88,48 @@ function addLetter(){
 
 }
 
+
+
+//endpoints
+const endpointUrl="https://studentvuelib-clean.up.railway.app"
+
+async function getSettings(url,userHash){
+   const result= await (await fetch(endpointUrl+"/getSettings",
+    {'method':'POST',
+      'headers':{'Content-Type':'application/json'},
+      'body':JSON.stringify({url:url,userHash:userHash})}
+  )).json()
+
+  return result
+}
+
+
+async function setSettings(url, userHash,encrypted,passHash,settings){
+      const result = await (await fetch(endpointUrl+"/setSettings",{
+            'method':'POST',
+            'headers':{'Content-Type':'application/json'},
+            'body':JSON.stringify({url:url,userHash:userHash,encrypted:encrypted,passHash:passHash,settings:settings})
+        })).json()
+    return result
+}
+
+
 async function saveNew(){
   
     if(validate()){
         
-        const newScale={rounding:undefined,letterScale:letterScale.toSorted((a,b)=>a[1]-b[1])}
-        const augmentedScale=structuredClone(grades)
-        augmentedScale.gradingScales[course.name+course.period+course.teacher.name]=newScale
+        const newScale={rounding:undefined,letterScale:letterScale.toSorted((a,b)=>a[1][1]-b[1][1])}
+        const augmentedGrades=structuredClone(grades)
+        augmentedGrades.gradingScales[course.name+course.period+course.teacher.name]=newScale
 
-    
-    const result = await (await fetch("https://studentvuelib-clean.up.railway.app/setSettings",{
-            'method':'POST',
-            'headers':{'Content-Type':'application/json'},
-            'body':JSON.stringify({url:client.district,userHash:client.username,encrypted:client.encrypted,passHash:(client.password),settings:augmentedScale.gradingScales})
-        })).json()
+    const result=await setSettings(client.district,client.username,client.encrypted,client.password,augmentedGrades.gradingScales)
     if(result.status){
         console.log("success")
-           for(var i=0;i<letterScale.length;i++){
+        
+    
 
-    }
-  
-        augmentedScale.courses[index].gradingScale=newScale; //gotta reverse the orientation rq trust
-        augmentedScale.courses[index]=reCalculateCourse(augmentedScale.courses[index])
-        setGrades(augmentedScale)
+    
+        setGrades(reCalculateAll(augmentedGrades))
         setShowModal(false)
 
 
@@ -122,12 +142,65 @@ async function saveNew(){
 
     }
     else{
-        console.log
+       
         createError("Malformed Scale")
     }
 
 
 }
+
+
+
+async function reset(allClasses=false){
+  if(index==-1&&!allClasses){
+  const result=await getSettings(client.district,"pleaseGodLetNobodySomehowMagicallyHashToThisHashOrItBreaks")
+  if(result.status){
+    const countyDefault=result.settings.default;
+    console.log("success")
+    let temp=structuredClone(grades)
+    temp.gradingScales.default=countyDefault
+    setLetterScale(countyDefault.letterScale)
+
+  }
+  else{
+    createError("Failed to retrieve default settings")
+  }
+
+
+
+
+
+  }
+  else{
+    let temp=structuredClone(grades)
+    if(allClasses){
+      temp.gradingScales={default:grades.gradingScales.default}
+    }
+    else{
+    delete temp.gradingScales[course.name+course.period+course.teacher.name]
+    }
+
+    if(allClasses){
+    const result = await setSettings(client.district,client.username,client.encrypted,client.password,temp.gradingScales)
+    if(result.status){
+        console.log("success")
+       
+    setLetterScale(grades.gradingScales.default.letterScale)
+    setGrades(reCalculateAll(temp))
+    setShowModal(false)
+  }
+  else{
+    createError("Failed to set settings")
+  }
+    }
+    else{
+      setLetterScale(grades.gradingScales.default.letterScale)
+    }
+}
+}
+
+
+
 
 
 function validate(){
@@ -167,26 +240,25 @@ function hasDuplicatesSorted(arr) {
 
 
 
-useEffect(()=>{
-   
 
-    
-},[grades])
+
+
 
 return(
 <div>
-{letterScale ? (
+{letterScale!=undefined ? (
 <Modal 
 show={showModal}
 onClose={()=>setShowModal(false)}
 >
 
 <Modal.Header
-className="bg-gray-700"
+className="dark:bg-gray-700"
 
 >
 
-Grade Calculation Settings
+<h1 className="text-2xl">Grade Calculation Settings <span style={{textOverflow:"ellipsis"}}  className="text-sm">{course.name}</span></h1>
+{index==-1 && <p className="text-sm">Changes here will be the default for all your classes!</p>}
 </Modal.Header>
 
 
@@ -199,10 +271,10 @@ className="w-full"
     <table className="flex-1 mx-auto min-w-max text-left">
       {/* ── header ─────────────────────────────────────────── */}
       <thead>
-        <tr className="text-white md:text-xl bg-slate-700">
-          <th className="px-4 py-2 font-semibold">Letter</th>
-          <th className="px-4 py-2 font-semibold">Lower</th>
-          <th className="px-4 py-2 font-semibold">Upper</th>
+        <tr className="text-white md:text-xl dark:bg-slate-700">
+          <th className="px-4 py-2 font-semibold text-black dark:text-white">Letter</th>
+          <th className="px-4 py-2 font-semibold text-black dark:text-white">Lower</th>
+          <th className="px-4 py-2 font-semibold text-black dark:text-white">Upper</th>
           {/* empty heading to keep the delete column aligned */}
           <th className="px-4 py-2" />
         </tr>
@@ -213,7 +285,7 @@ className="w-full"
         {letterScale.map((letter,i) => (
           <tr
             key={`${i}--23`}
-            className={i % 2 === 0 ? "bg-gray-900" : "bg-gray-800"}
+            className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}
           >
             {/* letter cell */}
             <td className="px-4 py-2">
@@ -221,7 +293,7 @@ className="w-full"
               <input 
               type="text"
                key={`${i}-0`}
-              value={active[0]==`${i}-0` ? active[1] : letter[0]}
+              value ={active[0]==`${i}-0` ? active[1] : letter[0]}
               onChange={(e)=>{
                     setActive([`${i}-0`,e.target.value])
 
@@ -232,11 +304,11 @@ className="w-full"
 
               onBlur={
                 (e)=>{
-                    setActive([false,''])
+                    setActive(['',''])
                     mutate(e,i,0)}
               }
-              style={{borderWidth:0}}
-              className="w-12 text-center font-bold bg-transparent text-white md:text-lg  ">
+              style={{borderWidth:0,textOverflow:"ellipsis"}}
+              className="w-12 text-center font-bold bg-transparent dark:text-white md:text-lg  ">
                 
               </input>
               <input
@@ -252,7 +324,7 @@ className="w-full"
               }}    
 
               onBlur={(e)=>{
-                setActive([false,''])
+                setActive(['',''])
                 mutate(e,i,2)
               }}
               >
@@ -268,7 +340,7 @@ className="w-full"
                 key={`${i}-1`}
                 value={   active[0]==`${i}-1` ? active[1] : letter[1][0]}
                 onBlur={(e) => {
-                               setActive([false,''])
+                               setActive(['',''])
                   mutate2(e,i,0)
                 }}
 
@@ -284,7 +356,7 @@ className="w-full"
                   bg-transparent
                   p-1.5
                   font-bold
-                  text-white
+                  dark:text-white
                   text-right
                   outline-none
                   border border-gray-300  focus:ring-primary-600 focus:border-primary-600   dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500
@@ -299,7 +371,7 @@ className="w-full"
                 value={   active[0]==`${i}-2` ? active[1] : letter[1][1]}
                  key={`${i}-2`}
                 onBlur={(e) => {
-                               setActive([false,''])
+                               setActive(['',''])
                     mutate2(e,i,1)
                 }}
 
@@ -315,7 +387,7 @@ className="w-full"
                   bg-transparent
                   p-1.5
                   font-bold
-                  text-white
+                  dark:text-white
                   text-right
                   outline-none
                   border border-gray-300  focus:ring-primary-600 focus:border-primary-600   dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500
@@ -348,7 +420,7 @@ className="w-full"
       </tbody>
     </table>
   </div>
-    <button className="p-1 px-2 mt-2 bg-primary-600 text-white rounded-lg" onClick={addLetter}>Add+</button>
+    <button className="p-1 px-2 mt-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onClick={addLetter}>Add+</button>
 
 {/*
     <h1 className="text-xl text-white font-bold mt-10">Rounding Rules</h1>
@@ -375,14 +447,45 @@ className="w-full"
 
 <Modal.Footer>
 <div className="w-full flex justify-start gap-5">
-      <button className="text-white bg-primary-600 p-2 px-3 rounded-lg" onClick={saveNew}>Save</button>
-      <button className="text-white bg-gray-800 p-2 px-3 rounded-lg"
+      <button 
+      className="text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 bg-primary-500 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 p-2 px-3 rounded-lg"
+      onClick={()=>{saveNew();}}
+      
+      >
+        Save
+      </button>
+
+     <button className="text-white bg-gray-500 hover:bg-gray-700 dark:bg-gray-800 dark:hover:bg-gray-900 p-2 px-3 rounded-lg"
+      type="button"
+      style={{userSelect:"none"}}
       onClick={()=>{
 //not yet cuz the structure doesn't match yet, but, setLetterGrade(course.gradingScale)
         setShowModal(false)
 
       }}
       >Cancel</button>
+
+      <button
+        type="button"
+        className="ml-auto text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 rounded-lg"
+        style={{}}
+        onClick={()=>{reset()}}
+      >
+        {index==-1 ? "Show Defaults" : "Show Defaults"} 
+      </button>
+
+      {index ==-1 &&
+          <button
+        type="button"
+        className="text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 rounded-lg"
+        style={{}}
+        onClick={()=>{reset(true);setShowModal(false)}}
+      >
+        Reset Classes
+      </button>
+
+
+      }
       
 
 
@@ -393,7 +496,7 @@ className="w-full"
 
 
 </Modal>)
-: "loading"}
+: <></>}
 
 
 

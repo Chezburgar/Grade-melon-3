@@ -201,7 +201,7 @@ export default function Grades({
 	const optimize = () => {
 		setModalType("optimize");
 		let tempProps = {};
-		tempProps["desiredGrade"] = course.gradingScale ? String(course.gradingScale[Object.keys(course.gradingScale)[0]][0]): 90;
+		tempProps["desiredGrade"] = grades?.gradingScales[course.name+course.period+course.teacher] ? String(grades?.gradingScales[course.name+course.period+course.teacher][0]) :  String(grades?.gradingScales['default'][0]);
 ;
 		course.categories.forEach((cat) => {
 			tempProps[cat.name] = cat.weight * 100;
@@ -296,7 +296,7 @@ export default function Grades({
 												updateOptimize(e.target.value, "desiredGrade")
 											}
 											className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-											placeholder={course.gradingScale ? String(course.gradingScale[Object.keys(course.gradingScale)[1]][0]): "90"}
+											placeholder={grades?.gradingScales[course.name+course.period+course.teacher] ? String(grades?.gradingScales[course.name+course.period+course.teacher][0]) :  String(grades?.gradingScales['default'][0])}
 										/>
 									</div>
 								</div>
@@ -443,7 +443,7 @@ export default function Grades({
 					>
 						{course?.name}
 							<BsGearWideConnected
-								className="sm:text-2xl md:text-3xl hover:text-gray-600"
+								className="sm:text-2xl md:text-3xl hover:text-gray-600 text-black dark:text-white"
 								style={{alignSelf:"end"}}
 								onClick={()=>setShowSettingsModal(true)}
 					
@@ -475,7 +475,7 @@ export default function Grades({
 					</motion.div>
 					<div className="mt-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
 						<div
-							className={ `text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
+							className={ `bg-${course?.grade.color}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
 							style={{
 								width: `${course?.grade.raw < 100 ? course?.grade.raw : 100}%`,backgroundColor:(course?.grade.color.includes("#") && `${course?.grade.color}`)
 							}}

@@ -63,8 +63,8 @@ interface Course {
 interface Grades {
 	courses: Course[];
 	gradingScales:{[key:string]:gradingScale}
-	gpa: number;
-	wgpa: number;
+	//gpa: number;
+	//wgpa: number;
 	period: {
 		name: string;
 		index: number;
@@ -261,7 +261,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 	}
 	let parsedGrades:Grades = {
 		gradingScales:gradingScale,
-		gpa:
+	/*	gpa:
 			grades.courses.reduce(
 				(a, b) =>
 					a +
@@ -278,7 +278,10 @@ const parseGrades = (grades: Gradebook): Grades => {
 					),
 				0
 			) / grades.courses.length,
-		courses: grades.courses.map(({ title, period, room, staff, marks }, i) => {
+	Deprecating until I remake it this is so useless and calculated so naively 
+	
+			*/
+			courses: grades.courses.map(({ title, period, room, staff, marks }, i) => {
 			const scale=gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] ? gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] : gradingScale.default
 			return({
 			name: ReplaceUnderscores(stripParens(title)),
@@ -512,7 +515,21 @@ const calculateCategory = (course: Course, categoryId: number): Course => {
 	return course;
 };
 
-const calculateGrade = (course: Course): Course => {
+
+
+function reCalculateAll(grades:Grades){
+	const copy=structuredClone(grades)
+	for(let course of copy.courses){
+		course.gradingScale=copy.gradingScales[course.name+course.period+course.teacher.name] ? copy.gradingScales[course.name+course.period+course.teacher.name] : copy.gradingScales.default
+		course=reCalculateCourse(course)
+	}	
+	return copy
+	
+
+
+}
+
+function calculateGrade(course: Course): Course{
 	const gradingScale=course.gradingScale;
 	let currWeight = 0;
 	let trueCategories = course.categories.filter((c) => {
@@ -562,6 +579,7 @@ const addAssignment = (course: Course): Course => {
 	return course;
 };
 
+/*
 const calculateGPA = (grades: Grades): Grades => {
 	grades.gpa =
 		grades.courses.reduce(
@@ -583,6 +601,8 @@ const updateGPA = (grades: Grades, i: number, val: boolean): Grades => {
 
 	return { ...grades };
 };
+
+*/
 
 const delAssignment = (course: Course, assignmentId: number): Course => {
 	course.assignments.splice(assignmentId, 1);
@@ -691,9 +711,9 @@ export {
 	delAssignment,
 	updateCategory,
 	genTable,
-	calculateGPA,
-	updateGPA,
+//	calculateGPA,
+//	updateGPA,
 	abbreviate,
-	reCalculateCourse,letterGradeColor
+	reCalculateCourse,reCalculateAll,letterGradeColor
 };
-export type { Grades, Assignment, Course };
+export type { Grades, Assignment, Course,gradingScale };

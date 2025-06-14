@@ -7,12 +7,15 @@ import { TbRefresh, TbMathSymbols } from "react-icons/tb";
 import {
 	parseGrades,
 	Grades as GradesType,
-	calculateGPA,
-	updateGPA,
+	//calculateGPA,
+	//updateGPA,
 } from "../../utils/grades";
 import { Modal } from "flowbite-react";
 import { motion } from "framer-motion";
 import CustomAd from "../../components/customAd";
+import { BsGearWideConnected } from "react-icons/bs";
+import SettingsModal from "../../components/settingsModal"
+
 
 interface GradesProps {
 	client: any;
@@ -47,6 +50,8 @@ export default function Grades({
 	//const [period, setPeriod] = useState<number>();
 	const [gpaModal, setGpaModal] = useState(false);
 	const view = (router.query.view as string) || defaultView;
+	const [settingsModal,setSettingsModal]=useState<Boolean>(false);
+
 	const isMediumOrLarger = width >= 768;
 
 	useEffect(() => {
@@ -70,7 +75,7 @@ export default function Grades({
 					client.gradebook().then(([res,extra]) => {
 						res.gradingScale=extra?.gradingScale
 						let parsedGrades = parseGrades(res);
-						console.log("checker")
+						console.log("checker",parsedGrades)
 						console.log(res);
 						setGrades(parsedGrades);
 						console.log(parsedGrades)
@@ -109,6 +114,7 @@ export default function Grades({
 			});
 	};
 
+	/*
 	useEffect(() => {
 		if (gpaModal) {
 			setGrades(calculateGPA(grades));
@@ -118,6 +124,7 @@ export default function Grades({
 	const changeWeights = (e, i: number) => {
 		setGrades(updateGPA(grades, i, e.target.checked));
 	};
+	*/
 
 
 	useEffect(()=>{
@@ -130,6 +137,7 @@ export default function Grades({
 			<Head>
 				<title>Gradebook - Grade Melon</title>
 			</Head>
+			{/*
 			<Modal show={gpaModal} onClose={() => setGpaModal(false)}>
 				<Modal.Header>GPA Calculator</Modal.Header>
 				<Modal.Body>
@@ -169,6 +177,19 @@ export default function Grades({
 					</div>
 				</Modal.Footer>
 			</Modal>
+			*/}
+
+			<SettingsModal
+				client={client}
+				index={-1}
+				showModal={settingsModal}
+				setShowModal={setSettingsModal}
+				grades={grades}
+				setGrades={setGrades}
+				createError={createError}
+			
+			/>
+
 			{loading ? (
 				<div className="flex justify-center">
 					<Spinner size="xl" color="pink" />
@@ -196,12 +217,24 @@ export default function Grades({
 								</option>
 							))}
 						</select>
+
 						<button
 							type="button"
 							onClick={() => setGpaModal(true)}
-							className=" bg-primary-500 border border-primary-500 focus:outline-none hover:bg-primary-600 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm p-2.5 dark:bg-primary-600 text-white dark:hover:bg-primary-700 dark:focus:ring-primary-400"
+							className="hidden bg-primary-500 border border-primary-500 focus:outline-none hover:bg-primary-600 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm p-2.5 dark:bg-primary-600 text-white dark:hover:bg-primary-700 dark:focus:ring-primary-400"
 						>
 							<TbMathSymbols size={"1.3rem"} />
+						</button>
+
+						
+						<button
+							onClick={()=>setSettingsModal(true)}
+
+							>
+							<BsGearWideConnected
+							className="sm:text-2xl md:text-3xl hover:text-gray-600 dark:text-white"
+							
+							/>
 						</button>
 					</div>
 					{view === "card" && (
