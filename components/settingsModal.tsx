@@ -488,10 +488,10 @@ className="flex ml-auto">
       >
         Reset Classes
       </button>
-</div>
+
 
       }
-      
+      </div>
 
 
 </div>
