@@ -423,8 +423,18 @@ className="w-full"
       </tbody>
     </table>
   </div>
-    <button className="p-1 px-2 mt-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onClick={addLetter}>Add+</button>
+ <div className="flex   mt-2 justify-between">
+    <button className="p-2 px-2 md:text-base bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onClick={addLetter}>Add+</button>
+      <button
+        type="button"
+        className="text-white md:p-2 md:text-base bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 py-1 rounded-lg text-sm"
+        style={{}}
+        onClick={()=>{reset()}}
+      >
+        {index==-1 ? "Show Defaults" : "Show Defaults"} 
+      </button>
 
+      </div> 
 {/*
     <h1 className="text-xl text-white font-bold mt-10">Rounding Rules</h1>
 
@@ -449,16 +459,16 @@ className="w-full"
 
 
 <Modal.Footer>
-<div className="w-full flex justify-start gap-5">
+<div className="-ml-2 w-full flex justify-start gap-5">
       <button 
-      className="text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 bg-primary-500 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 p-2 px-3 rounded-lg"
+      className="text-white text-sm md:text-base hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 bg-primary-500 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 p-2 px-3 rounded-lg"
       onClick={()=>{saveNew();}}
       
       >
         Save
       </button>
 
-     <button className="text-white bg-gray-500 hover:bg-gray-700 dark:bg-gray-800 dark:hover:bg-gray-900 p-2 px-3 rounded-lg"
+     <button className="text-white  md:text-base bg-gray-500 hover:bg-gray-700 dark:bg-gray-800 dark:hover:bg-gray-900 p-2 px-3 rounded-lg text-sm"
       type="button"
       style={{userSelect:"none"}}
       onClick={()=>{
@@ -468,21 +478,13 @@ className="w-full"
       }}
       >Cancel</button>
 
-<div 
-className="flex ml-auto">
-      <button
-        type="button"
-        className="text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 rounded-lg"
-        style={{}}
-        onClick={()=>{reset()}}
-      >
-        {index==-1 ? "Show Defaults" : "Show Defaults"} 
-      </button>
+
+    
 
       {index ==-1 &&
           <button
         type="button"
-        className="text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 rounded-lg"
+        className="ml-auto -mr-2  md:text-base text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-2  rounded-lg text-sm"
         style={{}}
         onClick={()=>{reset(true);setShowModal(false)}}
       >
@@ -491,7 +493,7 @@ className="flex ml-auto">
 
 
       }
-      </div>
+
 
 
 </div>
