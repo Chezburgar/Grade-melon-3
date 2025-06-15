@@ -468,9 +468,11 @@ className="w-full"
       }}
       >Cancel</button>
 
+<div 
+className="flex ml-auto">
       <button
         type="button"
-        className="ml-auto text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 rounded-lg"
+        className="text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 rounded-lg"
         style={{}}
         onClick={()=>{reset()}}
       >
@@ -486,7 +488,7 @@ className="w-full"
       >
         Reset Classes
       </button>
-
+</div>
 
       }
       
