@@ -232,7 +232,7 @@ export default function Grades({
 
 							>
 							<BsGearWideConnected
-							className="sm:text-2xl md:text-3xl hover:text-gray-600 dark:text-white"
+							className="text-2xl md:text-3xl hover:text-gray-600 dark:text-white"
 							
 							/>
 						</button>
