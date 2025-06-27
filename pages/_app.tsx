@@ -44,7 +44,7 @@ function MyApp({ Component, pageProps }) {
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
 
-	const apiUrl="https://studentvuelib-clean.up.railway.app"
+	const apiUrl="https://studentvuelib.up.railway.app"
 
 	const login = async (
 		username: string,

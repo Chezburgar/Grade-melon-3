@@ -47,6 +47,7 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
     	  const course = index==-1 ? {name:"default",teacher:{name:""},period:""} : grades?.courses[parseInt(index)];
         const [letterScale,setLetterScale]=useState<gradingScale["letterScale"] | undefined>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.letterScale || undefined) : grades?.gradingScales.default.letterScale)
         const [active,setActive]=useState<[string,string]>(['',''])
+        const [advancedOpen,setAdvancedOpen]=useState(false)
      //   const [rounding,setRounding]=useState(false)
    //     const [decimalPlaces,setDecimalPlaces]=useState<number>(0)
 
@@ -266,7 +267,8 @@ className="dark:bg-gray-700"
 
 
 <Modal.Body
-className="w-full"
+style={{maxHeight:500}}
+className="overflow-y-auto"
 >
   <h1 className="mb-4 text-xl font-bold text-white">Letter Scale</h1>
 
@@ -435,25 +437,34 @@ className="w-full"
       </button>
 
       </div> 
-{/*
-    <h1 className="text-xl text-white font-bold mt-10">Rounding Rules</h1>
 
-    <div className="border rounded-lg border-gray-600 flex flex-col gap-4 bg-gray-800">
-        <div style={{alignItems:"center"}} className="mx-2 flex gap-2">
-        <input
-        checked={rounding}
-        onChange={()=>setRounding(!rounding)}
-        type="checkbox"
-        />
-        <p className="text-white">Rounding on?</p>
-        </div>
-        <div>
-        <p className="text-white mx-2">Decimal Places</p>
-         <input type="number" className="bg-transparent max-w-fit mb-2 mx-2 rounded-lg text-gray-300" value={decimalPlaces} onChange={(e)=>setDecimalPlaces(parseInt(e.target.value))}></input>
-         </div>
+    
+
+<details
+onToggle={()=>setAdvancedOpen(!advancedOpen)}
+>
+  <summary
+  className="mt-2 dark:text-white flex"
+  ><p className="dark:text-white text-lg">{(advancedOpen ? "▼": "▶") + "Advanced"}</p></summary>
+
+  <div className="ml-7 flex-col md:flex-row"> 
+    <div style={{alignItems:"center"}} className="flex gap-2">
+        <p className="dark:text-white">Rounding Enabled</p>
+        <input type="checkbox" checked={true}></input>
     </div>
+    <div style={{alignItems:"center"}} className="mt-3 flex gap-2">
+        <p className="dark:text-white">Round to:</p>
+        <input className="hide-spinner w-10 h-5 rounded-lg bg-gray-400 dark:bg-gray-800 dark:text-white"  step="1" type="number"></input>
+        <p className="dark:text-white">decimal places</p>
+    </div>
+    <div style={{alignItems:"center"}} className="mt-3 flex gap-3  justify-center -ml-7">
+        <div  style={{alignItems:"center"}} className="flex gap-2"> <p className="dark:text-white text-sm">Round Up</p> <input   type="radio"></input></div>
+        <div style={{alignItems:"center"}} className="flex gap-2"> <p className="dark:text-white text-sm">Round Down</p> <input   type="radio"></input></div>
+    </div>
+  </div>
 
-    */}
+</details>
+
 </Modal.Body>
 
 

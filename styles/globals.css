@@ -29,3 +29,13 @@
 :focus {
     outline: none !important;
 }
+
+  input.hide-spinner::-webkit-inner-spin-button,
+  input.hide-spinner::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input.hide-spinner {
+    -moz-appearance: textfield;
+  }
