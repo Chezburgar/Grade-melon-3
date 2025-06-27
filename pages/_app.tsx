@@ -40,7 +40,7 @@ function MyApp({ Component, pageProps }) {
 	const [referal,setReferal]=useState(false);
 	const [districts, setDistricts] = useState(allDistricts);
 	const [timestamp,setTime]=useState(0);
-    const [ad,setAd]=useState(undefined);
+    const [ad,setAd]=useState<false | any>(false);
 	const { width } = useWindowSize();
 	const isMediumOrLarger = width >= 768;
 
@@ -118,7 +118,7 @@ function MyApp({ Component, pageProps }) {
 
 	async function getCourseSettings(username,password,encrypted,url){
 				if(!encrypted){
-						const result =await(await fetch("https://studentvuelib.up.railway.app" + "/encryptPassword", {
+						const result =await(await fetch(apiUrl + "/encryptPassword", {
 							'method': 'POST',
 							'headers': { 'Content-Type': 'application/json' },
 							'body': JSON.stringify({ 'password': password })
@@ -167,6 +167,7 @@ function MyApp({ Component, pageProps }) {
 }
 
 	useEffect(() => { //ad fetch
+		/*
 		if(ad==undefined){
 			getAd().then(res=>{
 				setAd(res.ad);
@@ -175,7 +176,7 @@ function MyApp({ Component, pageProps }) {
 		}
 
 
- 
+ */
 	  }, []);
  
 
@@ -189,7 +190,7 @@ function MyApp({ Component, pageProps }) {
 					setStudentInfo(cache.info);
 
 //log login
-fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
+fetch(apiUrl + "/logLogin", {
 	'method': 'POST',
 	'headers': { 'Content-Type': 'application/json' },
 	'body': JSON.stringify({ 'username': client.username,'schoolName':cache.info.currentSchool,url:districtURL})
@@ -211,7 +212,7 @@ fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 				localStorage.setItem("infoCache",JSON.stringify({user:client.username,info:info,url:districtURL}))
 
 
-				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
+				fetch(apiUrl + "/logLogin", {
 					'method': 'POST',
 					'headers': { 'Content-Type': 'application/json' },
 					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool,url:districtURL})
@@ -219,7 +220,7 @@ fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
 			}).catch(error=>{client.ChildList().then(([info])=>{
 				setStudentInfo(info);
 				localStorage.setItem("infoCache",JSON.stringify({user:client.username,info:info}))
-				fetch("https://studentvuelib.up.railway.app" + "/logLogin", {
+				fetch(apiUrl + "/logLogin", {
 					'method': 'POST',
 					'headers': { 'Content-Type': 'application/json' },
 					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool,url:districtURL})
@@ -295,7 +296,6 @@ const logout = async () => {
 			<Head>
 				<title>Grade Melon</title>
 	{ad	&& <link rel="preload" as="image" href={ad.image} />}	
-				<meta name="monetag" content="60496f145aa140bed68b191bae702c75"></meta>
          <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YWWBKH03T"></script>
 
           <script
