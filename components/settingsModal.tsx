@@ -45,9 +45,11 @@ need to implement save-settings fetch
 
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError}){
     	  const course = index==-1 ? {name:"default",teacher:{name:""},period:""} : grades?.courses[parseInt(index)];
-        const [letterScale,setLetterScale]=useState<gradingScale["letterScale"] | undefined>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.letterScale || undefined) : grades?.gradingScales.default.letterScale)
+        const [letterScale,setLetterScale]=useState<gradingScale["letterScale"]>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.letterScale || undefined) : grades?.gradingScales.default.letterScale)
+        const [rounding,setRounding]=useState<gradingScale["rounding"]>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.rounding || undefined) : grades?.gradingScales.default.rounding)
         const [active,setActive]=useState<[string,string]>(['',''])
         const [advancedOpen,setAdvancedOpen]=useState(false)
+        const [decimalPlaces,setDecimalPlaces]=useState(undefined)
      //   const [rounding,setRounding]=useState(false)
    //     const [decimalPlaces,setDecimalPlaces]=useState<number>(0)
 
@@ -120,7 +122,7 @@ async function saveNew(){
     if(validate()){
         
         const newScale = {
-  rounding: undefined,
+  rounding: rounding,
   letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse()
 };
         const augmentedGrades=structuredClone(grades)
@@ -132,7 +134,7 @@ async function saveNew(){
         
     
 
-    
+
         setGrades(reCalculateAll(augmentedGrades))
         setShowModal(false)
 
@@ -155,7 +157,7 @@ async function saveNew(){
 
 
 
-async function reset(allClasses=false){
+async function reset(allClasses=false,field="letter"){
   if(index==-1&&!allClasses){
   const result=await getSettings(client.district,"pleaseGodLetNobodySomehowMagicallyHashToThisHashOrItBreaks")
   if(result.status){
@@ -163,7 +165,13 @@ async function reset(allClasses=false){
     console.log("success")
     let temp=structuredClone(grades)
     temp.gradingScales.default=countyDefault
+    if(field=="letter"){
     setLetterScale(countyDefault.letterScale)
+    }
+    else if(field=="rounding"){
+    setRounding(countyDefault.rounding)
+    setDecimalPlaces(undefined)
+    }
 
   }
   else{
@@ -178,7 +186,9 @@ async function reset(allClasses=false){
   else{
     let temp=structuredClone(grades)
     if(allClasses){
+     
       temp.gradingScales={default:grades.gradingScales.default}
+ 
     }
     else{
     delete temp.gradingScales[course.name+course.period+course.teacher.name]
@@ -198,7 +208,11 @@ async function reset(allClasses=false){
   }
     }
     else{
-      setLetterScale(grades.gradingScales.default.letterScale)
+      if(field=="letter"){
+      setLetterScale(grades.gradingScales.default.letterScale)}
+      else{
+        setRounding(grades.gradingScales.default.rounding)
+      }
     }
 }
 }
@@ -244,9 +258,7 @@ function hasDuplicatesSorted(arr) {
 
 
 
-
-
-
+ 
 
 return(
 <div>
@@ -450,17 +462,36 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   <div className="ml-7 flex-col md:flex-row"> 
     <div style={{alignItems:"center"}} className="flex gap-2">
         <p className="dark:text-white">Rounding Enabled</p>
-        <input type="checkbox" checked={true}></input>
+        <input type="checkbox" onChange={(e)=>{setRounding((prev)=>{
+          let temp=structuredClone(prev)
+          temp.percent=!temp.percent;
+          return temp
+
+        })}} checked={rounding.percent}></input>
     </div>
     <div style={{alignItems:"center"}} className="mt-3 flex gap-2">
-        <p className="dark:text-white">Round to:</p>
-        <input className="hide-spinner w-10 h-5 rounded-lg bg-gray-400 dark:bg-gray-800 dark:text-white"  step="1" type="number"></input>
+        <p className="dark:text-white">Round up to:</p>
+        <input className="hide-spinner w-10 h-5 rounded-lg bg-gray-400 dark:bg-gray-800 dark:text-white"  step="1" type="number" 
+        onBlur={(e)=>setRounding((prev)=>{
+          let temp=structuredClone(prev);temp.percentPlaces=decimalPlaces;return temp})} 
+          onChange={(e)=>setDecimalPlaces(parseInt(e.target.value))} value={decimalPlaces ?? rounding.percentPlaces}/>
         <p className="dark:text-white">decimal places</p>
     </div>
-    <div style={{alignItems:"center"}} className="mt-3 flex gap-3  justify-center -ml-7">
+    {
+  /*  <div style={{alignItems:"center"}} className="mt-3 flex gap-3  justify-center -ml-7">
         <div  style={{alignItems:"center"}} className="flex gap-2"> <p className="dark:text-white text-sm">Round Up</p> <input   type="radio"></input></div>
         <div style={{alignItems:"center"}} className="flex gap-2"> <p className="dark:text-white text-sm">Round Down</p> <input   type="radio"></input></div>
-    </div>
+    </div> */
+}
+
+        <button
+        type="button"
+        className=" mt-2 py-1 text-white px-2 bg-primary-600 hover:bg-primary-800 active:bg-primary-500 rounded-lg text-sm"
+        style={{}}
+        onClick={()=>{reset(false,"rounding")}}
+      >
+       Reset
+      </button>
   </div>
 
 </details>

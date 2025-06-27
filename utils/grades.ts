@@ -246,7 +246,8 @@ const parseAssignmentName = (name: string): string => {
 };
 
 const parseGrades = (grades: Gradebook): Grades => {
-	const gradingScale=grades.gradingScale;
+	const gradingScale:Grades['gradingScales']=grades.gradingScale;
+	const decimalPlaces=gradingScale?.default?.rounding.percent===true ? gradingScale?.default.rounding.percentPlaces : (gradingScale?.default?.rounding.percent===false ? false : 2)
 	for (let i = 0; i < grades.courses.length; i++) {
 		if (grades.courses[i].marks.length === 0) {
 			grades.courses[i].marks = [
@@ -283,6 +284,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 			*/
 			courses: grades.courses.map(({ title, period, room, staff, marks }, i) => {
 			const scale=gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] ? gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] : gradingScale.default
+			const places=scale.rounding.percent===true ? scale.rounding.percentPlaces : (scale.rounding.percent===false ? false : 2)
 			return({
 			name: ReplaceUnderscores(stripParens(title)),
 			period: period ? period : i + 1,
@@ -306,9 +308,9 @@ const parseGrades = (grades: Gradebook): Grades => {
         weight: parseFloat(weight.standard) / 100,
         grade: {
           letter: letterGrade((points.current / points.possible) * 100,scale),
-          raw: parseFloat(
-            ((points.current / points.possible) * 100).toFixed(2)
-          ),
+          raw:    places!=false ? parseFloat(
+         ((points.current / points.possible) * 100).toFixed(places)
+          ) :  ((points.current / points.possible) * 100),
           color: letterGradeColor(
             letterGrade((points.current / points.possible) * 100,scale),scale
           ),
@@ -324,9 +326,9 @@ const parseGrades = (grades: Gradebook): Grades => {
         name: "Default5421",
         weight: 1, // assuming 100% weight   
         grade: {
-          letter: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGrade((pointsEarned/pointsP)*100,scale))})(), // or whatever default value you'd like
-          raw: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(parseFloat(((pointsEarned/pointsP)*100).toFixed(2)))})(),
-          color: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGradeColor(letterGrade((pointsEarned/pointsP)*100,scale),scale))})()
+          letter: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGrade((places!= false ? parseFloat(((pointsEarned/pointsP)*100).toFixed(places)) : (pointsEarned/pointsP)*100),scale))})(), // or whatever default value you'd like
+          raw: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(places!= false ? parseFloat(((pointsEarned/pointsP)*100).toFixed(places)) : (pointsEarned/pointsP)*100)})(),
+          color: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGradeColor(letterGrade((places!= false ? parseFloat(((pointsEarned/pointsP)*100).toFixed(places)) : (pointsEarned/pointsP)*100),scale),scale))})()
         },
         points: {
           earned: (()=>{let pointsE=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsE+=parsePoints(points).earned}});return(pointsE)})(),
@@ -341,7 +343,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 				name: parseAssignmentName(name),
 				grade: {
 					letter:  letterGrade(parsePoints(points).grade,scale), 
-					raw: parseFloat(parsePoints(points).grade.toFixed(2)),
+					raw: places!=false ? parseFloat(parsePoints(points).grade.toFixed(places)) : parsePoints(points).grade,
 					color: notes!="(Not For Grading)" ? letterGradeColor(letterGrade(parsePoints(points).grade,scale),scale) : "mud" ,
 				},
 				points: {
@@ -480,6 +482,7 @@ const genTable = (
 
 const calculateCategory = (course: Course, categoryId: number): Course => {
 	const gradingScale=course.gradingScale;
+	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	course.categories[categoryId].points.earned = course.assignments
 		.filter(
 			(assignment) =>
@@ -499,13 +502,17 @@ const calculateCategory = (course: Course, categoryId: number): Course => {
 				assignment.included
 		)
 		.reduce((a, b) => a + b.points.possible, 0);
-	course.categories[categoryId].grade.raw = parseFloat(
+	course.categories[categoryId].grade.raw = places!=false ? parseFloat(
 		(
 			(course.categories[categoryId].points.earned /
 				course.categories[categoryId].points.possible) *
 			100
-		).toFixed(2)
-	);
+		).toFixed(places) 
+	) : 	(
+			(course.categories[categoryId].points.earned /
+				course.categories[categoryId].points.possible) *
+			100
+		);
 	course.categories[categoryId].grade.letter = letterGrade(
 		course.categories[categoryId].grade.raw,gradingScale
 	);
@@ -531,6 +538,7 @@ function reCalculateAll(grades:Grades){
 
 function calculateGrade(course: Course): Course{
 	const gradingScale=course.gradingScale;
+	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	let currWeight = 0;
 	let trueCategories = course.categories.filter((c) => {
 		if (!isNaN(c.grade.raw)) {
@@ -539,13 +547,16 @@ function calculateGrade(course: Course): Course{
 		}
 		return false;
 	});
-	course.grade.raw = parseFloat(
+	course.grade.raw = places!=false ? parseFloat(
 		trueCategories
 			.reduce((a, b) => {
 				return a + b.grade.raw * (b.weight / currWeight);
 			}, 0)
-			.toFixed(2)
-	);
+			.toFixed(places)
+	) :trueCategories
+			.reduce((a, b) => {
+				return a + b.grade.raw * (b.weight / currWeight);
+			}, 0) ;
 
 	if (trueCategories.length === 0) {
 		course.grade.raw = NaN;
@@ -644,14 +655,20 @@ const updateCourse = (
 		(category) => category.name === course.assignments[assignmentId].category
 	);
 
+		const gradingScale=course.gradingScale;
+	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	//update assignment grade
-	course.assignments[assignmentId].grade.raw = parseFloat(
+	course.assignments[assignmentId].grade.raw = places!=false ? parseFloat(
 		(
 			(course.assignments[assignmentId].points.earned /
 				course.assignments[assignmentId].points.possible) *
 			100
-		).toFixed(2)
-	);
+		).toFixed(places)
+	) : (
+			(course.assignments[assignmentId].points.earned /
+				course.assignments[assignmentId].points.possible) *
+			100
+		);
 	course.assignments[assignmentId].grade.letter = letterGrade(
 		course.assignments[assignmentId].grade.raw,course.gradingScale
 	);
