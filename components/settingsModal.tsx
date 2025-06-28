@@ -1,6 +1,6 @@
 import React,{useState,useEffect} from "react";
 import {Modal} from "flowbite-react"
-import { HiOutlineTrash } from "react-icons/hi";
+import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
 import {gradingScale} from "../utils/grades"
@@ -94,7 +94,7 @@ function addLetter(){
 
 
 //endpoints
-const endpointUrl="https://studentvuelib-clean.up.railway.app"
+const endpointUrl="https://studentvuelib.up.railway.app"
 
 async function getSettings(url,userHash){
    const result= await (await fetch(endpointUrl+"/getSettings",
@@ -453,11 +453,12 @@ className="overflow-y-auto"
     
 
 <details
+className="hideCarat"
 onToggle={()=>setAdvancedOpen(!advancedOpen)}
 >
   <summary
-  className="mt-2 dark:text-white flex"
-  ><p className="dark:text-white text-lg">{(advancedOpen ? "▼": "▶") + "Advanced"}</p></summary>
+  className="mt-2 dark:text-white flex items-center"
+  >{advancedOpen ? <HiArrowCircleDown size={20}/>: <HiArrowCircleRight size={20}/>}<p className="dark:text-white text-lg">Advanced</p></summary>
 
   <div className="ml-7 flex-col md:flex-row"> 
     <div style={{alignItems:"center"}} className="flex gap-2">
@@ -471,7 +472,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
     </div>
     <div style={{alignItems:"center"}} className="mt-3 flex gap-2">
         <p className="dark:text-white">Round up to:</p>
-        <input className="hide-spinner w-10 h-5 rounded-lg bg-gray-400 dark:bg-gray-800 dark:text-white"  step="1" type="number" 
+        <input className="hide-spinner w-10 h-5 rounded-lg bg-neutral-100 dark:bg-gray-600 dark:text-white"  step="1" type="number" 
         onBlur={(e)=>setRounding((prev)=>{
           let temp=structuredClone(prev);temp.percentPlaces=decimalPlaces;return temp})} 
           onChange={(e)=>setDecimalPlaces(parseInt(e.target.value))} value={decimalPlaces ?? rounding.percentPlaces}/>

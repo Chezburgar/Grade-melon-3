@@ -39,3 +39,7 @@
   input.hide-spinner {
     -moz-appearance: textfield;
   }
+
+  details.hideCarat summary::-webkit-details-marker {
+  display:none;
+}
