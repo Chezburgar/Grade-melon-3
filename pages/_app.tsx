@@ -7,7 +7,7 @@ import Topbar from "../components/TopBar";
 import SideBar from "../components/SideBar";
 import MobileBar from "../components/MobileBar";
 import CustomAd from "../components/customAd";
-
+import {gradesCache as g} from "../utils/tempCache"
 import { Grades,parseGrades } from "../utils/grades";
 import Head from "next/head";
 import { HiX } from "react-icons/hi";
@@ -35,6 +35,7 @@ function MyApp({ Component, pageProps }) {
 	const [studentInfo, setStudentInfo] = useState(undefined);
 	const [toasts, setToasts] = useState<Toast[]>([]);
 	const [grades, setGrades] = useState<Grades>();
+	const [gradeCache,setGradeCache] = useState<Grades[]>(g)
 	const [period, setPeriod] = useState<number>();
 	const [loading, setLoading] = useState(false);
 	const [referal,setReferal]=useState(false);
@@ -357,6 +358,8 @@ const logout = async () => {
 								ad={ad}
 								setAd={setAd}
 								width={width}
+								gradeCache={gradeCache}
+								setGradeCache={setGradeCache}
 						 
 
 							/>
@@ -392,6 +395,8 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
+										gradeCache={gradeCache}
+										setGradeCache={setGradeCache}
 							 
 									/>
 								</AnimateSharedLayout>
@@ -423,6 +428,8 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
+										gradeCache={gradeCache}
+										setGradeCache={setGradeCache}
 	 
 									/>
 								</AnimateSharedLayout>
