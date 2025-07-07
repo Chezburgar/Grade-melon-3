@@ -57,9 +57,21 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [showFinal,setShowFinal]=useState(true) //this will become a part of the settings object or smthn
         const [type,setType]=useState("course") //
         const [period,setPeriod]=useState(0)
+        const [test,setTest]=useState([true,true]);
 
       console.log("quick output",gradesCache)
 
+//right so if it's not mcps the default will be off, but this is other default case
+      const temp_finals={
+        show:true,
+        categories:[{period:0,courseIndex:gradesCache[0].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length)),weight:0.25,type:"course"},
+      {period:1,courseIndex:gradesCache[1].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length)),weight:0.25,type:"course"},
+    {period:2,courseIndex:gradesCache[2].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length)),weight:0.25,type:"course"},
+  {period:3,courseIndex:gradesCache[3].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length)),weight:0.25,type:"course"}]
+
+      }
+
+      const [finals,setFinals]=useState(temp_finals)
 
 function mutate(e,letter,bound){
     setLetterScale((prev)=>{
@@ -541,24 +553,37 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
       
   
       <tbody>
-        <tr className="bg-gray-900">
+       
+
+       {finals.categories.map((f,i)=>(
+        <>
+        <tr className={`bg-gray-${i%2==0 ? "800" : 
+          "900"
+        }`}>
           <td 
           style={{textAlign:"center"}}
           >
+
+                {
+            //temporarily doing this really stupidly
+           }
             <select 
-           value={type}
-           onChange={(e)=>setType(e.target.value)}
+           value={f.type}
+           onChange={(e)=>{setType(e.target.value)}}
            className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
             >
               <option className="bg-gray-600" value={"course"}>Course</option>
               <option className="bg-gray-600" value="exam">Exam</option>
             </select>
+
+                
+
           </td>
 
           <td
             style={{textAlign:"center"}}
           >
-            <select value={period} onChange={(e)=>{setPeriod(parseInt(e.target.value))}}
+            <select value={f.period} onChange={(e)=>{setPeriod(parseInt(e.target.value))}}
               className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
             >
               {grades.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.rawName}</option>))}
@@ -569,7 +594,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             style={{textAlign:"center"}}
           >
          
-            <select value={0}
+            <select value={f.courseIndex}
               className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
             >
         {gradesCache[period].courses.map((c,i)=>(
@@ -590,13 +615,39 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             >
             <GradeField
             onChange={()=>{}}
-            value={25}
+            value={f.weight*100}
             />
             <p>%</p>
             </div>
    
           </td>
         </tr>
+
+
+        <tr className={`bg-gray-${i%2==0 ? "800" : "900"}`}>
+        <td colSpan={4}>
+           <button
+                onClick={() => {setTest([false,test[1]])
+
+                }}
+                className="
+                  flex items-center gap-1 ml-2 -mt-1 mb-1
+                  rounded-lg bg-primary-500
+                  text-xs font-medium text-white
+                  hover:bg-primary-600
+                  px-1
+                  focus:outline-none focus:ring-4 focus:ring-primary-300
+                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  sm:text-sm
+                "
+              >
+                <p className="dark:text-white">Delete</p>
+              </button>
+        </td>
+
+        </tr>
+        </>
+))}
 
       </tbody>
     </table>
