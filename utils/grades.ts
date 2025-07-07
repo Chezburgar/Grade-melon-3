@@ -28,9 +28,12 @@ interface gradingScale{
 }
 
 
+
+
 interface Course {
 	name: string;
 	period: number;
+	courseID:string;
 	layoutID: number;
 	room: string;
 	weighted: boolean;
@@ -72,6 +75,7 @@ interface Grades {
 	periods: {
 		name: string;
 		index: number;
+		rawName:string;
 	}[];
 }
 
@@ -282,13 +286,14 @@ const parseGrades = (grades: Gradebook): Grades => {
 	Deprecating until I remake it this is so useless and calculated so naively 
 	
 			*/
-			courses: grades.courses.map(({ title, period, room, staff, marks }, i) => {
+			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
 			const scale=gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] ? gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] : gradingScale.default
 			const places=scale.rounding.percent===true ? scale.rounding.percentPlaces : (scale.rounding.percent===false ? false : 2)
 			return({
 			name: ReplaceUnderscores(stripParens(title)),
 			period: period ? period : i + 1,
 			layoutID:null,
+			courseID:courseID,
 			room: room,
 			weighted: isWeighted(title),
 			gradingScale:scale,
@@ -363,6 +368,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 		},
 		periods: grades.reportingPeriod.available.map(({ name, index, date }) => ({
 			name: `${name} (${parseDate(date)})`,
+			rawName:name,
 			index: index,
 		})),
 	};
@@ -378,6 +384,13 @@ const parseGrades = (grades: Gradebook): Grades => {
 	parsedGrades.courses.forEach((course:Course,index) => {
 		course.layoutID=index;
 	});
+
+
+	//beginning some test calculations for the Global
+
+	
+
+
 
 	
 	return parsedGrades;

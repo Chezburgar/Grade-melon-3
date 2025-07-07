@@ -1,20 +1,29 @@
 import {Grades,gradingScale,parseGrades} from "./grades"
-import StudentVue from "studentvue"
+import {Client as C} from "studentvue"
 
-//public class Client extends StudentVue.Soap.Client  | work on making this an actual tie in later
-var Client:any;
-var endpointUrl:string;
+
+
+
+class Client extends C{
+
+    
+    constructor(credentials: any, proxyUrl:string,hostUrl: string) {
+    super(credentials,proxyUrl,hostUrl);
+  }
+        cache={gradebooks:undefined}
+    
 
 
 //function for that intial fetch at the beninging. 
-async function getGradebooks(reportPeriods:string[][]=[[null,undefined]]){ //error at this level will not be caught. Callers should be prepared to use .catch
+public async getGradebooks(reportPeriods:[[number,string]]=[[null,undefined]]){ //error at this level will not be caught. Callers should be prepared to use .catch
     //client.gradebook reworked to just return the xml for the requests
-    const xmls=reportPeriods.map(reportPeriod_OrgYear=>Client.gradebook.soap(reportPeriod_OrgYear[0],reportPeriod_OrgYear[1] != undefined ? reportPeriod_OrgYear[1] : null))
+    const xmls=reportPeriods.map(reportPeriod_OrgYear=>this.gradebook(reportPeriod_OrgYear[0][0],reportPeriod_OrgYear[1] != undefined ? reportPeriod_OrgYear[1] : null))
 
-    const results=await gradebookFetch(xmls,true)
+    //@ts-ignore
+    const results=await this.gradebookFetch(xmls,true)
     const responses=results.responses
     const gradingScales=results.extraData.gradingScales
-    const grades=responses.map(raw=>Client.gradebook.parse(raw)) //gunna wanna rework the parsing logic in addition the actual restructuring. needs to be more robust. remove any chacne of runtime errors. use zod to attempt type coercsion. pray.
+    const grades=responses.map((raw,i)=>this.gradebook.parse(raw,reportPeriods[i][0])) //gunna wanna rework the parsing logic in addition the actual restructuring. needs to be more robust. remove any chacne of runtime errors. use zod to attempt type coercsion. pray.
     grades.map(grade=>{grade.gradingScales=gradingScales;return grade})
 
     const parsedGrades:Grades[]=grades.map(grade=>parseGrades(grade))
@@ -22,19 +31,21 @@ async function getGradebooks(reportPeriods:string[][]=[[null,undefined]]){ //err
     for(let parsed of parsedGrades){
         cache[String(parsed.period.index)]=parsed;
     }
-    Client.gradebook.cache=cache
+    this.cache.gradebooks=cache
     return parsedGrades;
 }
 
 
 
 
-async function gradebookFetch(xmls,getGradeScale=false){
+ public async gradebookFetch(xmls:string[],getGradeScale=false){
     try{
-    const results= await( await fetch(endpointUrl+"/fulfillAxios",{
+    //@ts-ignore
+    const results= await( await fetch(this.url+"/fulfillAxios",{
             headers:{"content-type":"application/json"},
             method:"POST",
-            body:JSON.stringify({xmls:xmls,encrypted:Client.encrypted,getGradeScale:getGradeScale,url:Client.url})
+            //@ts-ignore
+            body:JSON.stringify({xmls:xmls,encrypted:this.encrypted,getGradeScale:getGradeScale,url:this.url})
         
         })).json()
 
@@ -49,3 +60,15 @@ async function gradebookFetch(xmls,getGradeScale=false){
         throw new Error("proxy error")
     }
 }
+}
+
+
+async function login(districtURL,credentials,proxyUrl){
+    const client=new Client(credentials,proxyUrl,districtURL)
+    let t = await client.getGradebooks()
+    return [client,t]
+}
+
+
+
+export {Client,login}

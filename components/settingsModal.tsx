@@ -5,6 +5,8 @@ import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
 import {gradingScale} from "../utils/grades"
 import { count } from "console";
+import {gradesCache} from "../utils/tempCache"
+import GradeField from "./GradeField";
 
 /*
 
@@ -50,12 +52,13 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [active,setActive]=useState<[string,string]>(['',''])
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
-     //   const [rounding,setRounding]=useState(false)
-   //     const [decimalPlaces,setDecimalPlaces]=useState<number>(0)
 
+        //these next several will get folded into settings object or smthn later, just testin
+        const [showFinal,setShowFinal]=useState(true) //this will become a part of the settings object or smthn
+        const [type,setType]=useState("course") //
+        const [period,setPeriod]=useState(0)
 
-
-
+      console.log("quick output",gradesCache)
 
 
 function mutate(e,letter,bound){
@@ -497,6 +500,113 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 </details>
 
+
+{
+  //i think i might make it an accordion component now that I'm setting more and more settings
+}
+
+
+<div>
+  <p className="dark:text-white font-bold mt-4  mb-2 text-xl">Final Grade</p>
+    <div className="ml-2">
+    <div style={{alignItems:"center"}} className="flex gap-2">
+        <p className="dark:text-white">Show Final Grade</p>
+        <input type="checkbox" onChange={(e)=>setShowFinal(!showFinal)} checked={showFinal}></input>
+    </div>
+
+    <p className="-ml-2 dark:text-white text-lg mt-4">Final Grade Calculation</p>
+
+    {
+      //i wanna try doin it with a grid, cuz tables get kinda ass if u need to set width on a text-input
+      //like. idk. u can do what the assignments table does and sub in text elements for input elements on click
+      //which means layout shift
+
+      //or u can just try to massage the padding till it works like the letter scale table
+      //but i think maybe grid would work better
+    }
+
+    <div
+      className="border-gray-600 rounded-lg border mt-2 overflow-x-auto -ml-2"
+    >
+    <table 
+    className="w-full">
+      <thead>
+        <tr className="dark:bg-slate-700">
+          <th          style={{textAlign:"center"}} className="py-2 dark:text-white">Type</th>
+          <th          style={{textAlign:"center"}} className="py-2 dark:text-white">Marking Period</th>
+          <th          style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>
+          <th          style={{textAlign:"center"}} className="py-2 pr-4 dark:text-white">Weight</th>
+        </tr>
+      </thead>
+      
+  
+      <tbody>
+        <tr className="bg-gray-900">
+          <td 
+          style={{textAlign:"center"}}
+          >
+            <select 
+           value={type}
+           onChange={(e)=>setType(e.target.value)}
+           className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
+            >
+              <option className="bg-gray-600" value={"course"}>Course</option>
+              <option className="bg-gray-600" value="exam">Exam</option>
+            </select>
+          </td>
+
+          <td
+            style={{textAlign:"center"}}
+          >
+            <select value={period} onChange={(e)=>{setPeriod(parseInt(e.target.value))}}
+              className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
+            >
+              {grades.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.rawName}</option>))}
+            </select>
+          </td>
+
+          <td
+            style={{textAlign:"center"}}
+          >
+         
+            <select value={0}
+              className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
+            >
+        {gradesCache[period].courses.map((c,i)=>(
+          <option className="bg-gray-600" value={i}>{c.name.trim()}</option>
+
+        ))}
+            
+            </select>
+            
+            
+          </td>
+
+          <td
+            style={{textAlign:"center"}}
+          >
+            <div
+              className="text-center dark:text-white flex items-center"
+            >
+            <GradeField
+            onChange={()=>{}}
+            value={25}
+            />
+            <p>%</p>
+            </div>
+   
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+    </div>
+     <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+     onClick={()=>{}}>Add+</button>
+   
+    </div>
+</div>
+
 </Modal.Body>
 
 
@@ -556,3 +666,61 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 )
 
 }
+
+
+
+/*
+  
+    <table 
+    className="w-full">
+      <thead>
+        <tr className="dark:bg-slate-700">
+          <th className="py-2 dark:text-white">Type</th>
+          <th className="py-2 dark:text-white">Marking Period</th>
+          <th className="py-2 dark:text-white">Name</th>
+          <th className="py-2 dark:text-white">Weight</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="bg-gray-900">
+          <td>
+           <select 
+           value="course"
+           className="bg-transparent dark:text-white"
+           >
+              <option value={"course"}>Course</option>
+              <option value="exam">Exam</option>
+           </select>
+          </td>
+
+          <td>
+             <select value={grades.period.index}
+              className="bg-transparent dark:text-white"
+             >
+              {grades.periods.map(p=>(<option value={p.index}>{p.rawName}</option>))}
+            </select>
+          </td>
+
+          <td>
+            <input
+              className="bg-transparent text-elipses w-12 dark:text-white"
+              value={"my course"}
+            />
+            
+          </td>
+
+          <td>
+            <input
+            className="bg-transparent text-elipses w-5 border-0 dark:text-white"
+            type="number"
+            value={25}
+
+            />
+
+          </td>
+
+
+        </tr>
+      </tbody>
+    </table>
+    */

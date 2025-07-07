@@ -24,7 +24,7 @@ interface final{ //this will probably be baked into gradingScale which may be re
 
 }
 
-
+/*
 const gradesCache:gradesCache={
     grades:grades,
     gradingScales:grades[0].gradingScales,
@@ -153,10 +153,14 @@ const gradesCache:gradesCache={
 
                 Case 4 | inexplicable MCPS course non-detection / mis-identification
                     problems: :( i think, like, would break opti modal, and porbably also would break other things also.
-        */
+        
         
         }
 }
+
+
+*/
+
 
 var grades:Grades[]=[{
   "gradingScales": {
@@ -3183,23 +3187,27 @@ var grades:Grades[]=[{
     "index": 0
   },
   "periods": [
-    {
-      "name": "1st Quarter (ended 275 days ago)",
-      "index": 0
-    },
-    {
-      "name": "2nd Quarter (ended 194 days ago)",
-      "index": 1
-    },
-    {
-      "name": "3rd Quarter (ended 111 days ago)",
-      "index": 2
-    },
-    {
-      "name": "4th Quarter (ended 35 days ago)",
-      "index": 3
-    }
-  ]
+  {
+    "name": "1st Quarter (ended 279 days ago)",
+    "rawName": "1st Quarter",
+    "index": 0
+  },
+  {
+    "name": "2nd Quarter (ended 199 days ago)",
+    "rawName": "2nd Quarter",
+    "index": 1
+  },
+  {
+    "name": "3rd Quarter (ended 115 days ago)",
+    "rawName": "3rd Quarter",
+    "index": 2
+  },
+  {
+    "name": "4th Quarter (ended 39 days ago)",
+    "rawName": "4th Quarter",
+    "index": 3
+  }
+]
 },{
   "gradingScales": {
     "default": {
@@ -9016,24 +9024,28 @@ var grades:Grades[]=[{
     "name": "2nd Quarter",
     "index": 1
   },
-  "periods": [
-    {
-      "name": "1st Quarter (ended 275 days ago)",
-      "index": 0
-    },
-    {
-      "name": "2nd Quarter (ended 194 days ago)",
-      "index": 1
-    },
-    {
-      "name": "3rd Quarter (ended 111 days ago)",
-      "index": 2
-    },
-    {
-      "name": "4th Quarter (ended 35 days ago)",
-      "index": 3
-    }
-  ]
+  "periods":[
+  {
+    "name": "1st Quarter (ended 279 days ago)",
+    "rawName": "1st Quarter",
+    "index": 0
+  },
+  {
+    "name": "2nd Quarter (ended 199 days ago)",
+    "rawName": "2nd Quarter",
+    "index": 1
+  },
+  {
+    "name": "3rd Quarter (ended 115 days ago)",
+    "rawName": "3rd Quarter",
+    "index": 2
+  },
+  {
+    "name": "4th Quarter (ended 39 days ago)",
+    "rawName": "4th Quarter",
+    "index": 3
+  }
+]
 },{
   "gradingScales": {
     "default": {
@@ -12682,24 +12694,28 @@ var grades:Grades[]=[{
     "name": "3rd Quarter",
     "index": 2
   },
-  "periods": [
-    {
-      "name": "1st Quarter (ended 275 days ago)",
-      "index": 0
-    },
-    {
-      "name": "2nd Quarter (ended 194 days ago)",
-      "index": 1
-    },
-    {
-      "name": "3rd Quarter (ended 111 days ago)",
-      "index": 2
-    },
-    {
-      "name": "4th Quarter (ended 35 days ago)",
-      "index": 3
-    }
-  ]
+  "periods":[
+  {
+    "name": "1st Quarter (ended 279 days ago)",
+    "rawName": "1st Quarter",
+    "index": 0
+  },
+  {
+    "name": "2nd Quarter (ended 199 days ago)",
+    "rawName": "2nd Quarter",
+    "index": 1
+  },
+  {
+    "name": "3rd Quarter (ended 115 days ago)",
+    "rawName": "3rd Quarter",
+    "index": 2
+  },
+  {
+    "name": "4th Quarter (ended 39 days ago)",
+    "rawName": "4th Quarter",
+    "index": 3
+  }
+]
 },{
   "gradingScales": {
     "default": {
@@ -17811,25 +17827,93 @@ var grades:Grades[]=[{
     "name": "4th Quarter",
     "index": 3
   },
-  "periods": [
-    {
-      "name": "1st Quarter (ended 275 days ago)",
-      "index": 0
-    },
-    {
-      "name": "2nd Quarter (ended 194 days ago)",
-      "index": 1
-    },
-    {
-      "name": "3rd Quarter (ended 111 days ago)",
-      "index": 2
-    },
-    {
-      "name": "4th Quarter (ended 35 days ago)",
-      "index": 3
-    }
-  ]
+  "periods":[
+  {
+    "name": "1st Quarter (ended 279 days ago)",
+    "rawName": "1st Quarter",
+    "index": 0
+  },
+  {
+    "name": "2nd Quarter (ended 199 days ago)",
+    "rawName": "2nd Quarter",
+    "index": 1
+  },
+  {
+    "name": "3rd Quarter (ended 115 days ago)",
+    "rawName": "3rd Quarter",
+    "index": 2
+  },
+  {
+    "name": "4th Quarter (ended 39 days ago)",
+    "rawName": "4th Quarter",
+    "index": 3
+  }
+]
 }]
 
+let it=[
+    [
+        "9244a1",
+        "250611",
+        "15015",
+        "803461",
+        "380851"
+    ],
+    [
+        "9244a1",
+        "250611",
+        "15015",
+        "803461",
+        "380851"
+    ],
+    [
+        "250612",
+        "10043",
+        "803462",
+        "380852"
+    ],
+    [
+        "250612",
+        "10043",
+        "803462",
+        "380852"
+    ]
+]
 
-export {gradesCache}
+for(let i=0;i<grades.length;i++){
+  for(let j=0;j<grades[i].courses.length;j++){
+    grades[i].courses[j].courseID=it[i][j]
+  }
+}
+
+
+
+let courseIDs:any=grades.map(g=>g.courses.map(c=>c.courseID.substring(0,c.courseID.length-1)+
+".")).flat()
+courseIDs=new Set(courseIDs)
+
+
+
+
+
+
+let obj:any={}
+for(let id of courseIDs){
+  obj[id]=grades.map(g=>g.courses.filter(c=>new RegExp(id).test(c.courseID))).flat()
+}
+
+console.log(obj,"cow says moo")
+obj[Object.keys(obj)[0]][0].testVar=11
+console.log(grades,obj,obj[Object.keys(obj)[0]])
+
+
+
+
+//maybe we should restructure parsedGrades to store from all Q's
+
+//new use state to control the active period, take that out of grades obj
+
+//the only data that changes between marking period is 
+
+
+export {grades as gradesCache}

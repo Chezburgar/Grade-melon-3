@@ -43,3 +43,8 @@
   details.hideCarat summary::-webkit-details-marker {
   display:none;
 }
+
+.space th,
+.space td {
+  padding-right: 8px,
+}
