@@ -10,7 +10,8 @@ import {
 	Grades as GradesType,
 	Course,
 	genTable,
-	abbreviate
+	abbreviate,
+	letterGradeColor,letterGrade
 } from "../../utils/grades";
 import GradeField from "../../components/GradeField";
 import CategoryField from "../../components/CategoryField";
@@ -25,6 +26,7 @@ import { BsGearWideConnected } from "react-icons/bs";
 import { BsGraphUp } from "react-icons/bs";
 import CustomAd from "../../components/customAd";
 import SettingsModal from "../../components/settingsModal"
+import {gradesCache} from "../../utils/tempCache"
 
 
 interface GradesProps {
@@ -65,7 +67,7 @@ export default function Grades({
 }: GradesProps) {
 	const router = useRouter();
 	const { index }: { index?: string } = router.query;
-	const course = grades?.courses[parseInt(index as string)];
+	const course = grades?.courses[parseInt(index)];
 	const [loading, setLoading] = useState(grades ? false : true);
 	const [showModal, setShowModal] = useState(false);
 	const [modalDetails, setModalDetails] = useState(0);
@@ -76,6 +78,44 @@ export default function Grades({
 	const [title,setTitle]=useState(undefined);
 	const [showSettingsModal,setShowSettingsModal]=useState(false);
 	const assignmentTitle = useRef(null);
+	//right so if it's not mcps the default will be off, but this is other default case
+
+	//this will I thinnnnnnk get folded into parseGrades for the intialization later
+
+			interface Category{
+				period:number,
+				grade:any,
+				courseIndex:number,
+				weight:number,
+				type:"exam"|"course"
+			}
+
+		     function calcFinal(categories:Category[]){
+                let realCat=[]
+				let currPoints=0
+				console.log(categories)
+                for(let category of categories){
+                    if(Number(category.grade?.raw)!=NaN){
+                    realCat.push(category);
+					currPoints+=category.grade.raw*category.weight
+                    }
+                }
+
+                return currPoints
+            
+            }
+
+
+
+      const [finals,setFinals]=useState(parseInt(index)!=-1 ? (grades?.courses[parseInt(index)]?.gradingScale?.finals || {
+        show:true,
+        categories:[{period:0,grade:gradesCache[0].courses[gradesCache[0].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))]?.grade,courseIndex:gradesCache[0].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1)),weight:0.25,type:"course"},
+      {period:1,grade:grades?.courses[parseInt(index)]?.grade,courseIndex:gradesCache[1].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1)),weight:0.25,type:"course"},
+    {period:2,grade:gradesCache[2].courses[gradesCache[2].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))]?.grade,courseIndex:gradesCache[2].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1)),weight:0.25,type:"course"},
+  {period:3,grade:gradesCache[3].courses[gradesCache[3].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))]?.grade,courseIndex:gradesCache[3].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1)),weight:0.25,type:"course"}],
+      }) : undefined)
+
+	  console.log("semper fi",finals,calcFinal(finals.categories))
 	
 
 	
@@ -232,6 +272,7 @@ export default function Grades({
 					{course ? `${course?.name} - Grade Melon` : "Grade Melon"}
 				</title>
 			</Head>
+			{!loading &&
 			<Modal show={showModal} onClose={() => setShowModal(false)}>
 				<Modal.Header className="text-xl font-medium text-gray-900 dark:text-white">
 					{modalType === "assignment"
@@ -383,6 +424,8 @@ export default function Grades({
 					createError={createError}
 					showModal={showSettingsModal}
 					setShowModal={setShowSettingsModal}
+					finals={finals}
+					setFinals={setFinals}
 				
 				/>
 				<Modal.Footer>
@@ -426,6 +469,7 @@ export default function Grades({
 					)}
 				</Modal.Footer>
 			</Modal>
+}
 			{loading ? (
 				<div className="flex justify-center">
 					<Spinner size="xl" color="pink" />
@@ -483,16 +527,21 @@ export default function Grades({
 							<p>Total</p>
 						</div>
 					</div>
-					<div className="mt-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
+
+					{
+						finals.show &&
+						<div className="mt-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
 						<div
 							className={ `bg-${course?.grade.color}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
 							style={{
-								width: `${course?.grade.raw < 100 ? course?.grade.raw : 100}%`,backgroundColor:(course?.grade.color.includes("#") && `${course?.grade.color}`)
+								width: `${calcFinal(finals.categories) < 100 ? calcFinal(finals.categories)  : 100}%`,backgroundColor:(letterGradeColor(letterGrade(calcFinal(finals.categories),course.gradingScale),course.gradingScale).includes("#") && `${letterGradeColor(letterGrade(calcFinal(finals.categories),course.gradingScale),course.gradingScale)}`)
 							}}
 						>
-							<p>Final</p>
+									<p className="absolute">
+									Final ({!isNaN(calcFinal(finals.categories)) ? `${calcFinal(finals.categories)}%` : "N/A"})
+								</p>
 						</div>
-					</div>
+					</div>}
 					{course?.categories.map(({ name, grade, points }, i) => (
 						<div
 							key={i}

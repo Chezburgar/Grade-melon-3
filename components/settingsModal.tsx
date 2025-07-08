@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
-import {gradingScale} from "../utils/grades"
+import {gradingScale,Grades} from "../utils/grades"
 import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
@@ -45,7 +45,20 @@ need to implement save-settings fetch
 
 */
 
-export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError}){
+interface props{
+  client:any;
+  index:string|-1;
+  showModal:boolean;
+  setShowModal:(boolean:boolean)=>void;
+  grades:Grades;
+  setGrades:(grades:Grades)=>void;
+  createError:(message:string)=>void;
+  finals?:any;
+  setFinals?:any;
+
+}
+
+export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,finals,setFinals}:props){
     	  const course = index==-1 ? {name:"default",teacher:{name:""},period:""} : grades?.courses[parseInt(index)];
         const [letterScale,setLetterScale]=useState<gradingScale["letterScale"]>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.letterScale || undefined) : grades?.gradingScales.default.letterScale)
         const [rounding,setRounding]=useState<gradingScale["rounding"]>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.rounding || undefined) : grades?.gradingScales.default.rounding)
@@ -57,21 +70,11 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [showFinal,setShowFinal]=useState(true) //this will become a part of the settings object or smthn
         const [type,setType]=useState("course") //
         const [period,setPeriod]=useState(0)
-        const [test,setTest]=useState([true,true]);
+        const [accordion,setAccordion]=useState([false,true])
 
-      console.log("quick output",gradesCache)
+      console.log("quick output",gradesCache,grades)
 
-//right so if it's not mcps the default will be off, but this is other default case
-      const temp_finals={
-        show:true,
-        categories:[{period:0,courseIndex:gradesCache[0].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length)),weight:0.25,type:"course"},
-      {period:1,courseIndex:gradesCache[1].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length)),weight:0.25,type:"course"},
-    {period:2,courseIndex:gradesCache[2].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length)),weight:0.25,type:"course"},
-  {period:3,courseIndex:gradesCache[3].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length)),weight:0.25,type:"course"}]
 
-      }
-
-      const [finals,setFinals]=useState(temp_finals)
 
 function mutate(e,letter,bound){
     setLetterScale((prev)=>{
@@ -106,6 +109,20 @@ function addLetter(){
 
 }
 
+function addFinalCategory(){
+  let temp=structuredClone(finals);
+
+  temp.categories.unshift({period:grades.period.index,courseIndex:index,weight:0,type:"exam"})
+  setFinals(temp)
+}
+
+
+function deleteFinalCategory(index){
+  let temp = structuredClone(finals)
+  temp.categories.splice(index,1)
+  setFinals(temp)
+
+}
 
 
 //endpoints
@@ -294,10 +311,24 @@ className="dark:bg-gray-700"
 
 
 <Modal.Body
-style={{maxHeight:500}}
+style={{maxHeight:500,minHeight:500}}
 className="overflow-y-auto"
 >
-  <h1 className="mb-4 text-xl font-bold text-white">Letter Scale</h1>
+  {
+    //Letter Scale
+  }
+  <details
+  open={accordion[0]}
+  >
+  <summary 
+  className="mb-4 text-xl font-bold text-white"
+    onClick={(e)=>{
+    e.preventDefault()
+    let temp=structuredClone(accordion)
+    temp[0]=!accordion[0]
+    setAccordion(temp)
+  }}
+  >Letter Scale</summary>
 
   <div className="w-full flex justify-center overflow-x-auto rounded-lg border border-gray-600">
     <table className="flex-1 mx-auto min-w-max text-left">
@@ -466,7 +497,9 @@ className="overflow-y-auto"
       </div> 
 
     
-
+{
+  //advanced letter scale
+}
 <details
 className="hideCarat"
 onToggle={()=>setAdvancedOpen(!advancedOpen)}
@@ -511,15 +544,26 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   </div>
 
 </details>
+</details>
 
 
 {
-  //i think i might make it an accordion component now that I'm setting more and more settings
+ //Final Grade
 }
 
-
-<div>
-  <p className="dark:text-white font-bold mt-4  mb-2 text-xl">Final Grade</p>
+{ index!=-1 &&
+<details
+  open={accordion[1]}
+>
+  <summary 
+  className="dark:text-white font-bold mt-4  mb-2 text-xl"
+    onClick={(e)=>{
+    e.preventDefault()
+    let temp=structuredClone(accordion)
+    temp[1]=!accordion[1]
+    setAccordion(temp)
+  }}
+  >Final Grade</summary>
     <div className="ml-2">
     <div style={{alignItems:"center"}} className="flex gap-2">
         <p className="dark:text-white">Show Final Grade</p>
@@ -627,9 +671,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         <tr className={`bg-gray-${i%2==0 ? "800" : "900"}`}>
         <td colSpan={4}>
            <button
-                onClick={() => {setTest([false,test[1]])
-
-                }}
+                onClick={() => {deleteFinalCategory(i)}}
                 className="
                   flex items-center gap-1 ml-2 -mt-1 mb-1
                   rounded-lg bg-primary-500
@@ -652,11 +694,11 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
       </tbody>
     </table>
     </div>
-     <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-     onClick={()=>{}}>Add+</button>
+     <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+     onClick={()=>{addFinalCategory()}}>Add+</button>
    
     </div>
-</div>
+</details>}
 
 </Modal.Body>
 

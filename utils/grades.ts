@@ -744,6 +744,6 @@ export {
 //	calculateGPA,
 //	updateGPA,
 	abbreviate,
-	reCalculateCourse,reCalculateAll,letterGradeColor
+	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade
 };
 export type { Grades, Assignment, Course,gradingScale };
