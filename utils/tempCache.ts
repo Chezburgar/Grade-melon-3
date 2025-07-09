@@ -828,11 +828,11 @@ var grades:Grades[]=[{
           "name": "Completion Grade PSAT/SAT Reading BOY",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
+            "earned": NaN,
             "possible": 10
           },
           "date": {
@@ -847,11 +847,11 @@ var grades:Grades[]=[{
           "name": "Completion Grade PSAT/SAT Writing BOY",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
+            "earned": NaN,
             "possible": 10
           },
           "date": {
@@ -1782,7 +1782,7 @@ var grades:Grades[]=[{
           "weight": 0.1,
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
@@ -2463,12 +2463,12 @@ var grades:Grades[]=[{
           "name": "Unit 1 Progress Check MCQ Part A",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-16T04:00:00.000Z",
@@ -2881,12 +2881,12 @@ var grades:Grades[]=[{
           "name": "Limits by direct substitution",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-14T04:00:00.000Z",
@@ -3052,12 +3052,12 @@ var grades:Grades[]=[{
           "name": "APSI Limits and Continuity",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-09T04:00:00.000Z",
@@ -3090,12 +3090,12 @@ var grades:Grades[]=[{
           "name": "Estimating limit values from graphs",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-09T04:00:00.000Z",
@@ -3109,12 +3109,12 @@ var grades:Grades[]=[{
           "name": "Limits intro",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-09T04:00:00.000Z",
@@ -3147,12 +3147,12 @@ var grades:Grades[]=[{
           "name": "Review Unit Circle ",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-07T04:00:00.000Z",
@@ -3166,12 +3166,12 @@ var grades:Grades[]=[{
           "name": "Unit Circle and Radian Introduction edited)",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-08T04:00:00.000Z",
@@ -4538,11 +4538,11 @@ var grades:Grades[]=[{
           "name": "Completion Grade PSAT/SAT Reading BOY",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
+            "earned": NaN,
             "possible": 10
           },
           "date": {
@@ -4557,11 +4557,11 @@ var grades:Grades[]=[{
           "name": "Completion Grade PSAT/SAT Writing BOY",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
+            "earned": NaN,
             "possible": 10
           },
           "date": {
@@ -4977,7 +4977,7 @@ var grades:Grades[]=[{
           "name": "Untitled Assignment",
           "grade": {
             "letter": "A",
-            "raw": null,
+            "raw": NaN,
             "color": "green"
           },
           "points": {
@@ -5967,7 +5967,7 @@ var grades:Grades[]=[{
           "weight": 0.1,
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
@@ -6553,12 +6553,12 @@ var grades:Grades[]=[{
           "name": "Unit 6 AP Classroom Progress Check MCQ Part A",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-11-13T05:00:00.000Z",
@@ -8719,12 +8719,12 @@ var grades:Grades[]=[{
           "name": "Limits by direct substitution",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-14T04:00:00.000Z",
@@ -8890,12 +8890,12 @@ var grades:Grades[]=[{
           "name": "APSI Limits and Continuity",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-09T04:00:00.000Z",
@@ -8928,12 +8928,12 @@ var grades:Grades[]=[{
           "name": "Estimating limit values from graphs",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-09T04:00:00.000Z",
@@ -8947,12 +8947,12 @@ var grades:Grades[]=[{
           "name": "Limits intro",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-09T04:00:00.000Z",
@@ -8985,12 +8985,12 @@ var grades:Grades[]=[{
           "name": "Review Unit Circle ",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-07T04:00:00.000Z",
@@ -9004,12 +9004,12 @@ var grades:Grades[]=[{
           "name": "Unit Circle and Radian Introduction edited)",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2024-08-08T04:00:00.000Z",
@@ -9462,12 +9462,12 @@ var grades:Grades[]=[{
           "name": "Extra Credit Tissues",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-02-21T05:00:00.000Z",
@@ -10473,7 +10473,7 @@ var grades:Grades[]=[{
           "weight": 0.1,
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
@@ -12484,12 +12484,12 @@ var grades:Grades[]=[{
           "name": "Unit 7 Progress Check A In AP Classroom",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-13T05:00:00.000Z",
@@ -12579,12 +12579,12 @@ var grades:Grades[]=[{
           "name": "Lesson 7-3 HW ",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-10T05:00:00.000Z",
@@ -12598,12 +12598,12 @@ var grades:Grades[]=[{
           "name": "7.1_Modeling with Differential Equations",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-08T05:00:00.000Z",
@@ -12617,12 +12617,12 @@ var grades:Grades[]=[{
           "name": "Desmos Activity (How Long Does Coffee Stay Hot)",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-08T05:00:00.000Z",
@@ -12636,12 +12636,12 @@ var grades:Grades[]=[{
           "name": "KA_HW 7-1",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-08T05:00:00.000Z",
@@ -12655,12 +12655,12 @@ var grades:Grades[]=[{
           "name": "KA_HW_7-2",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-08T05:00:00.000Z",
@@ -12674,12 +12674,12 @@ var grades:Grades[]=[{
           "name": "Verifying Solutions for Differential Equations_7.2",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-08T05:00:00.000Z",
@@ -12923,12 +12923,12 @@ var grades:Grades[]=[{
           "name": "Extra Credit: \"O. Henry's Guide to the Present\"",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-04-28T04:00:00.000Z",
@@ -13474,12 +13474,12 @@ var grades:Grades[]=[{
           "name": "Extra Credit Tissues",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-02-21T05:00:00.000Z",
@@ -13799,7 +13799,7 @@ var grades:Grades[]=[{
           "name": "Extra Credit/Late Passes",
           "grade": {
             "letter": "A",
-            "raw": null,
+            "raw": NaN,
             "color": "green"
           },
           "points": {
@@ -13837,11 +13837,11 @@ var grades:Grades[]=[{
           "name": "Western USA Map Quiz",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
+            "earned": NaN,
             "possible": 1
           },
           "date": {
@@ -14865,7 +14865,7 @@ var grades:Grades[]=[{
           "weight": 0.1,
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
@@ -14900,12 +14900,12 @@ var grades:Grades[]=[{
           "name": "2017 International Practice Exam",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-05-02T04:00:00.000Z",
@@ -14919,12 +14919,12 @@ var grades:Grades[]=[{
           "name": "2018 International Practice Exam",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-04-23T04:00:00.000Z",
@@ -14938,12 +14938,12 @@ var grades:Grades[]=[{
           "name": "2019 International Practice Exam BC",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-04-21T04:00:00.000Z",
@@ -14995,12 +14995,12 @@ var grades:Grades[]=[{
           "name": "AP Classroom Unit 10 Progress Check: MCQ Part C",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-04-14T04:00:00.000Z",
@@ -17712,12 +17712,12 @@ var grades:Grades[]=[{
           "name": "Lesson 7-3 HW ",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-10T05:00:00.000Z",
@@ -17769,12 +17769,12 @@ var grades:Grades[]=[{
           "name": "KA_HW 7-1",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-08T05:00:00.000Z",
@@ -17788,12 +17788,12 @@ var grades:Grades[]=[{
           "name": "KA_HW_7-2",
           "grade": {
             "letter": "N/A",
-            "raw": null,
+            "raw": NaN,
             "color": "gray"
           },
           "points": {
-            "earned": null,
-            "possible": null
+            "earned": NaN,
+            "possible": NaN
           },
           "date": {
             "due": "2025-01-08T05:00:00.000Z",
@@ -17907,6 +17907,15 @@ obj[Object.keys(obj)[0]][0].testVar=11
 console.log(grades,obj,obj[Object.keys(obj)[0]])
 
 
+
+for(let g of grades){
+  for(let course of g.courses){
+    for(let assignment of course.assignments){
+      assignment.date.due=new Date(assignment.date.due)
+      assignment.date.assigned=new Date(assignment.date.assigned)
+    }
+  }
+}
 
 
 //maybe we should restructure parsedGrades to store from all Q's

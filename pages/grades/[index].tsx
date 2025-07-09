@@ -26,7 +26,6 @@ import { BsGearWideConnected } from "react-icons/bs";
 import { BsGraphUp } from "react-icons/bs";
 import CustomAd from "../../components/customAd";
 import SettingsModal from "../../components/settingsModal"
-import {gradesCache} from "../../utils/tempCache"
 
 
 interface GradesProps {
@@ -44,12 +43,31 @@ interface GradesProps {
 	width:any;
 	courseSettings:any;
 	setCourseSettings:any;
+	gradesCache:GradesType[]
+	setGradesCache:(grades:GradesType[])=>void;
+	markingPeriod:number;
+	setMarkingPeriod:(p:number)=>void;
 }
 
 interface OptimizeProps {
 	[key: string]: number;
 	
 }
+
+
+
+
+/*
+Inconsistencies:
+the finals settings update live but the gradeScale settings only change after u hit save
+
+the grades type shit should prob just also be stored in gradesCache, or at least moved into gradesCache when changes
+are made
+
+
+*/
+
+
 
 export default function Grades({
 	client,
@@ -63,7 +81,8 @@ export default function Grades({
 	setAd,
 	setTime,
 	timestamp,
-	width,courseSettings,setCourseSettings
+	width,gradesCache,setGradesCache,markingPeriod,setMarkingPeriod
+	
 }: GradesProps) {
 	const router = useRouter();
 	const { index }: { index?: string } = router.query;
@@ -93,7 +112,7 @@ export default function Grades({
 		     function calcFinal(categories:Category[]){
                 let realCat=[]
 				let currPoints=0
-				console.log(categories)
+				console.log(categories,"calc final type shit")
                 for(let category of categories){
                     if(Number(category.grade?.raw)!=NaN){
                     realCat.push(category);
@@ -107,15 +126,55 @@ export default function Grades({
 
 
 
-      const [finals,setFinals]=useState(parseInt(index)!=-1 ? (grades?.courses[parseInt(index)]?.gradingScale?.finals || {
-        show:true,
-        categories:[{period:0,grade:gradesCache[0].courses[gradesCache[0].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))]?.grade,courseIndex:gradesCache[0].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1)),weight:0.25,type:"course"},
-      {period:1,grade:grades?.courses[parseInt(index)]?.grade,courseIndex:gradesCache[1].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1)),weight:0.25,type:"course"},
-    {period:2,grade:gradesCache[2].courses[gradesCache[2].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))]?.grade,courseIndex:gradesCache[2].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1)),weight:0.25,type:"course"},
-  {period:3,grade:gradesCache[3].courses[gradesCache[3].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))]?.grade,courseIndex:gradesCache[3].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1)),weight:0.25,type:"course"}],
-      }) : undefined)
+interface Finals{
+	show:boolean,
+	categories:Category[]
+}
 
-	  console.log("semper fi",finals,calcFinal(finals.categories))
+		function initFinals<Finals>(){
+			let temp:any={}
+			//temp hardSet
+			temp.show=true;
+
+			//the defualt settings system if no overides given
+			//if(settings.categories==undefined) type shit
+
+			let categories=[]
+
+			for(let i=0;i<gradesCache.length;i++){ //will be different when coded for mcps indeces
+			//by default we gunna not assume anything about final exams. we'll assume 4-term avg with error handling
+			//for 2-term classes
+
+				if(i==grades?.period.index){
+					categories.push({period:i,grade:grades?.courses[parseInt(index)]?.grade,courseIndex:parseInt(index,),weight:0.25,type:"course"}) //hard coded weight for rn
+				}
+				else{
+				let tempCat={period:i,weight:0.25,type:"course"}
+				const specIndex=gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))
+				if(specIndex==-1){continue}
+				else{
+					categories.push({courseIndex:specIndex,grade:gradesCache[i].courses[specIndex].grade,...tempCat})
+				}
+			}
+			}
+			
+			temp.categories=categories
+
+
+		console.log("get ur temp, temp for sale!",temp)
+		return temp as Finals
+
+	  }
+
+
+      const [finals,setFinals]=useState<Finals>(()=>initFinals())
+		
+		
+function tempSetCache(fresh:GradesType){
+	let temp=structuredClone(gradesCache)
+	temp[grades?.period.index]=fresh
+	setGradesCache(temp)
+}
 	
 
 	
@@ -127,6 +186,10 @@ export default function Grades({
 					console.log(typeof index);
 					let parsedGrades = parseGrades(res);
 					setGrades(parsedGrades);
+					tempSetCache(parsedGrades)
+
+
+
 					setPeriod(parsedGrades.period.index);
 					setLoading(false);
 				});
@@ -170,6 +233,7 @@ export default function Grades({
 			parseFloat(val)
 		);
 		setGrades({ ...temp });
+		tempSetCache({...temp})
 	};
 
 	const handleChange = (e) => setTitle(e.target.value);
@@ -179,6 +243,7 @@ export default function Grades({
 		let temp = grades;
 		temp.courses[parseInt(index as string)].assignments[modalDetails].name=newTitle;
 		setGrades(temp);
+		tempSetCache(temp)
 		setIsEditing(false);
 	  };
 
@@ -188,6 +253,7 @@ export default function Grades({
 			temp.courses[parseInt(index as string)]
 		);
 		setGrades({ ...temp });
+		tempSetCache({...temp})
 	};
 
 	const del = (id: number) => {
@@ -197,6 +263,7 @@ export default function Grades({
 			id
 		);
 		setGrades({ ...temp });
+		tempSetCache({...temp})
 	};
 
 	const updateCat = (val: string, assignmentId: number) => {
@@ -207,6 +274,7 @@ export default function Grades({
 			val
 		);
 		setGrades({ ...temp });
+		tempSetCache({...temp})
 	};
 
 	const OpenModal = (assignmnetId: number) => {
@@ -216,15 +284,17 @@ export default function Grades({
 		setShowModal(true);
 	};
 
-	const update = (p: number) => {
+	function update(p: number,getFresh=false){
 		console.log(p);
 		setLoading(true);
+		if(getFresh){
 		client
 			.gradebook(p)
 			.then(([res,extra]) => {
 				res.gradingScale=extra?.gradingScale
 				console.log(res);
 				setGrades(parseGrades(res));
+				tempSetCache(parseGrades(res))
 				setPeriod(p);
 				setLoading(false);
 			})
@@ -232,6 +302,15 @@ export default function Grades({
 				createError(err.message);
 				setLoading(false);
 			});
+		}else{
+			console.log(gradesCache[p],"astroworld")
+			setGrades(gradesCache[p])
+			setPeriod(p)
+			setLoading(false)
+		}
+		//this could prob be a useEffect. the temp Cache sets could also be a useEffect tbh
+		setFinals(initFinals())
+		
 	};
 
 	const editTitle=()=>{
@@ -532,13 +611,13 @@ export default function Grades({
 						finals.show &&
 						<div className="mt-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
 						<div
-							className={ `bg-${course?.grade.color}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
+							className={ `bg-${letterGradeColor(letterGrade(calcFinal(finals.categories),course.gradingScale),course.gradingScale)}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
 							style={{
 								width: `${calcFinal(finals.categories) < 100 ? calcFinal(finals.categories)  : 100}%`,backgroundColor:(letterGradeColor(letterGrade(calcFinal(finals.categories),course.gradingScale),course.gradingScale).includes("#") && `${letterGradeColor(letterGrade(calcFinal(finals.categories),course.gradingScale),course.gradingScale)}`)
 							}}
 						>
 									<p className="absolute">
-									Final ({!isNaN(calcFinal(finals.categories)) ? `${calcFinal(finals.categories)}%` : "N/A"})
+									Final ({!isNaN(calcFinal(finals.categories)) ? `${course.gradingScale.rounding.percent ? (calcFinal(finals.categories).toFixed(course.gradingScale.rounding.percentPlaces)) : calcFinal(finals.categories)}%` : "N/A"})
 								</p>
 						</div>
 					</div>}
@@ -562,7 +641,7 @@ export default function Grades({
 					<div className="flex gap-2 mt-5 w-full">
 						<button
 							type="button"
-							onClick={() => update(period)}
+							onClick={() => update(period,true)}
 							className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm p-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
 						>
 							<TbRefresh size={"1.3rem"} />

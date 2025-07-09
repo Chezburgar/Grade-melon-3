@@ -8,42 +8,16 @@ import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
 
-/*
-
-I'm thinkin:
-
-Letter grade bounds / grades   (mayyybe colors, but I'd rather infer)
-
-Category names and weights (sawwy can't auto detect this...)
-
-Rounding rules (checkbox system)
-
-gpa and final exam stuff can happen laterrrrrrrr
-*/
- 
-
-
-//TODO: finish modal, determine means of retroactive application, determine if it's necessarry to await the settings fetch at the very beginning, decide a format for storage of 
-//this shi
-
 
 /*
-Okay, at this point, what's up is thus:
-need to add rounding part of modal,
-need to add the checks and shit for the save function
+finish the features and functions for this shi finals shi
 
-need to unify the format and pick a primary one for the gradingScale object
 
-unify accross: on courses attribute, in grades.ts, and on backend,
-
-need to implement settings fetch in initial gradebook fetch via extraData
-
-need to implement fallback if gradebook settings fetch fails
-
-need to implement save-settings fetch
+make the categories modable/customizable, this will require a global as well
 
 
 */
+
 
 interface props{
   client:any;
@@ -66,10 +40,8 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
 
+
         //these next several will get folded into settings object or smthn later, just testin
-        const [showFinal,setShowFinal]=useState(true) //this will become a part of the settings object or smthn
-        const [type,setType]=useState("course") //
-        const [period,setPeriod]=useState(0)
         const [accordion,setAccordion]=useState([false,true])
 
       console.log("quick output",gradesCache,grades)
@@ -567,19 +539,17 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
     <div className="ml-2">
     <div style={{alignItems:"center"}} className="flex gap-2">
         <p className="dark:text-white">Show Final Grade</p>
-        <input type="checkbox" onChange={(e)=>setShowFinal(!showFinal)} checked={showFinal}></input>
+        <input type="checkbox" onChange={(e)=>{
+          let temp=structuredClone(finals)
+          temp.show=!temp.show
+          setFinals(temp)
+
+        }} checked={finals.show}></input>
     </div>
 
     <p className="-ml-2 dark:text-white text-lg mt-4">Final Grade Calculation</p>
 
-    {
-      //i wanna try doin it with a grid, cuz tables get kinda ass if u need to set width on a text-input
-      //like. idk. u can do what the assignments table does and sub in text elements for input elements on click
-      //which means layout shift
 
-      //or u can just try to massage the padding till it works like the letter scale table
-      //but i think maybe grid would work better
-    }
 
     <div
       className="border-gray-600 rounded-lg border mt-2 overflow-x-auto -ml-2"
@@ -613,7 +583,12 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
            }
             <select 
            value={f.type}
-           onChange={(e)=>{setType(e.target.value)}}
+           onChange={(e)=>{
+            let temp=structuredClone(finals)
+            temp.categories[i].type==e.target.value
+            setFinals(temp)
+
+           }}
            className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
             >
               <option className="bg-gray-600" value={"course"}>Course</option>
@@ -627,7 +602,14 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-            <select value={f.period} onChange={(e)=>{setPeriod(parseInt(e.target.value))}}
+            <select value={f.period} onChange={(e)=>{
+              let temp=structuredClone(finals)
+              temp.categories[i].period=parseInt(e.target.value)
+              let t=temp.categories[i]
+              t.grade=gradesCache[t.perod].courses[t.courseIndex].grade //uninteded interference behavior with the "live" one
+              setFinals(temp)
+
+            }}
               className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
             >
               {grades.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.rawName}</option>))}
@@ -640,9 +622,17 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
          
             <select value={f.courseIndex}
               className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
+              onChange={(e)=>{
+                let temp=structuredClone(finals)
+                temp.categories[i].courseIndex=parseInt(e.target.value)
+                let t=temp.categories[i]
+                t.grade=gradesCache[t.period].courses[t.courseIndex].grade // will cause da interference 
+                setFinals(temp)
+
+              }}
             >
-        {gradesCache[period].courses.map((c,i)=>(
-          <option className="bg-gray-600" value={i}>{c.name.trim()}</option>
+        {gradesCache[f.period].courses.map((c,j)=>(
+          <option className="bg-gray-600" value={j}>{c.name.trim()}</option>
 
         ))}
             
@@ -658,7 +648,12 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
               className="text-center dark:text-white flex items-center"
             >
             <GradeField
-            onChange={()=>{}}
+            onChange={(e)=>{}}
+            onBlur={(e)=>{
+              let temp=structuredClone(finals)
+              finals.categories[i].weight=parseFloat(e.target.value)/100
+              setFinals(temp)
+            }}
             value={f.weight*100}
             />
             <p>%</p>

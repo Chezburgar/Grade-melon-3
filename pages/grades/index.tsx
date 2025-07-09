@@ -29,6 +29,10 @@ interface GradesProps {
 	setTime:(time:number)=>void;
 	timestamp:number;
 	width:any;
+	gradesCache:GradesType[]
+	setGradesCache:(grades:GradesType[])=>void;
+	markingPeriod:number;
+	setMarkingPeriod:(p:number)=>void;
 }
 
 export default function Grades({
@@ -42,7 +46,8 @@ export default function Grades({
 	setAd,
 	setTime,
 	timestamp,
-	width
+	width,
+	gradesCache,setGradesCache,markingPeriod,setMarkingPeriod
 }: GradesProps) {
 	const router = useRouter();
 	const [loading, setLoading] = useState(grades ? false : true);
@@ -67,6 +72,12 @@ export default function Grades({
 		}
 	}, [router.query.view]);
 
+function tempSetCache(fresh:GradesType){
+	let temp=structuredClone(gradesCache)
+	temp[grades?.period.index]=fresh
+	setGradesCache(temp)
+}
+
 	useEffect(() => {
 		try {
 			if (!grades && client) {
@@ -78,6 +89,7 @@ export default function Grades({
 						console.log("checker",parsedGrades)
 						console.log(res);
 						setGrades(parsedGrades);
+						tempSetCache(parsedGrades)
 						console.log(parsedGrades)
 						setPeriod(parsedGrades.period.index);
 						setLoading(false);
@@ -95,15 +107,18 @@ export default function Grades({
 		}
 	}, [client]);
 
-	const update = (p: number) => {
+	function update(p: number,getFresh=false){
 		console.log(p);
 		setLoading(true);
+
+		if(getFresh){
 		client
 			.gradebook(p)
 			.then(([res,extra]) => {
 				res.gradingScale=extra?.gradingScale
 				console.log(res);
 				setGrades(parseGrades(res));
+				tempSetCache(parseGrades(res))
 				setLoading(false);
 				setPeriod(p);
 			})
@@ -112,6 +127,12 @@ export default function Grades({
 				createError(err.message);
 				setLoading(false);
 			});
+
+		}else{
+			setGrades(gradesCache[p])
+		}
+
+		setFinals(initFinals())
 	};
 
 	/*
@@ -199,7 +220,7 @@ export default function Grades({
 					<div className="flex gap-2 mb-5">
 						<button
 							type="button"
-							onClick={() => update(period)}
+							onClick={() => update(period,true)}
 							className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm p-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
 						>
 							<TbRefresh size={"1.3rem"} />

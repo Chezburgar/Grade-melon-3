@@ -15,8 +15,8 @@ interface Assignment {
 		possible: number;
 	};
 	date: {
-		due: Date|string;
-		assigned: Date|string;
+		due: Date;
+		assigned: Date;
 	};
 	category: string;
 }

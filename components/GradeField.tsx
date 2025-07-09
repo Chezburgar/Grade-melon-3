@@ -3,9 +3,10 @@ import React, { useState, useRef } from "react";
 interface GradeFieldProps {
 	value: number;
 	onChange: any;
+	onBlur?:any;
 }
 
-export default function GradeField({ value, onChange }: GradeFieldProps) {
+export default function GradeField({ value, onChange,onBlur=()=>{} }: GradeFieldProps) {
 	const [focus, setFocus] = useState(false);
 	const [valasString, setValasString] = useState(value.toString());
 	const ref = useRef(null);
@@ -18,10 +19,13 @@ export default function GradeField({ value, onChange }: GradeFieldProps) {
 	};
 
 	const onUpdate = async (e) => {
-		await setValasString(e.target.value);
+		setValasString(e.target.value);
 		await onChange(e);
 	};
 
+	async function onBlurFunc(){
+		await onBlur();
+	}
 
 
 	return (
@@ -45,6 +49,7 @@ export default function GradeField({ value, onChange }: GradeFieldProps) {
 					type="number"
 					value={valasString}
 					onChange={onUpdate}
+					onBlur={onBlurFunc}
 					className="w-12 inline-block bg-gray-50 border-none bg-transparent p-2 md:p-1 text-gray-900 sm:text-xs rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 				/>
 			)}

@@ -35,7 +35,7 @@ function MyApp({ Component, pageProps }) {
 	const [studentInfo, setStudentInfo] = useState(undefined);
 	const [toasts, setToasts] = useState<Toast[]>([]);
 	const [grades, setGrades] = useState<Grades>();
-	const [gradeCache,setGradeCache] = useState<Grades[]>(g)
+	const [gradesCache,setGradesCache] = useState<Grades[]>(g)
 	const [period, setPeriod] = useState<number>();
 	const [loading, setLoading] = useState(false);
 	const [referal,setReferal]=useState(false);
@@ -57,7 +57,47 @@ function MyApp({ Component, pageProps }) {
 		await setLoading(true);
 
 		const encryptedPass=getCourseSettings(username,password,encrypted,url);
+/*
+you'd do it it in parallel
 
+wherever you do a setGrades()
+you'd also do in tandem, a setGradesCache() so they continously match up
+could add a flag to see if it's changed so that you know if you need to refetch it upon a refresh
+
+could cause some eroneous re-renders.
+
+but actually it could work.
+
+
+may be neater to reFactor grades obj to BE gradesCache and then create a seperate index prop to control which
+one is the "active" one rather than maintain a whole "active" version as its own prop which is what grades effectively becomes now
+
+refactor would be annoying as hell though. okay I'll do seperate for now and refactor later prob.
+
+
+
+
+Also:
+
+the settings modal is inconsitent. finals settings update live, letterScale and rounding don't
+also the weights don't automagically change respectively yet
+also exams / general full functionality and saving doesn't exist as a practical matter yet
+
+
+the animation is janky now that there can be instantaneous switching
+
+it's annoying and unuintuitive that switching from one marking period to the next on the same class
+has no regard for moving classes, though, that was also how the og worked
+
+optimization modal not done yet
+
+
+it would probably be a good idea to show the final grade also on the Home Screen grades cards/table 
+
+
+
+
+*/
 
 
 		await StudentVue.login(url || districtURL, {
@@ -358,8 +398,8 @@ const logout = async () => {
 								ad={ad}
 								setAd={setAd}
 								width={width}
-								gradeCache={gradeCache}
-								setGradeCache={setGradeCache}
+								gradesCache={gradesCache}
+								setGradesCache={setGradesCache}
 						 
 
 							/>
@@ -395,8 +435,8 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
-										gradeCache={gradeCache}
-										setGradeCache={setGradeCache}
+										gradesCache={gradesCache}
+										setGradesCache={setGradesCache}
 							 
 									/>
 								</AnimateSharedLayout>
@@ -428,8 +468,8 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
-										gradeCache={gradeCache}
-										setGradeCache={setGradeCache}
+										gradesCache={gradesCache}
+										setGradesCache={setGradesCache}
 	 
 									/>
 								</AnimateSharedLayout>
