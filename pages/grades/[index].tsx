@@ -3,15 +3,16 @@ import { Spinner, Modal } from "flowbite-react";
 import { useRouter } from "next/router";
 import {
 	parseGrades,
+	parseDate,
 	updateCourse,
 	addAssignment,
 	delAssignment,
 	updateCategory,
 	Grades as GradesType,
-	Course,
+	Course,getCache
 	genTable,
 	abbreviate,
-	letterGradeColor,letterGrade
+	letterGradeColor,letterGrade,Cache
 } from "../../utils/grades";
 import GradeField from "../../components/GradeField";
 import CategoryField from "../../components/CategoryField";
@@ -30,8 +31,8 @@ import SettingsModal from "../../components/settingsModal"
 
 interface GradesProps {
 	client: any;
-	grades: GradesType;
-	setGrades: React.Dispatch<React.SetStateAction<GradesType | undefined>>;
+	grades: Cache;
+	setGrades: React.Dispatch<React.SetStateAction<Cache | undefined>>;
 	period: number;
 	setPeriod: (period: number) => void;
 	isMediumOrLarger:boolean;
@@ -85,8 +86,8 @@ export default function Grades({
 	
 }: GradesProps) {
 	const router = useRouter();
-	const { index }: { index?: string } = router.query;
-	const course = grades?.courses[parseInt(index)];
+	const { index }: { index?: string } = router.query; //you could've just parseInt'd it here but u didnt' and now i'm too lazy to refactor i hate u
+	const course = grades?.[parseInt(index)]?.courses[parseInt(index)];
 	const [loading, setLoading] = useState(grades ? false : true);
 	const [showModal, setShowModal] = useState(false);
 	const [modalDetails, setModalDetails] = useState(0);
@@ -99,82 +100,15 @@ export default function Grades({
 	const assignmentTitle = useRef(null);
 	//right so if it's not mcps the default will be off, but this is other default case
 
-	//this will I thinnnnnnk get folded into parseGrades for the intialization later
-
-			interface Category{
-				period:number,
-				grade:any,
-				courseIndex:number,
-				weight:number,
-				type:"exam"|"course"
-			}
-
-		     function calcFinal(categories:Category[]){
-                let realCat=[]
-				let currPoints=0
-				console.log(categories,"calc final type shit")
-                for(let category of categories){
-                    if(Number(category.grade?.raw)!=NaN){
-                    realCat.push(category);
-					currPoints+=category.grade.raw*category.weight
-                    }
-                }
-
-                return currPoints
-            
-            }
 
 
 
-interface Finals{
-	show:boolean,
-	categories:Category[]
-}
-
-		function initFinals<Finals>(){
-			let temp:any={}
-			//temp hardSet
-			temp.show=true;
-
-			//the defualt settings system if no overides given
-			//if(settings.categories==undefined) type shit
-
-			let categories=[]
-
-			for(let i=0;i<gradesCache.length;i++){ //will be different when coded for mcps indeces
-			//by default we gunna not assume anything about final exams. we'll assume 4-term avg with error handling
-			//for 2-term classes
-
-				if(i==grades?.period.index){
-					categories.push({period:i,grade:grades?.courses[parseInt(index)]?.grade,courseIndex:parseInt(index,),weight:0.25,type:"course"}) //hard coded weight for rn
-				}
-				else{
-				let tempCat={period:i,weight:0.25,type:"course"}
-				const specIndex=gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))
-				if(specIndex==-1){continue}
-				else{
-					categories.push({courseIndex:specIndex,grade:gradesCache[i].courses[specIndex].grade,...tempCat})
-				}
-			}
-			}
-			
-			temp.categories=categories
-
-
-		console.log("get ur temp, temp for sale!",temp)
-		return temp as Finals
-
-	  }
-
+		
 
       const [finals,setFinals]=useState<Finals>(()=>initFinals())
 		
 		
-function tempSetCache(fresh:GradesType){
-	let temp=structuredClone(gradesCache)
-	temp[grades?.period.index]=fresh
-	setGradesCache(temp)
-}
+
 	
 
 	
@@ -185,8 +119,9 @@ function tempSetCache(fresh:GradesType){
 					res.gradingScale=extras?.gradingScale
 					console.log(typeof index);
 					let parsedGrades = parseGrades(res);
+					let realshi=getCache(KILL ME) //this sucks so much. it would almost be easier to just actually finish the backend. so many fucking tmep layers.
 					setGrades(parsedGrades);
-					tempSetCache(parsedGrades)
+					
 
 
 
@@ -206,7 +141,7 @@ function tempSetCache(fresh:GradesType){
 		const deleteLast=(event)=>{
 			if (event.ctrlKey && event.key === "z") {
 				event.preventDefault(); // Prevent default undo behavior if needed
-				let temp=grades.courses[parseInt(index as string)];
+				let temp=grades?.[period]?.courses[parseInt(index as string)];
 		
 
 			if(temp.assignments[0].custom==true){
@@ -215,7 +150,7 @@ function tempSetCache(fresh:GradesType){
 		}
 		}
 		
-		if(grades?.courses[parseInt(index as string)]?.assignments?.length>1){
+		if(grades?.[period]?.courses[parseInt(index as string)]?.assignments?.length>1){
 			window.addEventListener("keydown", deleteLast);
 		}
 		return () => {
@@ -225,56 +160,62 @@ function tempSetCache(fresh:GradesType){
 	},[grades])
 
 	const updateGrade = (val: string, assignmentId: number, update: string) => {
-		let temp = grades;
+		let tempCache=structuredClone(grades)
+		let temp=tempCache?.[period]
 		temp.courses[parseInt(index as string)] = updateCourse(
 			temp.courses[parseInt(index as string)],
 			assignmentId,
 			update,
 			parseFloat(val)
 		);
-		setGrades({ ...temp });
-		tempSetCache({...temp})
+
+		setGrades(tempCache);
+		
 	};
 
 	const handleChange = (e) => setTitle(e.target.value);
 	
 	const handleTitleChange = () => {
 		const newTitle =assignmentTitle.current.value=='' ? "New Assignment" : assignmentTitle.current.value
-		let temp = grades;
+		let tempCache = structuredClone(grades);
+		let temp = tempCache?.[period]
 		temp.courses[parseInt(index as string)].assignments[modalDetails].name=newTitle;
-		setGrades(temp);
-		tempSetCache(temp)
+		setGrades(tempCache);
+		
 		setIsEditing(false);
 	  };
 
 	const add = () => {
-		let temp = grades;
+		let tempCache = grades;
+		let temp=tempCache?.[period]
 		temp.courses[parseInt(index as string)] = addAssignment(
 			temp.courses[parseInt(index as string)]
 		);
-		setGrades({ ...temp });
-		tempSetCache({...temp})
+		setGrades({ ...tempCache }); //yeah that works too I guess. I like structuredClone better though. that way no mutations.
+		
 	};
 
 	const del = (id: number) => {
-		let temp = grades;
+		let tempCache = structuredClone(grades);
+		let temp = tempCache?.[period]
 		temp.courses[parseInt(index as string)] = delAssignment(
 			temp.courses[parseInt(index as string)],
 			id
 		);
-		setGrades({ ...temp });
-		tempSetCache({...temp})
+		setGrades(tempCache);
+		
 	};
 
 	const updateCat = (val: string, assignmentId: number) => {
-		let temp = grades;
+		let tempCache = structuredClone(grades)
+		let temp = tempCache?.[period]
 		temp.courses[parseInt(index as string)] = updateCategory(
 			temp.courses[parseInt(index as string)],
 			assignmentId,
 			val
 		);
-		setGrades({ ...temp });
-		tempSetCache({...temp})
+		setGrades(tempCache);
+		
 	};
 
 	const OpenModal = (assignmnetId: number) => {
@@ -294,7 +235,7 @@ function tempSetCache(fresh:GradesType){
 				res.gradingScale=extra?.gradingScale
 				console.log(res);
 				setGrades(parseGrades(res));
-				tempSetCache(parseGrades(res))
+				
 				setPeriod(p);
 				setLoading(false);
 			})
@@ -320,7 +261,7 @@ function tempSetCache(fresh:GradesType){
 	const optimize = () => {
 		setModalType("optimize");
 		let tempProps = {};
-		tempProps["desiredGrade"] = grades?.gradingScales[course.name+course.period+course.teacher] ? String(grades?.gradingScales[course.name+course.period+course.teacher][0]) :  String(grades?.gradingScales['default'][0]);
+		tempProps["desiredGrade"] = course.settings.letterScale[0][1][0]
 ;
 		course.categories.forEach((cat) => {
 			tempProps[cat.name] = cat.weight * 100;
@@ -416,7 +357,7 @@ function tempSetCache(fresh:GradesType){
 												updateOptimize(e.target.value, "desiredGrade")
 											}
 											className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-											placeholder={grades?.gradingScales[course.name+course.period+course.teacher] ? String(grades?.gradingScales[course.name+course.period+course.teacher][0]) :  String(grades?.gradingScales['default'][0])}
+											placeholder={String(course.settings.letterScale[0][1][0])}
 										/>
 									</div>
 								</div>
@@ -611,13 +552,13 @@ function tempSetCache(fresh:GradesType){
 						finals.show &&
 						<div className="mt-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
 						<div
-							className={ `bg-${letterGradeColor(letterGrade(calcFinal(finals.categories),course.gradingScale),course.gradingScale)}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
+							className={ `bg-${letterGradeColor(letterGrade(calcFinal(finals.categories),course.settings),course.settings)}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
 							style={{
-								width: `${calcFinal(finals.categories) < 100 ? calcFinal(finals.categories)  : 100}%`,backgroundColor:(letterGradeColor(letterGrade(calcFinal(finals.categories),course.gradingScale),course.gradingScale).includes("#") && `${letterGradeColor(letterGrade(calcFinal(finals.categories),course.gradingScale),course.gradingScale)}`)
+								width: `${calcFinal(finals.categories) < 100 ? calcFinal(finals.categories)  : 100}%`,backgroundColor:(letterGradeColor(letterGrade(calcFinal(finals.categories),course.settings),course.settings).includes("#") && `${letterGradeColor(letterGrade(calcFinal(finals.categories),course.settings),course.settings)}`)
 							}}
 						>
 									<p className="absolute">
-									Final ({!isNaN(calcFinal(finals.categories)) ? `${course.gradingScale.rounding.percent ? (calcFinal(finals.categories).toFixed(course.gradingScale.rounding.percentPlaces)) : calcFinal(finals.categories)}%` : "N/A"})
+									Final ({!isNaN(calcFinal(finals.categories)) ? `${course.settings.rounding.percent ? (calcFinal(finals.categories).toFixed(course.settings.rounding.percentPlaces)) : calcFinal(finals.categories)}%` : "N/A"})
 								</p>
 						</div>
 					</div>}
@@ -652,9 +593,9 @@ function tempSetCache(fresh:GradesType){
 							onChange={(e) => update(parseInt(e.target.value))}
 							className="block w-full p-2 text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 						>
-							{grades.periods.map((period) => (
+							{grades?.[period]?.periods.map((period) => (
 								<option value={period.index} key={period.index}>
-									{period.name}
+									{`${period.name} (${parseDate(period.date)})`}
 								</option>
 							))}
 						</select>
@@ -696,7 +637,7 @@ function tempSetCache(fresh:GradesType){
 							<tbody>
 								{(()=>{
 									var stopBreakingTheIndexSystems;
-									let temp=structuredClone(grades.courses[parseInt(index as string)]);	
+									let temp=structuredClone(grades?.[period].courses[parseInt(index as string)]);	
 									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){
 										stopBreakingTheIndexSystems=true; //disabled for [name-redacted]
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false,included:false,notes:""})

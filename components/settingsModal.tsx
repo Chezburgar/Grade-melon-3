@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
-import {gradingScale,Grades} from "../utils/grades"
+import {gradingScale,Grades,parseDate} from "../utils/grades"
 import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
@@ -612,7 +612,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             }}
               className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
             >
-              {grades.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.rawName}</option>))}
+              {grades.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.name}</option>))}
             </select>
           </td>
 

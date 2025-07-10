@@ -1,4 +1,6 @@
 import { Gradebook } from "studentvue";
+import Grades from "../pages/grades";
+import { gradesCache } from "./tempCache";
 
 interface Assignment {
 	name: string;
@@ -22,10 +24,39 @@ interface Assignment {
 }
 
 
-interface gradingScale{
-	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},letterScale:
-	[string,[number,number],string?][]  
+
+interface Finals{
+	show:boolean,
+	categories:Category[]
 }
+
+
+interface Category{
+		period:number,
+		grade:any,
+		courseIndex:number,
+		weight:number,
+		type:"exam"|"course"
+			}
+
+
+
+interface CourseSettings{
+	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},letterScale:
+	[string,[number,number],string?][],finals?:Finals,categories?:undefined // categories is to be implemented
+}
+
+interface GlobalSettings{
+	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},letterScale:
+	[string,[number,number],string?][],categories?:undefined // categories is to be implemented
+}
+
+type Settings = {
+  default: GlobalSettings;
+} & {
+  [K in Exclude<string, 'default'>]?: CourseSettings;
+};
+
 
 
 
@@ -37,7 +68,7 @@ interface Course {
 	layoutID: number;
 	room: string;
 	weighted: boolean;
-	gradingScale:gradingScale;
+	settings:CourseSettings;
 	grade: {
 		letter: string;
 		raw: number;
@@ -63,9 +94,18 @@ interface Course {
 	assignments: Assignment[];
 }
 
+
+//The ONLY case where an index returns undefined should be those such cases where the inital fetch
+//returned undefined as to mean that THAT GRADE PERIOD HAS NOT ARRIVED YET
+
+//this could be flawed if Synergy's error rate is too high
+type Cache = {
+	[key:number]:Grades
+} & {"settings":Settings}
+
 interface Grades {
 	courses: Course[];
-	gradingScales:{[key:string]:gradingScale}
+	settings:Settings;
 	//gpa: number;
 	//wgpa: number;
 	period: {
@@ -75,12 +115,28 @@ interface Grades {
 	periods: {
 		name: string;
 		index: number;
-		rawName:string;
+		date:{start:Date,end:Date}
 	}[];
 }
 
-//should rebuild this to also take in a list from custom grading scales and to go by descending order 
-function letterGradeColor(letterGrade: string,gradingScale:gradingScale|false=false){
+
+function findCurrentPeriod([cache]:Grades[]){
+	let dates=cache.periods.map(period=>period.date)
+	const index = dates.findIndex((date,i)=>{
+		if(Date.now()>=(new Date(date.start)).getTime()&&Date.now()<=(new Date(date.end)).getTime()){
+			return true
+		}
+	})
+	if(index==-1){return 0}
+	else{
+		return index
+	}
+}
+
+
+
+
+function letterGradeColor(letterGrade: string,gradingScale:CourseSettings|false=false){
 
 
 	
@@ -111,7 +167,7 @@ function letterGradeColor(letterGrade: string,gradingScale:gradingScale|false=fa
 }catch(error){return "gray"}
 };
 
-function letterGrade(grade: number,gradingScale:gradingScale):string{
+function letterGrade(grade: number,gradingScale:CourseSettings):string{
 
 	//deprecating rounding unless someone complains chat
 	/*
@@ -249,9 +305,59 @@ const parseAssignmentName = (name: string): string => {
 	).documentElement.textContent;
 };
 
+
+/*
+function initFinals<Finals>(){
+			let temp:any={}
+			//temp hardSet
+			temp.show=true;
+
+			//the defualt settings system if no overides given
+			//if(settings.categories==undefined) type shit
+
+			let categories=[]
+
+			for(let i=0;i<gradesCache.length;i++){ //will be different when coded for mcps indeces
+			//by default we gunna not assume anything about final exams. we'll assume 4-term avg with error handling
+			//for 2-term classes
+
+				if(i==grades?.period.index){
+					categories.push({period:i,grade:grades?.courses[parseInt(index)]?.grade,courseIndex:parseInt(index,),weight:0.25,type:"course"}) //hard coded weight for rn
+				}
+				else{
+				let tempCat={period:i,weight:0.25,type:"course"}
+				const specIndex=gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))
+				if(specIndex==-1){continue}
+				else{
+					categories.push({courseIndex:specIndex,grade:gradesCache[i].courses[specIndex].grade,...tempCat})
+				}
+			}
+			}
+			
+			temp.categories=categories
+
+
+		console.log("get ur temp, temp for sale!",temp)
+		return temp as Finals
+
+	  }
+
+*/
+
+
+
+
+function getCache(books:Gradebook[]):Cache{
+	let gradesCache:any=books.map(book=>parseGrades(book))
+	gradesCache.settings=books[0].gradingScale //idgaf fuck off i'll do whatever the fuck I want. it's fucking javascript. why have a ridiculous language that does ridiculous things if I can't abuse any of its stupid properties.
+	return gradesCache as Cache
+}
+
+
 const parseGrades = (grades: Gradebook): Grades => {
-	const gradingScale:Grades['gradingScales']=grades.gradingScale;
-	const decimalPlaces=gradingScale?.default?.rounding.percent===true ? gradingScale?.default.rounding.percentPlaces : (gradingScale?.default?.rounding.percent===false ? false : 2)
+	//@ts-ignore
+	const settings:Settings=grades.gradingScale;
+	const decimalPlaces=settings?.default?.rounding.percent===true ? settings?.default.rounding.percentPlaces : (settings?.default?.rounding.percent===false ? false : 2)
 	for (let i = 0; i < grades.courses.length; i++) {
 		if (grades.courses[i].marks.length === 0) {
 			grades.courses[i].marks = [
@@ -265,7 +371,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 		}
 	}
 	let parsedGrades:Grades = {
-		gradingScales:gradingScale,
+		settings:settings,
 	/*	gpa:
 			grades.courses.reduce(
 				(a, b) =>
@@ -287,8 +393,8 @@ const parseGrades = (grades: Gradebook): Grades => {
 	
 			*/
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
-			const scale=gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] ? gradingScale[ReplaceUnderscores(stripParens(title))+(period ? period : i + 1)+staff.name] : gradingScale.default
-			const places=scale.rounding.percent===true ? scale.rounding.percentPlaces : (scale.rounding.percent===false ? false : 2)
+			const courseSettings=settings[courseID.substring(0,courseID.length-1)] ? settings[courseID.substring(0,courseID.length-1)] : settings.default
+			const places=courseSettings.rounding.percent===true ? courseSettings.rounding.percentPlaces : (courseSettings.rounding.percent===false ? false : 2)
 			return({
 			name: ReplaceUnderscores(stripParens(title)),
 			period: period ? period : i + 1,
@@ -296,11 +402,11 @@ const parseGrades = (grades: Gradebook): Grades => {
 			courseID:courseID,
 			room: room,
 			weighted: isWeighted(title),
-			gradingScale:scale,
+			settings:courseSettings,
 			grade: {
-				letter: (marks[0].calculatedScore.string!=="N/A" ? letterGrade(marks[0].calculatedScore.raw,scale) : "N/A"),
+				letter: (marks[0].calculatedScore.string!=="N/A" ? letterGrade(marks[0].calculatedScore.raw,courseSettings) : "N/A"),
 				raw: marks[0].calculatedScore.string!=="N/A" ? marks[0].calculatedScore.raw : NaN,
-				color: marks[0].calculatedScore.string!=="N/A" ? letterGradeColor(letterGrade(marks[0].calculatedScore.raw,scale),scale) : letterGradeColor("N/A"),
+				color: marks[0].calculatedScore.string!=="N/A" ? letterGradeColor(letterGrade(marks[0].calculatedScore.raw,courseSettings),courseSettings) : letterGradeColor("N/A"),
 			},
 			teacher: {
 				name: staff.name,
@@ -312,12 +418,12 @@ const parseGrades = (grades: Gradebook): Grades => {
         name: type,
         weight: parseFloat(weight.standard) / 100,
         grade: {
-          letter: letterGrade((points.current / points.possible) * 100,scale),
+          letter: letterGrade((points.current / points.possible) * 100,courseSettings),
           raw:    places!=false ? parseFloat(
          ((points.current / points.possible) * 100).toFixed(places)
           ) :  ((points.current / points.possible) * 100),
           color: letterGradeColor(
-            letterGrade((points.current / points.possible) * 100,scale),scale
+            letterGrade((points.current / points.possible) * 100,courseSettings),courseSettings
           ),
         },
         points: {
@@ -331,9 +437,9 @@ const parseGrades = (grades: Gradebook): Grades => {
         name: "Default5421",
         weight: 1, // assuming 100% weight   
         grade: {
-          letter: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGrade((places!= false ? parseFloat(((pointsEarned/pointsP)*100).toFixed(places)) : (pointsEarned/pointsP)*100),scale))})(), // or whatever default value you'd like
+          letter: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGrade((places!= false ? parseFloat(((pointsEarned/pointsP)*100).toFixed(places)) : (pointsEarned/pointsP)*100),courseSettings))})(), // or whatever default value you'd like
           raw: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(places!= false ? parseFloat(((pointsEarned/pointsP)*100).toFixed(places)) : (pointsEarned/pointsP)*100)})(),
-          color: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGradeColor(letterGrade((places!= false ? parseFloat(((pointsEarned/pointsP)*100).toFixed(places)) : (pointsEarned/pointsP)*100),scale),scale))})()
+          color: (()=>{let pointsEarned=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsEarned+=parsePoints(points).earned}});let pointsP=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsP+=parsePoints(points).possible}});return(letterGradeColor(letterGrade((places!= false ? parseFloat(((pointsEarned/pointsP)*100).toFixed(places)) : (pointsEarned/pointsP)*100),courseSettings),courseSettings))})()
         },
         points: {
           earned: (()=>{let pointsE=0;marks[0].assignments.forEach(({name,date,points,type,notes})=>{if(!isNaN(parsePoints(points).earned)&&notes!="(Not For Grading)"){pointsE+=parsePoints(points).earned}});return(pointsE)})(),
@@ -347,9 +453,9 @@ const parseGrades = (grades: Gradebook): Grades => {
 				notes:notes,
 				name: parseAssignmentName(name),
 				grade: {
-					letter:  letterGrade(parsePoints(points).grade,scale), 
+					letter:  letterGrade(parsePoints(points).grade,courseSettings), 
 					raw: places!=false ? parseFloat(parsePoints(points).grade.toFixed(places)) : parsePoints(points).grade,
-					color: notes!="(Not For Grading)" ? letterGradeColor(letterGrade(parsePoints(points).grade,scale),scale) : "mud" ,
+					color: notes!="(Not For Grading)" ? letterGradeColor(letterGrade(parsePoints(points).grade,courseSettings),courseSettings) : "mud" ,
 				},
 				points: {
 					earned: parsePoints(points).earned,
@@ -367,8 +473,8 @@ const parseGrades = (grades: Gradebook): Grades => {
 			index: grades.reportingPeriod.current.index,
 		},
 		periods: grades.reportingPeriod.available.map(({ name, index, date }) => ({
-			name: `${name} (${parseDate(date)})`,
-			rawName:name,
+			name:name,
+			date:date,
 			index: index,
 		})),
 	};
@@ -390,6 +496,15 @@ const parseGrades = (grades: Gradebook): Grades => {
 
 	
 
+	//tech debt tech debt tech debt tech debt
+
+
+	let temp=new Array(gradesCache.length)
+	for(let grades of gradesCache){
+		temp[grades.period.index]=gradesCache
+	}
+	//@ts-ignore javascript bs but cool
+	temp.settings=settings
 
 
 	
@@ -494,7 +609,7 @@ const genTable = (
 };
 
 const calculateCategory = (course: Course, categoryId: number): Course => {
-	const gradingScale=course.gradingScale;
+	const gradingScale=course.settings;
 	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	course.categories[categoryId].points.earned = course.assignments
 		.filter(
@@ -540,7 +655,7 @@ const calculateCategory = (course: Course, categoryId: number): Course => {
 function reCalculateAll(grades:Grades){
 	const copy=structuredClone(grades)
 	for(let course of copy.courses){
-		course.gradingScale=copy.gradingScales[course.name+course.period+course.teacher.name] ? copy.gradingScales[course.name+course.period+course.teacher.name] : copy.gradingScales.default
+		course.settings=copy.settings[course.name+course.period+course.teacher.name] ? copy.settings[course.name+course.period+course.teacher.name] : copy.settings.default
 		course=reCalculateCourse(course)
 	}	
 	return copy
@@ -550,7 +665,7 @@ function reCalculateAll(grades:Grades){
 }
 
 function calculateGrade(course: Course): Course{
-	const gradingScale=course.gradingScale;
+	const gradingScale=course.settings;
 	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	let currWeight = 0;
 	let trueCategories = course.categories.filter((c) => {
@@ -668,7 +783,7 @@ const updateCourse = (
 		(category) => category.name === course.assignments[assignmentId].category
 	);
 
-		const gradingScale=course.gradingScale;
+		const gradingScale=course.settings;
 	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	//update assignment grade
 	course.assignments[assignmentId].grade.raw = places!=false ? parseFloat(
@@ -683,10 +798,10 @@ const updateCourse = (
 			100
 		);
 	course.assignments[assignmentId].grade.letter = letterGrade(
-		course.assignments[assignmentId].grade.raw,course.gradingScale
+		course.assignments[assignmentId].grade.raw,course.settings
 	);
 	course.assignments[assignmentId].grade.color = letterGradeColor(
-		course.assignments[assignmentId].grade.letter,course.gradingScale
+		course.assignments[assignmentId].grade.letter,course.settings
 	);
 
 	//update category grade
@@ -701,8 +816,8 @@ const updateCourse = (
 function reCalculateCourse(course:Course){
  
 	for(let assignment of course.assignments){
-		assignment.grade.letter=letterGrade(assignment.grade.raw,course.gradingScale)
-		assignment.grade.color=letterGradeColor(assignment.grade.letter,course.gradingScale)
+		assignment.grade.letter=letterGrade(assignment.grade.raw,course.settings)
+		assignment.grade.color=letterGradeColor(assignment.grade.letter,course.settings)
 	}
 	for(let i=0;i<course.categories.length;i++){
 		course=calculateCategory(course,i)
@@ -734,16 +849,40 @@ function abbreviate(category) {
     return (words[0].trim()[0] + words[1].trim()[0]);
 }
 
+
+		     function calcFinal(categories:Category[]){
+                let realCat=[]
+				let currPoints=0
+				console.log(categories,"calc final type shit")
+                for(let category of categories){
+					//@ts-ignore
+                    if(Number(category.grade?.raw)!=NaN){
+                    realCat.push(category);
+					currPoints+=category.grade.raw*category.weight
+                    }
+                }
+
+                return currPoints
+            
+            }
+
+
+
+
+
 export {
 	parseGrades,
 	updateCourse,
 	addAssignment,
 	delAssignment,
 	updateCategory,
+	parseDate,
 	genTable,
+	calcFinal,
+	findCurrentPeriod,
 //	calculateGPA,
 //	updateGPA,
 	abbreviate,
-	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade
+	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache
 };
-export type { Grades, Assignment, Course,gradingScale };
+export type { Grades, Assignment, Course,Settings,Cache };

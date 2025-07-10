@@ -6,7 +6,7 @@ import Head from "next/head";
 import { TbRefresh, TbMathSymbols } from "react-icons/tb";
 import {
 	parseGrades,
-	Grades as GradesType,
+	Grades as GradesType,parseDate,findCurrentPeriod,getCache
 	//calculateGPA,
 	//updateGPA,
 } from "../../utils/grades";
@@ -15,11 +15,11 @@ import { motion } from "framer-motion";
 import CustomAd from "../../components/customAd";
 import { BsGearWideConnected } from "react-icons/bs";
 import SettingsModal from "../../components/settingsModal"
-
+import { gradesCache as g } from "../../utils/tempCache";
 
 interface GradesProps {
 	client: any;
-	grades: GradesType;
+	grades: GradesType[];
 	setGrades: (grades: GradesType) => void;
 	period: number;
 	setPeriod: (period: number) => void;
@@ -55,7 +55,7 @@ export default function Grades({
 	//const [period, setPeriod] = useState<number>();
 	const [gpaModal, setGpaModal] = useState(false);
 	const view = (router.query.view as string) || defaultView;
-	const [settingsModal,setSettingsModal]=useState<Boolean>(false);
+	const [settingsModal,setSettingsModal]=useState<boolean>(false);
 
 	const isMediumOrLarger = width >= 768;
 
@@ -72,11 +72,7 @@ export default function Grades({
 		}
 	}, [router.query.view]);
 
-function tempSetCache(fresh:GradesType){
-	let temp=structuredClone(gradesCache)
-	temp[grades?.period.index]=fresh
-	setGradesCache(temp)
-}
+
 
 	useEffect(() => {
 		try {
@@ -86,12 +82,13 @@ function tempSetCache(fresh:GradesType){
 					client.gradebook().then(([res,extra]) => {
 						res.gradingScale=extra?.gradingScale
 						let parsedGrades = parseGrades(res);
+						//once again, let there be bullshit. temp.
+						//let g = parseAllGrades(res) or smthn idfk
 						console.log("checker",parsedGrades)
 						console.log(res);
-						setGrades(parsedGrades);
-						tempSetCache(parsedGrades)
+						setGrades(g);
 						console.log(parsedGrades)
-						setPeriod(parsedGrades.period.index);
+						setPeriod(findCurrentPeriod(g));
 						setLoading(false);
 					});
 				} catch (err) {
@@ -117,10 +114,13 @@ function tempSetCache(fresh:GradesType){
 			.then(([res,extra]) => {
 				res.gradingScale=extra?.gradingScale
 				console.log(res);
-				setGrades(parseGrades(res));
-				tempSetCache(parseGrades(res))
-				setLoading(false);
+			//	setGrades(parseGrades(res));
+			//again BS
+				//let g = somebs 
+				setGrades(g)
 				setPeriod(p);
+				setLoading(false);
+			
 			})
 			.catch((err) => {
 				console.log(err);
@@ -129,10 +129,11 @@ function tempSetCache(fresh:GradesType){
 			});
 
 		}else{
-			setGrades(gradesCache[p])
+			setPeriod(p)
+			setLoading(false)
 		}
 
-		setFinals(initFinals())
+
 	};
 
 	/*
@@ -149,7 +150,7 @@ function tempSetCache(fresh:GradesType){
 
 
 	useEffect(()=>{
-		console.log("surely there is a better way to force re-renders on changes to ad")
+	//	console.log("surely there is a better way to force re-renders on changes to ad")
 
 	},[ad])
 
@@ -231,10 +232,10 @@ function tempSetCache(fresh:GradesType){
 							value={period}
 							className="block w-full p-2 text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 						>
-							{grades?.periods.map((period) => (
+							{grades[period]?.periods.map((period) => (
 								<option value={period.index} key={period.index}//
 								>
-									{period.name}
+									{`${period.name} (${parseDate(period.date)})`}
 								</option>
 							))}
 						</select>
@@ -265,14 +266,14 @@ function tempSetCache(fresh:GradesType){
 						>
 							{(()=>{
 								const temp=structuredClone(grades);
-								if(temp?.courses&&ad&&client.username!="10016976"&&!isMediumOrLarger){ //disalbe for [name redacted] cuz i aint buildin a subscription service rn gang
+								if(temp?.[period]?.courses&&ad&&client.username!="10016976"&&!isMediumOrLarger){ //disalbe for [name redacted] cuz i aint buildin a subscription service rn gang
 									console.log("is my life real?")
 									//@ts-ignore
 									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
 
 								}
 							
-								return (temp?.courses.map(({ name, period, grade, teacher, gradingScale,layoutID}, i) => {
+								return (temp?.[period]?.courses.map(({ name, period, grade, teacher, settings,layoutID}, i) => {
 								if(name=="ad goes here"){return (<div key={i} className="flex shrink justify-center max-h-64"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
 								return(
 								<div className="mx-2 flex justify-center w-full md:w-96" key={i}>
@@ -314,8 +315,8 @@ function tempSetCache(fresh:GradesType){
 													style={{color:grade.color.includes("#") && grade.color}}
 													className={`text-xl md:text-3xl font-bold text-${grade.color}-400`}
 												>
-													{gradingScale ? grade.letter:""}
-													{gradingScale ? (!isNaN(grade.raw) && ` (${grade.raw}%)`) : (!isNaN(grade.raw) ? `${grade.raw}%`:"N/A")}
+													{settings ? grade.letter:""}
+													{settings ? (!isNaN(grade.raw) && ` (${grade.raw}%)`) : (!isNaN(grade.raw) ? `${grade.raw}%`:"N/A")}
 												</motion.span>
 												<Link href={`/grades/${layoutID}`} legacyBehavior>
 													<button className="rounded-lg bg-primary-500 px-5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
@@ -350,7 +351,7 @@ function tempSetCache(fresh:GradesType){
 									</tr>
 								</thead>
 								<tbody>
-									{grades?.courses.map(
+									{grades?.[period]?.courses.map(
 										({ name, period, grade, teacher }, i) => (
 											<tr
 												className={`bg-${

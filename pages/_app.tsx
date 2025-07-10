@@ -8,7 +8,7 @@ import SideBar from "../components/SideBar";
 import MobileBar from "../components/MobileBar";
 import CustomAd from "../components/customAd";
 import {gradesCache as g} from "../utils/tempCache"
-import { Grades,parseGrades } from "../utils/grades";
+import { Grades,parseGrades,findCurrentPeriod } from "../utils/grades";
 import Head from "next/head";
 import { HiX } from "react-icons/hi";
 import { AnimateSharedLayout } from "framer-motion";
@@ -34,7 +34,7 @@ function MyApp({ Component, pageProps }) {
 	 
 	const [studentInfo, setStudentInfo] = useState(undefined);
 	const [toasts, setToasts] = useState<Toast[]>([]);
-	const [grades, setGrades] = useState<Grades>();
+	const [grades, setGrades] = useState<Grades[]>();
 	const [gradesCache,setGradesCache] = useState<Grades[]>(g)
 	const [period, setPeriod] = useState<number>();
 	const [loading, setLoading] = useState(false);
@@ -137,8 +137,22 @@ it would probably be a good idea to show the final grade also on the Home Screen
 					Cookies.remove("districtURL");
 				}
 				const parsedGrades=parseGrades(gradebook);
-				await setGrades(parsedGrades);
-				await setPeriod(parsedGrades.period.index);
+				/*sigh. I could implement lazy loading here so that we do this inital fetch of no report period
+				and display that and put up blockers for the finals elements that need the full gradesCache
+				that get chagned asynchronossly via an additional useState hook call it loading2 or smthn
+
+				but then there also needs to be handling for if the user immediately decides they want a different
+				report period, cuz then it's most optimal to await the already fetching stuff. SO I guess I could
+				make it a ref or memo or smthn so it only ever changes once cause after that intial load you're never
+				gunna need to fetch all MP's at once again, the user can't ask for it in current design 
+				*/
+
+
+				//let g=parseGrades(gradebook[]) or smthn so its a list of them or whatever. 
+				setGrades(g);
+				setPeriod(findCurrentPeriod(g));
+
+
 				if(router.pathname=="/"||router.pathname=="/login"){router.push("/grades")}
 				
 				await setLoading(false);
