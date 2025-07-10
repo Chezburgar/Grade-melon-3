@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
-import {gradingScale,Grades,parseDate} from "../utils/grades"
+import {gradingScale,Grades,parseDate,Cache} from "../utils/grades"
 import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
@@ -24,18 +24,19 @@ interface props{
   index:string|-1;
   showModal:boolean;
   setShowModal:(boolean:boolean)=>void;
-  grades:Grades;
-  setGrades:(grades:Grades)=>void;
+  grades:Cache;
+  setGrades:(grades:Cache)=>void;
   createError:(message:string)=>void;
+  period:number
   finals?:any;
   setFinals?:any;
 
 }
 
-export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,finals,setFinals}:props){
-    	  const course = index==-1 ? {name:"default",teacher:{name:""},period:""} : grades?.courses[parseInt(index)];
-        const [letterScale,setLetterScale]=useState<gradingScale["letterScale"]>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.letterScale || undefined) : grades?.gradingScales.default.letterScale)
-        const [rounding,setRounding]=useState<gradingScale["rounding"]>(index!=-1 ? (grades?.courses[parseInt(index)].gradingScale?.rounding || undefined) : grades?.gradingScales.default.rounding)
+export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period,finals,setFinals}:props){
+    	  const course = index==-1 ? {name:"default",teacher:{name:""},period:""} : grades?.[period]?.courses[parseInt(index)];
+        const [letterScale,setLetterScale]=useState<gradingScale["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : grades?.settings.default.letterScale)
+        const [rounding,setRounding]=useState<gradingScale["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : grades?.settings.default.rounding)
         const [active,setActive]=useState<[string,string]>(['',''])
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)

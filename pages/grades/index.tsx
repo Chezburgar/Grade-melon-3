@@ -6,7 +6,7 @@ import Head from "next/head";
 import { TbRefresh, TbMathSymbols } from "react-icons/tb";
 import {
 	parseGrades,
-	Grades as GradesType,parseDate,findCurrentPeriod,getCache
+	Grades as GradesType,parseDate,findCurrentPeriod,getCache,Cache
 	//calculateGPA,
 	//updateGPA,
 } from "../../utils/grades";
@@ -16,11 +16,12 @@ import CustomAd from "../../components/customAd";
 import { BsGearWideConnected } from "react-icons/bs";
 import SettingsModal from "../../components/settingsModal"
 import { gradesCache as g } from "../../utils/tempCache";
+import {rawsCache as killMe} from "../../utils/tempCache2"
 
 interface GradesProps {
 	client: any;
-	grades: GradesType[];
-	setGrades: (grades: GradesType) => void;
+	grades: Cache;
+	setGrades: (grades: Cache) => void;
 	period: number;
 	setPeriod: (period: number) => void;
 	createError:(message:string)=>void;
@@ -86,7 +87,9 @@ export default function Grades({
 						//let g = parseAllGrades(res) or smthn idfk
 						console.log("checker",parsedGrades)
 						console.log(res);
-						setGrades(g);
+						//setGrades(g);
+						//@ts-ignore
+						setGrades(getCache(killMe))
 						console.log(parsedGrades)
 						setPeriod(findCurrentPeriod(g));
 						setLoading(false);
@@ -117,7 +120,8 @@ export default function Grades({
 			//	setGrades(parseGrades(res));
 			//again BS
 				//let g = somebs 
-				setGrades(g)
+				//@ts-ignore
+				setGrades(getCache(killMe))
 				setPeriod(p);
 				setLoading(false);
 			

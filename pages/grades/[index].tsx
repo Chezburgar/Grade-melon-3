@@ -9,10 +9,11 @@ import {
 	delAssignment,
 	updateCategory,
 	Grades as GradesType,
-	Course,getCache
+	Course,getCache,
 	genTable,
 	abbreviate,
-	letterGradeColor,letterGrade,Cache
+	letterGradeColor,letterGrade,Cache,
+	findCurrentPeriod
 } from "../../utils/grades";
 import GradeField from "../../components/GradeField";
 import CategoryField from "../../components/CategoryField";
@@ -27,6 +28,8 @@ import { BsGearWideConnected } from "react-icons/bs";
 import { BsGraphUp } from "react-icons/bs";
 import CustomAd from "../../components/customAd";
 import SettingsModal from "../../components/settingsModal"
+import {rawsCache as killMe} from "../../utils/tempCache2"
+
 
 
 interface GradesProps {
@@ -115,17 +118,17 @@ export default function Grades({
 	useEffect(() => {
 		try {
 			if (!grades&&client&&ad!==undefined) {
+				//oh my fucking god just fucking stop for fucks sake
+
 				client.gradebook().then(([res,extras]) => {
 					res.gradingScale=extras?.gradingScale
 					console.log(typeof index);
 					let parsedGrades = parseGrades(res);
-					let realshi=getCache(KILL ME) //this sucks so much. it would almost be easier to just actually finish the backend. so many fucking tmep layers.
-					setGrades(parsedGrades);
-					
 
-
-
-					setPeriod(parsedGrades.period.index);
+					//@ts-ignore
+					let realShi=getCache(killMe) //this sucks so much. it would almost be easier to just actually finish the backend. so many fucking tmep layers.
+					setGrades(realShi);
+					setPeriod(findCurrentPeriod(realShi));
 					setLoading(false);
 				});
 			}
@@ -234,8 +237,11 @@ export default function Grades({
 			.then(([res,extra]) => {
 				res.gradingScale=extra?.gradingScale
 				console.log(res);
-				setGrades(parseGrades(res));
-				
+			//	setGrades(parseGrades(res));
+			//@ts-ignore
+				setGrades(getCache(killMe))	
+
+
 				setPeriod(p);
 				setLoading(false);
 			})
@@ -245,7 +251,6 @@ export default function Grades({
 			});
 		}else{
 			console.log(gradesCache[p],"astroworld")
-			setGrades(gradesCache[p])
 			setPeriod(p)
 			setLoading(false)
 		}
@@ -438,7 +443,7 @@ export default function Grades({
 				</Modal.Body>
 				<SettingsModal
 					client={client}
-					grades={grades}
+					grades={grades?.[period]}
 					setGrades={setGrades}
 					index={index}
 					createError={createError}

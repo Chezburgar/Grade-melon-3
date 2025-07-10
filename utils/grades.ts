@@ -69,6 +69,7 @@ interface Course {
 	room: string;
 	weighted: boolean;
 	settings:CourseSettings;
+	finals:Finals;
 	grade: {
 		letter: string;
 		raw: number;
@@ -99,9 +100,7 @@ interface Course {
 //returned undefined as to mean that THAT GRADE PERIOD HAS NOT ARRIVED YET
 
 //this could be flawed if Synergy's error rate is too high
-type Cache = {
-	[key:number]:Grades
-} & {"settings":Settings}
+type Cache = Grades[] & {"settings":Settings}
 
 interface Grades {
 	courses: Course[];
@@ -306,8 +305,8 @@ const parseAssignmentName = (name: string): string => {
 };
 
 
-/*
-function initFinals<Finals>(){
+
+function initalizeFinals<Finals>(grades,index,courseSettings){
 			let temp:any={}
 			//temp hardSet
 			temp.show=true;
@@ -342,7 +341,7 @@ function initFinals<Finals>(){
 
 	  }
 
-*/
+
 
 
 
@@ -395,6 +394,9 @@ const parseGrades = (grades: Gradebook): Grades => {
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
 			const courseSettings=settings[courseID.substring(0,courseID.length-1)] ? settings[courseID.substring(0,courseID.length-1)] : settings.default
 			const places=courseSettings.rounding.percent===true ? courseSettings.rounding.percentPlaces : (courseSettings.rounding.percent===false ? false : 2)
+			
+			const m=initalizeFinals(grades,i,courseSettings)
+			
 			return({
 			name: ReplaceUnderscores(stripParens(title)),
 			period: period ? period : i + 1,
