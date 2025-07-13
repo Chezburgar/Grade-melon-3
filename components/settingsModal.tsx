@@ -41,8 +41,6 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
 
-
-        //these next several will get folded into settings object or smthn later, just testin
         const [accordion,setAccordion]=useState([false,true])
 
       console.log("quick output",gradesCache,grades)
@@ -616,7 +614,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             }}
               className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
             >
-              {grades.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.name}</option>))}
+              {grades?.[period]?.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.name}</option>))}
             </select>
           </td>
 

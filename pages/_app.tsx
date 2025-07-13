@@ -8,7 +8,7 @@ import SideBar from "../components/SideBar";
 import MobileBar from "../components/MobileBar";
 import CustomAd from "../components/customAd";
 import {gradesCache as g} from "../utils/tempCache"
-import { Grades,parseGrades,findCurrentPeriod } from "../utils/grades";
+import { Grades,parseGrades,findCurrentPeriod,getCache} from "../utils/grades";
 import Head from "next/head";
 import { HiX } from "react-icons/hi";
 import { AnimateSharedLayout } from "framer-motion";
@@ -16,6 +16,7 @@ import Cookies from "js-cookie";
 import useWindowSize from '../hooks/useWindowSize';
 import { Analytics } from "@vercel/analytics/react";
 import allDistricts from "../lib/districts";
+import {rawsCache as killMe} from "../utils/tempCache2"
 
 
 interface Toast {
@@ -149,7 +150,9 @@ it would probably be a good idea to show the final grade also on the Home Screen
 
 
 				//let g=parseGrades(gradebook[]) or smthn so its a list of them or whatever. 
-				setGrades(g);
+
+				//@ts-ignore
+				setGrades(getCache(killMe));
 				setPeriod(findCurrentPeriod(g));
 
 

@@ -8,7 +8,7 @@ import {
 	addAssignment,
 	delAssignment,
 	updateCategory,
-	Grades as GradesType,
+	Grades as GradesType,calcFinal,
 	Course,getCache,
 	genTable,
 	abbreviate,
@@ -104,11 +104,6 @@ export default function Grades({
 	//right so if it's not mcps the default will be off, but this is other default case
 
 
-
-
-		
-
-      const [finals,setFinals]=useState<Finals>(()=>initFinals())
 		
 		
 
@@ -255,7 +250,7 @@ export default function Grades({
 			setLoading(false)
 		}
 		//this could prob be a useEffect. the temp Cache sets could also be a useEffect tbh
-		setFinals(initFinals())
+
 		
 	};
 
@@ -443,14 +438,13 @@ export default function Grades({
 				</Modal.Body>
 				<SettingsModal
 					client={client}
-					grades={grades?.[period]}
+					grades={grades}
+					period={period}
 					setGrades={setGrades}
 					index={index}
 					createError={createError}
 					showModal={showSettingsModal}
 					setShowModal={setShowSettingsModal}
-					finals={finals}
-					setFinals={setFinals}
 				
 				/>
 				<Modal.Footer>
@@ -554,16 +548,16 @@ export default function Grades({
 					</div>
 
 					{
-						finals.show &&
+						course.settings.finals.show &&
 						<div className="mt-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
 						<div
-							className={ `bg-${letterGradeColor(letterGrade(calcFinal(finals.categories),course.settings),course.settings)}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
+							className={ `bg-${letterGradeColor(letterGrade(calcFinal(course.settings.finals.categories),course.settings),course.settings)}-400 text-xs md:text-sm font-medium text-left pl-2 p-0.5 leading-none rounded-full h-4 md:h-6`}
 							style={{
-								width: `${calcFinal(finals.categories) < 100 ? calcFinal(finals.categories)  : 100}%`,backgroundColor:(letterGradeColor(letterGrade(calcFinal(finals.categories),course.settings),course.settings).includes("#") && `${letterGradeColor(letterGrade(calcFinal(finals.categories),course.settings),course.settings)}`)
+								width: `${calcFinal(course.settings.finals.categories) < 100 ? calcFinal(course.settings.finals.categories)  : 100}%`,backgroundColor:(letterGradeColor(letterGrade(calcFinal(course.settings.finals.categories),course.settings),course.settings).includes("#") && `${letterGradeColor(letterGrade(calcFinal(course.settings.finals.categories),course.settings),course.settings)}`)
 							}}
 						>
 									<p className="absolute">
-									Final ({!isNaN(calcFinal(finals.categories)) ? `${course.settings.rounding.percent ? (calcFinal(finals.categories).toFixed(course.settings.rounding.percentPlaces)) : calcFinal(finals.categories)}%` : "N/A"})
+									Final ({!isNaN(calcFinal(course.settings.finals.categories)) ? `${course.settings.rounding.percent ? (calcFinal(course.settings.finals.categories).toFixed(course.settings.rounding.percentPlaces)) : calcFinal(course.settings.finals.categories)}%` : "N/A"})
 								</p>
 						</div>
 					</div>}

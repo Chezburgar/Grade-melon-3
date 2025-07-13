@@ -69,7 +69,6 @@ interface Course {
 	room: string;
 	weighted: boolean;
 	settings:CourseSettings;
-	finals:Finals;
 	grade: {
 		letter: string;
 		raw: number;
@@ -306,13 +305,13 @@ const parseAssignmentName = (name: string): string => {
 
 
 
-function initalizeFinals<Finals>(grades,index,courseSettings){
+function initalizeFinals<Finals>(grades:Grades,index,courseSettings:CourseSettings){
 			let temp:any={}
 			//temp hardSet
-			temp.show=true;
+			temp.show=courseSettings.finals?.show != undefined ? courseSettings.finals?.show : true //this will need to implement a check for mcps later;
 
 			//the defualt settings system if no overides given
-			//if(settings.categories==undefined) type shit
+			if(courseSettings.finals?.categories!=undefined){
 
 			let categories=[]
 
@@ -320,20 +319,20 @@ function initalizeFinals<Finals>(grades,index,courseSettings){
 			//by default we gunna not assume anything about final exams. we'll assume 4-term avg with error handling
 			//for 2-term classes
 
-				if(i==grades?.period.index){
-					categories.push({period:i,grade:grades?.courses[parseInt(index)]?.grade,courseIndex:parseInt(index,),weight:0.25,type:"course"}) //hard coded weight for rn
-				}
-				else{
+
 				let tempCat={period:i,weight:0.25,type:"course"}
 				const specIndex=gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))
 				if(specIndex==-1){continue}
 				else{
 					categories.push({courseIndex:specIndex,grade:gradesCache[i].courses[specIndex].grade,...tempCat})
-				}
+				
 			}
 			}
 			
 			temp.categories=categories
+		}else{
+			temp.categories=courseSettings.finals.categories.map(category=>({...category,grade:grades?.courses[category.courseIndex]}))
+		}
 
 
 		console.log("get ur temp, temp for sale!",temp)
@@ -391,12 +390,12 @@ const parseGrades = (grades: Gradebook): Grades => {
 	Deprecating until I remake it this is so useless and calculated so naively 
 	
 			*/
-			//@ts-ignore
+
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
 			const courseSettings=settings[courseID.substring(0,courseID.length-1)] ? settings[courseID.substring(0,courseID.length-1)] : settings.default
 			const places=courseSettings.rounding.percent===true ? courseSettings.rounding.percentPlaces : (courseSettings.rounding.percent===false ? false : 2)
 			
-			const m=initalizeFinals(grades,i,courseSettings)
+	
 			
 			return({
 			name: ReplaceUnderscores(stripParens(title)),
@@ -502,12 +501,10 @@ const parseGrades = (grades: Gradebook): Grades => {
 	//tech debt tech debt tech debt tech debt
 
 
-	let temp=new Array(gradesCache.length)
-	for(let grades of gradesCache){
-		temp[grades.period.index]=gradesCache
-	}
-	//@ts-ignore javascript bs but cool
-	temp.settings=settings
+
+for(let i=0;i<parsedGrades.courses.length;i++){
+	parsedGrades.courses[i].settings.finals=initalizeFinals(parsedGrades,i,structuredClone(parsedGrades.courses[i].settings))
+}
 
 
 	

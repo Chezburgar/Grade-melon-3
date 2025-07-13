@@ -212,6 +212,7 @@ export default function Grades({
 				setShowModal={setSettingsModal}
 				grades={grades}
 				setGrades={setGrades}
+				period={period}
 				createError={createError}
 			
 			/>
