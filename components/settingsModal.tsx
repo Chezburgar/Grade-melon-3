@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
-import {gradingScale,Grades,parseDate,Cache} from "../utils/grades"
+import {Settings,Grades,parseDate,Cache,CourseSettings,GlobalSettings} from "../utils/grades"
 import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
@@ -35,8 +35,8 @@ interface props{
 
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period,finals,setFinals}:props){
     	  const course = index==-1 ? {name:"default",teacher:{name:""},period:""} : grades?.[period]?.courses[parseInt(index)];
-        const [letterScale,setLetterScale]=useState<gradingScale["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : grades?.settings.default.letterScale)
-        const [rounding,setRounding]=useState<gradingScale["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : grades?.settings.default.rounding)
+        const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : grades?.settings.default.letterScale)
+        const [rounding,setRounding]=useState<CourseSettings["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : grades?.settings.default.rounding)
         const [active,setActive]=useState<[string,string]>(['',''])
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
@@ -85,7 +85,7 @@ function addLetter(){
 function addFinalCategory(){
   let temp=structuredClone(finals);
 
-  temp.categories.unshift({period:grades.period.index,courseIndex:index,weight:0,type:"exam"})
+  temp.categories.unshift({period:grades?.[period]?.period.index,courseIndex:index,weight:0,type:"exam"})
   setFinals(temp)
 }
 
@@ -126,21 +126,21 @@ async function saveNew(){
   
     if(validate()){
         
-        const newScale = {
+        const newScale:CourseSettings | GlobalSettings = {
   rounding: rounding,
-  letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse()
+  letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse() //need to ad shi for the new shi type shi
 };
         const augmentedGrades=structuredClone(grades)
-        augmentedGrades.gradingScales[course.name+course.period+course.teacher.name]=newScale
+        augmentedGrades.settings[course.courseID.substring(0,course.courseID.length-1)]=newScale
 
-    const result=await setSettings(client.district,client.username,client.encrypted,client.password,augmentedGrades.gradingScales)
+    const result=await setSettings(client.district,client.username,client.encrypted,client.password,augmentedGrades.settings)
     if(result.status){
         console.log("success")
         
-    
-
-
-        setGrades(reCalculateAll(augmentedGrades))
+      
+      let m:any=augmentedGrades.map(grades=>reCalculateAll(grades,augmentedGrades.settings))
+      m.settings=augmentedGrades.settings
+        setGrades(m)
         setShowModal(false)
 
 
@@ -169,7 +169,7 @@ async function reset(allClasses=false,field="letter"){
     const countyDefault=result.settings.default;
     console.log("success")
     let temp=structuredClone(grades)
-    temp.gradingScales.default=countyDefault
+    temp.settings.default=countyDefault
     if(field=="letter"){
     setLetterScale(countyDefault.letterScale)
     }
@@ -192,20 +192,23 @@ async function reset(allClasses=false,field="letter"){
     let temp=structuredClone(grades)
     if(allClasses){
      
-      temp.gradingScales={default:grades.gradingScales.default}
+      temp.settings={default:grades.settings.default}
  
     }
     else{
-    delete temp.gradingScales[course.name+course.period+course.teacher.name]
+    delete temp.settings[course.courseID.substring(0,course.courseID.length-1)]
     }
 
     if(allClasses){
-    const result = await setSettings(client.district,client.username,client.encrypted,client.password,temp.gradingScales)
+    const result = await setSettings(client.district,client.username,client.encrypted,client.password,temp.settings)
     if(result.status){
         console.log("success")
        
-    setLetterScale(grades.gradingScales.default.letterScale)
-    setGrades(reCalculateAll(temp))
+    setLetterScale(grades.settings.default.letterScale)
+    let m:any=temp.map(grades=>reCalculateAll(grades,temp.settings))
+    m.settings=temp.settings
+
+    setGrades(m)
     setShowModal(false)
   }
   else{
@@ -214,9 +217,9 @@ async function reset(allClasses=false,field="letter"){
     }
     else{
       if(field=="letter"){
-      setLetterScale(grades.gradingScales.default.letterScale)}
+      setLetterScale(grades.settings.default.letterScale)}
       else{
-        setRounding(grades.gradingScales.default.rounding)
+        setRounding(grades.settings.default.rounding)
       }
     }
 }

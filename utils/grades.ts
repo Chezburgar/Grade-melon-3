@@ -391,6 +391,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 	Deprecating until I remake it this is so useless and calculated so naively 
 	
 			*/
+			//@ts-ignore
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
 			const courseSettings=settings[courseID.substring(0,courseID.length-1)] ? settings[courseID.substring(0,courseID.length-1)] : settings.default
 			const places=courseSettings.rounding.percent===true ? courseSettings.rounding.percentPlaces : (courseSettings.rounding.percent===false ? false : 2)
@@ -654,10 +655,11 @@ const calculateCategory = (course: Course, categoryId: number): Course => {
 
 
 
-function reCalculateAll(grades:Grades){
+function reCalculateAll(grades:Grades,settings:Settings){
+	grades.settings=settings;
 	const copy=structuredClone(grades)
 	for(let course of copy.courses){
-		course.settings=copy.settings[course.name+course.period+course.teacher.name] ? copy.settings[course.name+course.period+course.teacher.name] : copy.settings.default
+		course.settings=copy.settings[course.courseID.substring(0,course.courseID.length-1)] ? copy.settings[course.courseID.substring(0,course.courseID.length-1)] : copy.settings.default
 		course=reCalculateCourse(course)
 	}	
 	return copy
@@ -887,4 +889,4 @@ export {
 	abbreviate,
 	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache
 };
-export type { Grades, Assignment, Course,Settings,Cache };
+export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings };
