@@ -33,7 +33,6 @@ interface Finals{
 
 interface Category{
 		period:number,
-		grade:any,
 		courseIndex:number,
 		weight:number,
 		type:"exam"|"course"
@@ -328,7 +327,7 @@ function initalizeFinals<Finals>(grades:Grades,index:number,courseSettings:Cours
 				const specIndex=gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[index].courseID.substring(0,grades.courses[index].courseID.length-1))
 				if(specIndex==-1){continue}
 				else{
-					categories.push({courseIndex:specIndex,grade:gradesCache[i].courses[specIndex].grade,...tempCat})
+					categories.push({courseIndex:specIndex,...tempCat})
 				
 			}
 			}
@@ -336,7 +335,7 @@ function initalizeFinals<Finals>(grades:Grades,index:number,courseSettings:Cours
 			temp.categories=categories
 		}else{
 			console.log("wait what")
-			temp.categories=courseSettings.finals.categories.map(category=>({...category,grade:grades?.courses[category.courseIndex]}))
+			temp.categories=courseSettings.finals.categories.map(category=>({...category}))
 		}
 
  
@@ -855,22 +854,24 @@ function abbreviate(category) {
 }
 
 
-		     function calcFinal(categories:Category[]){
+		     function calcFinal(categories:Category[],cache:Cache){
                 let realCat=[]
 				let currPoints=0
 				let currWeight=0
 				console.log(categories,"calc final type shit")
                 for(let category of categories){
-					//@ts-ignore
-                    if(Number(category.grade?.raw)!=NaN){
+					
+					const grade=cache[category.period].courses[category.courseIndex].grade
+                    //@ts-ignore
+					if(Number(grade.raw)!=NaN){
                     realCat.push(category);
-					currPoints+=category.grade.raw*category.weight
+					currPoints+=grade.raw*category.weight
 					currWeight+=category.weight
  
                     }
                 }
 				console.log("bro what",currPoints,currWeight)
-                return currPoints/currWeight
+                return {raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[categories[0].period].courses[categories[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[categories[0].period].courses[categories[0].courseIndex].settings),cache[categories[0].period].courses[categories[0].courseIndex].settings)}
             
             }
 

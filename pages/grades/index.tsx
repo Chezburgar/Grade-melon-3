@@ -6,7 +6,7 @@ import Head from "next/head";
 import { TbRefresh, TbMathSymbols } from "react-icons/tb";
 import {
 	parseGrades,
-	Grades as GradesType,parseDate,findCurrentPeriod,getCache,Cache
+	Grades as GradesType,parseDate,findCurrentPeriod,getCache,Cache,calcFinal
 	//calculateGPA,
 	//updateGPA,
 } from "../../utils/grades";
@@ -159,6 +159,8 @@ export default function Grades({
 
 	},[ad])
 
+
+
 	return (
 		<motion.div className="p-5 md:p-10 md:flex-1">
 			<Head>
@@ -281,6 +283,7 @@ export default function Grades({
 							
 								return (temp?.[period]?.courses.map(({ name, period, grade, teacher, settings,layoutID}, i) => {
 								if(name=="ad goes here"){return (<div key={i} className="flex shrink justify-center max-h-64"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
+								const finalGrade=calcFinal(settings.finals.categories,grades)
 								return(
 								<div className="mx-2 flex justify-center w-full md:w-96" key={i}>
 									<motion.div
@@ -315,15 +318,28 @@ export default function Grades({
 										</div>
 										<div className="">
 											<div className="flex items-center justify-between">
+												<div
+												className="flex-col"
+												>
 												<motion.span
 													layoutId={`grade-${layoutID}`}
 													layout="preserve-aspect"
 													style={{color:grade.color.includes("#") && grade.color}}
 													className={`text-xl md:text-3xl font-bold text-${grade.color}-400`}
 												>
-													{settings ? grade.letter:""}
-													{settings ? (!isNaN(grade.raw) && ` (${grade.raw}%)`) : (!isNaN(grade.raw) ? `${grade.raw}%`:"N/A")}
+													{grade.letter}
+													{settings ? (!isNaN(grade.raw) && ` (${grade.raw}%)`) : (!isNaN(grade.raw) ? `${grade.raw}%`:"")}
 												</motion.span>
+												<motion.div
+													layoutId={`final-${layoutID}`}
+													layout="preserve-aspect"
+													style={{color:finalGrade.color.includes("#") && finalGrade.color}}
+													className={`text-md md:text-xl font-bold text-${grade.color}-400`}
+												>
+													Final {finalGrade.letter} ({!isNaN(finalGrade.raw) ? (`${settings.rounding.percent ? (finalGrade.raw).toFixed(settings.rounding.percentPlaces) : finalGrade.raw}%`) : ""})
+												</motion.div>
+												</div>
+
 												<Link href={`/grades/${layoutID}`} legacyBehavior>
 													<button className="rounded-lg bg-primary-500 px-5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
 														View

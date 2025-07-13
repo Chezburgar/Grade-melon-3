@@ -106,7 +106,7 @@ export default function Grades({
 
 		
 		
-
+	const finalGrade=calcFinal(course.settings.categories,grades)
 	
 
 	
@@ -551,13 +551,13 @@ export default function Grades({
 						course.settings.finals.show &&
 						<div className="mt-2.5 mb-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
 						<div
-							className={ `bg-${letterGradeColor(letterGrade(calcFinal(course.settings.finals.categories),course.settings),course.settings)}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-5 md:h-6`}
+							className={ `bg-${finalGrade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-5 md:h-6`}
 							style={{
-								width: `${calcFinal(course.settings.finals.categories) < 100 ? calcFinal(course.settings.finals.categories)  : 100}%`,backgroundColor:(letterGradeColor(letterGrade(calcFinal(course.settings.finals.categories),course.settings),course.settings).includes("#") && `${letterGradeColor(letterGrade(calcFinal(course.settings.finals.categories),course.settings),course.settings)}`)
+								width: `${finalGrade.raw < 100 ? finalGrade.raw  : 100}%`,backgroundColor:(finalGrade.color.includes("#") && `${finalGrade.color}`)
 							}}
 						>
 									<p className="">
-									Final Calc ({!isNaN(calcFinal(course.settings.finals.categories)) ? `${course.settings.rounding.percent ? (calcFinal(course.settings.finals.categories).toFixed(course.settings.rounding.percentPlaces)) : calcFinal(course.settings.finals.categories)}%` : "N/A"})
+									Final Calc ({!isNaN(finalGrade.raw) ? `${course.settings.rounding.percent ? (finalGrade.raw.toFixed(course.settings.rounding.percentPlaces))+"%" : finalGrade.raw}%` : "N/A"})
 								</p>
 						</div>
 					</div>}
