@@ -7,6 +7,7 @@ import {Settings,Grades,parseDate,Cache,CourseSettings,GlobalSettings} from "../
 import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
+import StudentVue from "studentvue";
 
 
 /*
@@ -20,7 +21,7 @@ make the categories modable/customizable, this will require a global as well
 
 
 interface props{
-  client:any;
+  client:Awaited<ReturnType<typeof StudentVue.login>>[0]
   index:string|-1;
   showModal:boolean;
   setShowModal:(boolean:boolean)=>void;
@@ -33,14 +34,14 @@ interface props{
 
 }
 
-export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period,finals,setFinals}:props){
-    	  const course = index==-1 ? {name:"default",teacher:{name:""},period:""} : grades?.[period]?.courses[parseInt(index)];
+export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period}:props){
+    	  const course = index==-1 ? {courseID:"default",settings:{finals:undefined},name:""} : grades?.[period]?.courses[parseInt(index)];
         const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : grades?.settings.default.letterScale)
         const [rounding,setRounding]=useState<CourseSettings["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : grades?.settings.default.rounding)
         const [active,setActive]=useState<[string,string]>(['',''])
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
-
+        const [finals,setFinals]=useState(course.settings.finals)
         const [accordion,setAccordion]=useState([false,true])
 
       console.log("quick output",gradesCache,grades)

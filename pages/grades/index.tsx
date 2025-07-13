@@ -17,9 +17,10 @@ import { BsGearWideConnected } from "react-icons/bs";
 import SettingsModal from "../../components/settingsModal"
 import { gradesCache as g } from "../../utils/tempCache";
 import {rawsCache as killMe} from "../../utils/tempCache2"
+import StudentVue from "studentvue";
 
 interface GradesProps {
-	client: any;
+	client: Awaited<ReturnType<typeof StudentVue.login>>[0];
 	grades: Cache;
 	setGrades: (grades: Cache) => void;
 	period: number;
@@ -91,7 +92,7 @@ export default function Grades({
 						//@ts-ignore
 						setGrades(getCache(killMe))
 						console.log(parsedGrades)
-						setPeriod(findCurrentPeriod(g));
+						setPeriod(findCurrentPeriod(getCache(killMe)));
 						setLoading(false);
 					});
 				} catch (err) {

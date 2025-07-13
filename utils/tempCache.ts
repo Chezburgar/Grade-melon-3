@@ -17924,5 +17924,5 @@ for(let g of grades){
 
 //the only data that changes between marking period is 
 
-
+console.log(grades.map(g=>g.courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)=="9244a1".substring(0,"9244a1".length-1))),"this shit is so fucked")
 export {grades as gradesCache}

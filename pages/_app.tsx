@@ -31,7 +31,7 @@ function MyApp({ Component, pageProps }) {
 	const [districtURL, setDistrictURL] = useState(
 		undefined
 	);
-	const [client, setClient] = useState(undefined);
+	const [client, setClient] = useState<Awaited<ReturnType<typeof StudentVue.login>>[0]>(undefined);
 	 
 	const [studentInfo, setStudentInfo] = useState(undefined);
 	const [toasts, setToasts] = useState<Toast[]>([]);
@@ -151,9 +151,9 @@ it would probably be a good idea to show the final grade also on the Home Screen
 
 				//let g=parseGrades(gradebook[]) or smthn so its a list of them or whatever. 
 
-				//@ts-ignore
+		 
 				setGrades(getCache(killMe));
-				setPeriod(findCurrentPeriod(g));
+				setPeriod(findCurrentPeriod(getCache(killMe)));
 
 
 				if(router.pathname=="/"||router.pathname=="/login"){router.push("/grades")}

@@ -119,7 +119,9 @@ interface Grades {
 
 
 function findCurrentPeriod([cache]:Grades[]){
+	console.log(cache)
 	let dates=cache.periods.map(period=>period.date)
+	console.log(dates,"oh okay I get it now")
 	const index = dates.findIndex((date,i)=>{
 		if(Date.now()>=(new Date(date.start)).getTime()&&Date.now()<=(new Date(date.end)).getTime()){
 			return true
@@ -305,13 +307,15 @@ const parseAssignmentName = (name: string): string => {
 
 
 
-function initalizeFinals<Finals>(grades:Grades,index,courseSettings:CourseSettings){
+function initalizeFinals<Finals>(grades:Grades,index:number,courseSettings:CourseSettings){
+	console.log("I'm gunna lose it",grades.courses[index].courseID,grades.courses[index].name)
 			let temp:any={}
 			//temp hardSet
 			temp.show=courseSettings.finals?.show != undefined ? courseSettings.finals?.show : true //this will need to implement a check for mcps later;
 
 			//the defualt settings system if no overides given
-			if(courseSettings.finals?.categories!=undefined){
+ 
+			if((courseSettings.finals?.categories==undefined)){
 
 			let categories=[]
 
@@ -319,9 +323,9 @@ function initalizeFinals<Finals>(grades:Grades,index,courseSettings:CourseSettin
 			//by default we gunna not assume anything about final exams. we'll assume 4-term avg with error handling
 			//for 2-term classes
 
-
+				console.log("let's diagnose it I guess",index,grades?.courses[index].courseID,i,grades.courses[index].courseID,gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[index].courseID.substring(0,grades.courses[(index)].courseID.length-1)),)
 				let tempCat={period:i,weight:0.25,type:"course"}
-				const specIndex=gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[parseInt(index)].courseID.substring(0,grades.courses[parseInt(index)].courseID.length-1))
+				const specIndex=gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[index].courseID.substring(0,grades.courses[index].courseID.length-1))
 				if(specIndex==-1){continue}
 				else{
 					categories.push({courseIndex:specIndex,grade:gradesCache[i].courses[specIndex].grade,...tempCat})
@@ -331,11 +335,11 @@ function initalizeFinals<Finals>(grades:Grades,index,courseSettings:CourseSettin
 			
 			temp.categories=categories
 		}else{
+			console.log("wait what")
 			temp.categories=courseSettings.finals.categories.map(category=>({...category,grade:grades?.courses[category.courseIndex]}))
 		}
 
-
-		console.log("get ur temp, temp for sale!",temp)
+ 
 		return temp as Finals
 
 	  }
@@ -392,7 +396,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 			*/
 
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
-			const courseSettings=settings[courseID.substring(0,courseID.length-1)] ? settings[courseID.substring(0,courseID.length-1)] : settings.default
+			const courseSettings=settings[courseID.substring(0,courseID.length-1)] ? settings[courseID.substring(0,courseID.length-1)] : structuredClone(settings.default)
 			const places=courseSettings.rounding.percent===true ? courseSettings.rounding.percentPlaces : (courseSettings.rounding.percent===false ? false : 2)
 			
 	
@@ -854,16 +858,19 @@ function abbreviate(category) {
 		     function calcFinal(categories:Category[]){
                 let realCat=[]
 				let currPoints=0
+				let currWeight=0
 				console.log(categories,"calc final type shit")
                 for(let category of categories){
 					//@ts-ignore
                     if(Number(category.grade?.raw)!=NaN){
                     realCat.push(category);
 					currPoints+=category.grade.raw*category.weight
+					currWeight+=category.weight
+ 
                     }
                 }
-
-                return currPoints
+				console.log("bro what",currPoints,currWeight)
+                return currPoints/currWeight
             
             }
 
