@@ -283,7 +283,7 @@ export default function Grades({
 							
 								return (temp?.[period]?.courses.map(({ name, period, grade, teacher, settings,layoutID}, i) => {
 								if(name=="ad goes here"){return (<div key={i} className="flex shrink justify-center max-h-64"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
-								const finalGrade=calcFinal(settings.finals.categories,grades)
+								const finalGrade=settings.finals?.show ? calcFinal(settings.finals.categories,grades) : undefined
 								return(
 								<div className="mx-2 flex justify-center w-full md:w-96" key={i}>
 									<motion.div
@@ -330,6 +330,7 @@ export default function Grades({
 													{grade.letter}
 													{settings ? (!isNaN(grade.raw) && ` (${grade.raw}%)`) : (!isNaN(grade.raw) ? `${grade.raw}%`:"")}
 												</motion.span>
+												{settings.finals?.show &&
 												<motion.div
 													layoutId={`final-${layoutID}`}
 													layout="preserve-aspect"
@@ -337,7 +338,7 @@ export default function Grades({
 													className={`text-md md:text-xl font-bold text-${grade.color}-400`}
 												>
 													Final {finalGrade.letter} ({!isNaN(finalGrade.raw) ? (`${settings.rounding.percent ? (finalGrade.raw).toFixed(settings.rounding.percentPlaces) : finalGrade.raw}%`) : ""})
-												</motion.div>
+												</motion.div>}
 												</div>
 
 												<Link href={`/grades/${layoutID}`} legacyBehavior>

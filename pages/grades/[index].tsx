@@ -106,7 +106,7 @@ export default function Grades({
 
 		
 		
-	const finalGrade=calcFinal(course.settings.categories,grades)
+	const finalGrade=course != undefined ? calcFinal(course?.settings.finals.categories,grades) : undefined
 	
 
 	

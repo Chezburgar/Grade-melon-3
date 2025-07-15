@@ -40,6 +40,7 @@ interface Category{
 
 
 
+
 interface CourseSettings{
 	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},letterScale:
 	[string,[number,number],string?][],finals?:Finals,categories?:undefined // categories is to be implemented
@@ -306,8 +307,22 @@ const parseAssignmentName = (name: string): string => {
 
 
 
+
+
+
+
+function simplifyWeights(categories:Category[]){
+	let totalWeight:number=categories.reduce((a,b)=>(a+b.weight),0)
+	for(let category of categories){
+		category.weight=category.weight/totalWeight
+	}
+	
+	return categories
+
+}
+
+
 function initalizeFinals<Finals>(grades:Grades,index:number,courseSettings:CourseSettings){
-	console.log("I'm gunna lose it",grades.courses[index].courseID,grades.courses[index].name)
 			let temp:any={}
 			//temp hardSet
 			temp.show=courseSettings.finals?.show != undefined ? courseSettings.finals?.show : true //this will need to implement a check for mcps later;
@@ -338,7 +353,7 @@ function initalizeFinals<Finals>(grades:Grades,index:number,courseSettings:Cours
 			temp.categories=courseSettings.finals.categories.map(category=>({...category}))
 		}
 
- 
+		temp.categories=simplifyWeights(temp.categories)
 		return temp as Finals
 
 	  }
@@ -396,6 +411,8 @@ const parseGrades = (grades: Gradebook): Grades => {
 
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
 			const courseSettings=settings[courseID.substring(0,courseID.length-1)] ? settings[courseID.substring(0,courseID.length-1)] : structuredClone(settings.default)
+		//this is a dumb hotfix but we ARE not refactoring again. why i let some settings be global and finals not be global and now the default and reset system is fucked to hell. 
+			if(!courseSettings.letterScale||!courseSettings.rounding){courseSettings.rounding=settings.default.rounding;courseSettings.letterScale=settings.default.letterScale}
 			const places=courseSettings.rounding.percent===true ? courseSettings.rounding.percentPlaces : (courseSettings.rounding.percent===false ? false : 2)
 			
 	
@@ -507,6 +524,7 @@ const parseGrades = (grades: Gradebook): Grades => {
 
 for(let i=0;i<parsedGrades.courses.length;i++){
 	parsedGrades.courses[i].settings.finals=initalizeFinals(parsedGrades,i,structuredClone(parsedGrades.courses[i].settings))
+	parsedGrades.settings[parsedGrades.courses[i].courseID]=parsedGrades.courses[i].settings
 }
 
 
@@ -892,6 +910,6 @@ export {
 //	calculateGPA,
 //	updateGPA,
 	abbreviate,
-	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache
+	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights
 };
 export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings };

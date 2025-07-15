@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
-import {Settings,Grades,parseDate,Cache,CourseSettings,GlobalSettings} from "../utils/grades"
+import {Settings,Grades,parseDate,Cache,CourseSettings,GlobalSettings,simplifyWeights} from "../utils/grades"
 import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
@@ -11,13 +11,21 @@ import StudentVue from "studentvue";
 
 
 /*
-finish the features and functions for this shi finals shi
+//if we still have semester grades that will complicate things. 
+/*
+I think I'd just make it so that each courseID is strictly correspondant to its own settings
+then people can manually input other shit I guess. type shit. 
+I'd still use loose courseID's for marking period change mapping u to the same course though I guess
 
 
-make the categories modable/customizable, this will require a global as well
+like it very much depends on whether or not we're still gunna have semester grades. I'm gunna 
+assume we're not. i'll change it if i'm wrong ig.
 
+
+We'll presume for now that semester grades are no more
 
 */
+
 
 
 interface props{
@@ -42,7 +50,7 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
         const [finals,setFinals]=useState(course.settings.finals)
-        const [accordion,setAccordion]=useState([false,true])
+        const [accordion,setAccordion]=useState([index==-1,index!=-1])
 
       console.log("quick output",gradesCache,grades)
 
@@ -126,6 +134,7 @@ async function saveNew(){
     if(validate()){
         
         const newScale:CourseSettings | GlobalSettings = {
+  finals:{...finals,categories:simplifyWeights(finals.categories)},
   rounding: rounding,
   letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse() //need to ad shi for the new shi type shi
 };
@@ -136,7 +145,7 @@ async function saveNew(){
     if(result.status){
         console.log("success")
         
-      
+      console.log("i sohuldn't have tried to do weird bullshit...",augmentedGrades.settings)
       let m:any=augmentedGrades.map(grades=>reCalculateAll(grades,augmentedGrades.settings))
       m.settings=augmentedGrades.settings
         setGrades(m)
@@ -161,7 +170,17 @@ async function saveNew(){
 
 
 
-async function reset(allClasses=false,field="letter"){
+function resetFinals(){
+  setFinals(grades[period].courses[index].settings.finals);
+
+
+}
+
+
+
+
+
+async function reset(allClasses=false,field="letter"){ //god I should really spereate this out into different functions jesus christ
   if(index==-1&&!allClasses){
   const result=await getSettings(client.district,"pleaseGodLetNobodySomehowMagicallyHashToThisHashOrItBreaks")
   if(result.status){
@@ -190,12 +209,18 @@ async function reset(allClasses=false,field="letter"){
   else{
     let temp=structuredClone(grades)
     if(allClasses){
-     
-      temp.settings={default:grades.settings.default}
+      for(let key in temp.settings){
+        if(key=="default"){continue} //this is NOT scalable. could at least ad a "global" flag or something oh my god
+        temp.settings[key].rounding=undefined
+        temp.settings[key].letterScale=undefined
+      }
+
+
  
     }
     else{
-    delete temp.settings[course.courseID.substring(0,course.courseID.length-1)]
+      //this is a dumb ah solution to globals. dumb ah. u can feel the pain in his 
+    temp.settings[course.courseID.substring(0,course.courseID.length-1)] = {...temp.settings[course.courseID.substring(0,course.courseID.length-1)],letterScale:undefined,rounding:undefined}
     }
 
     if(allClasses){
