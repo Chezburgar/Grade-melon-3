@@ -3473,51 +3473,7 @@ const rawsCache=[{
                 ]
             ]
         },
-        "ENGLISH 12 2Kelly Tobeler-Price": {
-            "rounding": {
-                "percent": true,
-                "percentPlaces": 2,
-                "mark": false,
-                "markPlaces": 0
-            },
-            "letterScale": [
-                [
-                    "A",
-                    [
-                        89.5,
-                        100
-                    ]
-                ],
-                [
-                    "B",
-                    [
-                        79.5,
-                        89.49
-                    ]
-                ],
-                [
-                    "C",
-                    [
-                        69.5,
-                        79.49
-                    ]
-                ],
-                [
-                    "D",
-                    [
-                        59.5,
-                        69.49
-                    ]
-                ],
-                [
-                    "E",
-                    [
-                        0,
-                        59.49
-                    ]
-                ]
-            ]
-        }
+
     }
 },
 
@@ -11320,51 +11276,7 @@ const rawsCache=[{
                 ]
             ]
         },
-        "ENGLISH 12 2Kelly Tobeler-Price": {
-            "rounding": {
-                "percent": true,
-                "percentPlaces": 2,
-                "mark": false,
-                "markPlaces": 0
-            },
-            "letterScale": [
-                [
-                    "A",
-                    [
-                        89.5,
-                        100
-                    ]
-                ],
-                [
-                    "B",
-                    [
-                        79.5,
-                        89.49
-                    ]
-                ],
-                [
-                    "C",
-                    [
-                        69.5,
-                        79.49
-                    ]
-                ],
-                [
-                    "D",
-                    [
-                        59.5,
-                        69.49
-                    ]
-                ],
-                [
-                    "E",
-                    [
-                        0,
-                        59.49
-                    ]
-                ]
-            ]
-        }
+
     }
 },
 {
@@ -15707,51 +15619,7 @@ const rawsCache=[{
                 ]
             ]
         },
-        "ENGLISH 12 2Kelly Tobeler-Price": {
-            "rounding": {
-                "percent": true,
-                "percentPlaces": 2,
-                "mark": false,
-                "markPlaces": 0
-            },
-            "letterScale": [
-                [
-                    "A",
-                    [
-                        89.5,
-                        100
-                    ]
-                ],
-                [
-                    "B",
-                    [
-                        79.5,
-                        89.49
-                    ]
-                ],
-                [
-                    "C",
-                    [
-                        69.5,
-                        79.49
-                    ]
-                ],
-                [
-                    "D",
-                    [
-                        59.5,
-                        69.49
-                    ]
-                ],
-                [
-                    "E",
-                    [
-                        0,
-                        59.49
-                    ]
-                ]
-            ]
-        }
+
     }
 },
 {
@@ -23366,51 +23234,7 @@ const rawsCache=[{
                 ]
             ]
         },
-        "ENGLISH 12 2Kelly Tobeler-Price": {
-            "rounding": {
-                "percent": true,
-                "percentPlaces": 2,
-                "mark": false,
-                "markPlaces": 0
-            },
-            "letterScale": [
-                [
-                    "A",
-                    [
-                        89.5,
-                        100
-                    ]
-                ],
-                [
-                    "B",
-                    [
-                        79.5,
-                        89.49
-                    ]
-                ],
-                [
-                    "C",
-                    [
-                        69.5,
-                        79.49
-                    ]
-                ],
-                [
-                    "D",
-                    [
-                        59.5,
-                        69.49
-                    ]
-                ],
-                [
-                    "E",
-                    [
-                        0,
-                        59.49
-                    ]
-                ]
-            ]
-        }
+
     }
 }
 

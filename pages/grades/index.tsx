@@ -208,7 +208,15 @@ export default function Grades({
 			</Modal>
 			*/}
 
-			<SettingsModal
+			
+
+			{loading ? (
+				<div className="flex justify-center">
+					<Spinner size="xl" color="pink" />
+				</div>
+			) : (
+				<div className="md:max-w-max">
+					<SettingsModal
 				client={client}
 				index={-1}
 				showModal={settingsModal}
@@ -219,13 +227,6 @@ export default function Grades({
 				createError={createError}
 			
 			/>
-
-			{loading ? (
-				<div className="flex justify-center">
-					<Spinner size="xl" color="pink" />
-				</div>
-			) : (
-				<div className="md:max-w-max">
 					<div className="flex gap-2 mb-5">
 						<button
 							type="button"
@@ -283,7 +284,7 @@ export default function Grades({
 							
 								return (temp?.[period]?.courses.map(({ name, period, grade, teacher, settings,layoutID}, i) => {
 								if(name=="ad goes here"){return (<div key={i} className="flex shrink justify-center max-h-64"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
-								const finalGrade=settings.finals?.show ? calcFinal(settings.finals.categories,grades) : undefined
+								const finalGrade=settings?.finals?.show ? calcFinal(settings.finals.categories,grades) : undefined
 								return(
 								<div className="mx-2 flex justify-center w-full md:w-96" key={i}>
 									<motion.div

@@ -3,11 +3,12 @@ import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
-import {Settings,Grades,parseDate,Cache,CourseSettings,GlobalSettings,simplifyWeights,initalizeFinals2} from "../utils/grades"
+import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2} from "../utils/grades"
 import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
 import StudentVue from "studentvue";
+
 
 
 /*
@@ -43,14 +44,16 @@ interface props{
 }
 
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period}:props){
-    	  const course = index==-1 ? {courseID:"default",settings:{finals:undefined},name:""} : grades?.[period]?.courses[parseInt(index)];
-        const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : grades?.settings.default.letterScale)
-        const [rounding,setRounding]=useState<CourseSettings["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : grades?.settings.default.rounding)
+          const settings= grades?.[0]?.settings  	  
+  const course = index==-1 ? {courseID:"default",settings:{finals:undefined},name:""} : grades?.[period]?.courses[parseInt(index)];
+        const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : settings.default.letterScale)
+        const [rounding,setRounding]=useState<CourseSettings["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : settings.default.rounding)
         const [active,setActive]=useState<[string,string]>(['',''])
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
         const [finals,setFinals]=useState(course.settings.finals)
         const [accordion,setAccordion]=useState([index==-1,index!=-1])
+
 
       console.log("quick output",gradesCache,grades)
 
@@ -139,15 +142,15 @@ async function saveNew(){
   letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse() //need to ad shi for the new shi type shi
 };
         const augmentedGrades=structuredClone(grades)
-        augmentedGrades.settings[course.courseID.substring(0,course.courseID.length-1)]=newScale
+        const tempSettings=structuredClone(settings)
+        tempSettings[course.courseID.substring(0,course.courseID.length-1)]=newScale
 
-    const result=await setSettings(client.district,client.username,client.encrypted,client.password,augmentedGrades.settings)
+    const result=await setSettings(client.district,client.username,client.encrypted,client.password,tempSettings)
     if(result.status){
         console.log("success")
         
-      console.log("i sohuldn't have tried to do weird bullshit...",augmentedGrades.settings)
-      let m:any=augmentedGrades.map(grades=>reCalculateAll(grades,augmentedGrades.settings))
-      m.settings=augmentedGrades.settings
+      console.log("i sohuldn't have tried to do weird bullshit...",tempSettings)
+      let m:any=augmentedGrades.map(grades=>reCalculateAll(grades,tempSettings))
         setGrades(m)
         setShowModal(false)
 
@@ -252,26 +255,7 @@ async function reset(allClasses=false,field="letter"){ //god I should really spe
 
 */
 
-function templateFinals(mode){
-    let settings = grades.settings as any
-      if(mode=="automatic"){
-		if(!settings.default.finals){
-      //@ts-ignore
-			let mps=getRealMarkingPeriods(periods)
-			let weight=1/mps.length
-			let categories=mps.map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))
-			
-			settings.default.finals={show:true,categories:categories,isSemester:false,semester:{show:true,semesters:[mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight})),mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))]}}
-		}
 
-	}else{
-		settings.default.finals={show:false,categories:[],isSemester:false,semester:{show:false,semesters:[]}}
-	}
-
-  return settings.default.finals
-  
-
-}
 
 
 
@@ -281,7 +265,6 @@ function templateFinals(mode){
 
 
 function showDefaults(field){
-  let settings = grades.settings as any
   if(index!=-1){
     console.log("intialize finals 2 from show defaults props log",grades,settings,grades[period].courses[index].identifier)
     const template={...settings.default,finals:initalizeFinals2(grades,settings,grades[period].courses[index].identifier)}
@@ -807,7 +790,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         type="button"
         className="ml-auto -mr-2  md:text-base text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-2  rounded-lg text-sm"
         style={{}}
-        onClick={()=>{reset(true);setShowModal(false)}}
+        onClick={()=>{setShowModal(false)}}
       >
         Reset Classes
       </button>

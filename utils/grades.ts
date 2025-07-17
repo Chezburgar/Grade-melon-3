@@ -29,7 +29,7 @@ interface Finals{
 	show:boolean,
 	categories:Category[],
 	isSemester:boolean,
-	semesters:Category[][]
+	semesters:{show:boolean,categories:Category[]}[]
 
 }
 
@@ -75,7 +75,8 @@ interface Course {
 	layoutID: number;
 	room: string;
 	weighted: boolean;
-	identifer:string;
+	identifier:string;
+	settings:CourseSettings
 	grade: {
 		letter: string;
 		raw: number;
@@ -106,7 +107,7 @@ interface Course {
 //returned undefined as to mean that THAT GRADE PERIOD HAS NOT ARRIVED YET
 
 //this could be flawed if Synergy's error rate is too high
-type Cache = Grades[] & {"settings":Settings}
+type Cache = Grades[]
 
 interface Grades {
 	courses: Course[];
@@ -329,6 +330,8 @@ function simplifyWeights(categories:Category[]){
 }
 
 function initalizeFinals2<Finals>(cache:Cache,settings:Settings,identifier:string){
+	settings=structuredClone(settings)
+	console.log("I want a perfect body",settings)
 	let temp:any={}
 
 	//@ts-ignore
@@ -358,9 +361,9 @@ function initalizeFinals2<Finals>(cache:Cache,settings:Settings,identifier:strin
 
 		//sigh...
 
-		for(let categories of settings[identifier].finals.semesters){
+		for(let semester of settings[identifier].finals.semesters){
 					const categories=[]
-			for(let category of settings[identifier].finals.categories){
+			for(let category of semester.categories){
 				if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
 					const index=cache[category.mp].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==identifier) //the many to one idea would require a custom data structure that would store poorly in json so how about, no.
 					category.courseIndex=index!=-1 ? index : NaN //gunna kms fr fr
@@ -446,11 +449,11 @@ function getRealMarkingPeriods(periods:Grades["periods"]){
 
 function templateFinals(mode,periods){
       if(mode=="automatic"){
-			let mps=getRealMarkingPeriods(periods)
+			let mps=getRealMarkingPeriods(periods).map(mp=>mp.index)
 			let weight=1/mps.length
 			let categories=mps.map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))
 			
-			return {show:true,categories:categories,isSemester:false,semester:{show:true,semesters:[mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight})),mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))]}}
+			return {show:true,categories:categories,isSemester:false,semesters:[{show:true,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))},{show:true,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))}]}
 		}
 
 	else{
@@ -465,6 +468,7 @@ function templateFinals(mode,periods){
 function getCache(books:Gradebook[]):Cache{
 	//pre parsing
 	const settings=books[0].gradingScale
+	if(settings.mode==undefined){settings.mode="automatic"}
 
 	const periods=books[0].reportingPeriod.available.map(({ name, index, date }) => ({
 			name:name,
@@ -472,11 +476,47 @@ function getCache(books:Gradebook[]):Cache{
 			index: index,
 		}))
 
-	settings.finals=templateFinals(settings.mode,books)
+	settings.default.finals=templateFinals(settings.mode,periods)
 	let gradesCache:any=books.map(book=>parseGrades(book,settings))
 
+		
+
+
+	/*this is essential. structural dust. unlesss we move away from having unsynced
+	settings objects at the cache, grades, and courses level. all seperate. all fucking unsynced.
+	like a fucking maniac. get it working first. then we myabe refactor.
+	*/
+
+
+
+/*This is dumb. It exists twice because we're operating with the assumption that EVERY 
+class will have an entry in setttings
+
+whereas before we operated under the assumption that while every class
+would have an entry in COUSRE.SETTINGS, it wouldn't necessarily
+have an entry in the global grades.settings, which, frnakly, though it's lost of some its value,
+remains the superior design choice
+
+
+*/
+	for(let grades of gradesCache){
+		grades.settings=settings
+		for(let course of grades.courses){
+			const id = settings.mode=="automatic" ? course.identifier : Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(course.identifier))]
+			if(settings[id]==undefined){
+				settings[id]=settings.default
+			}
+			course.settings=settings[id]
+		}
+	}
+
+
+
+		//basically this is the handling for if a course needs to have some settings set explicit but others 
+	//remain at the default, it is thus essential whenever we be revamping type shit type shit type shit
+	//type shit. 
 	for(let key in settings){
-		if(key=="default"){continue}
+		if(key=="default"||key=="mode"){continue}
 		else{
 			for(let prop in settings[key]){
 				if(settings[key][prop]==false){
@@ -487,9 +527,21 @@ function getCache(books:Gradebook[]):Cache{
 		settings[key]=initalizeFinals2(gradesCache,settings,key)
 	}
 
-	for(let grades of gradesCache){
+
+		for(let grades of gradesCache){
 		grades.settings=settings
+		for(let course of grades.courses){
+			const id = settings.mode=="automatic" ? course.identifier : Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(course.identifier))]
+			if(settings[id]==undefined){
+				settings[id]=settings.default
+			}
+			course.settings=settings[id]
+		}
 	}
+
+
+	console.log("he's officially lost it chat",settings)
+	console.log("genuinely lost his marbles",gradesCache)
 
 
 return gradesCache as Cache
@@ -550,7 +602,8 @@ const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
 			layoutID:null,
 			courseID:courseID,
 			room: room,
-			identifer:identifier,
+			settings:courseSettings,
+			identifier:identifier,
 			weighted: isWeighted(title),
 			grade: {
 				letter: (marks[0].calculatedScore.string!=="N/A" ? letterGrade(marks[0].calculatedScore.raw,courseSettings) : "N/A"),
@@ -742,8 +795,8 @@ const genTable = (
 	return [...solutions];
 };
 
-const calculateCategory = (course: Course, categoryId: number,settings): Course => {
-	const gradingScale=settings;
+const calculateCategory = (course: Course, categoryId: number): Course => {
+	const gradingScale=course.settings;
 	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	course.categories[categoryId].points.earned = course.assignments
 		.filter(
@@ -988,7 +1041,7 @@ function abbreviate(category) {
 				let currWeight=0
 				console.log(categories,"calc final type shit")
                 for(let category of categories){
-					
+					if(isNaN(category.courseIndex)||category.courseIndex==null){continue}
 					const grade=cache[category.mp].courses[category.courseIndex].grade
                     //@ts-ignore
 					if(Number(grade.raw)!=NaN){
@@ -999,7 +1052,7 @@ function abbreviate(category) {
                     }
                 }
 				console.log("bro what",currPoints,currWeight)
-                return {raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[categories[0].mp].courses[categories[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[categories[0].mp].courses[categories[0].courseIndex].settings),cache[categories[0].mp].courses[categories[0].courseIndex].settings)}
+                return {raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
             
             }
 
@@ -1014,6 +1067,7 @@ export {
 	delAssignment,
 	updateCategory,
 	parseDate,
+	templateFinals,
 	genTable,
 	calcFinal,
 	findCurrentPeriod,
