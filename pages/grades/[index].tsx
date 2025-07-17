@@ -556,7 +556,7 @@ export default function Grades({
 								width: `${finalGrade.raw < 100 ? finalGrade.raw  : 100}%`,backgroundColor:(finalGrade.color.includes("#") && `${finalGrade.color}`)
 							}}
 						>
-									<p className="">
+									<p className="absolute">
 									Final Calc ({!isNaN(finalGrade.raw) ? `${course.settings.rounding.percent ? (finalGrade.raw.toFixed(course.settings.rounding.percentPlaces))+"%" : finalGrade.raw}%` : "N/A"})
 								</p>
 						</div>

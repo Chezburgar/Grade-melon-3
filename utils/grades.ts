@@ -27,12 +27,15 @@ interface Assignment {
 
 interface Finals{
 	show:boolean,
-	categories:Category[]
+	categories:Category[],
+	isSemester:boolean,
+	semesters:Category[][]
+
 }
 
 
 interface Category{
-		period:number,
+		mp:number,
 		courseIndex:number,
 		weight:number,
 		type:"exam"|"course"
@@ -52,9 +55,13 @@ interface GlobalSettings{
 }
 
 type Settings = {
-  default: GlobalSettings;
+  default: CourseSettings;
 } & {
-  [K in Exclude<string, 'default'>]?: CourseSettings;
+  [key:string]:CourseSettings
+}
+&
+{
+	mode:"automatic" | "manual"
 };
 
 
@@ -68,7 +75,7 @@ interface Course {
 	layoutID: number;
 	room: string;
 	weighted: boolean;
-	settings:CourseSettings;
+	identifer:string;
 	grade: {
 		letter: string;
 		raw: number;
@@ -321,6 +328,65 @@ function simplifyWeights(categories:Category[]){
 
 }
 
+function initalizeFinals2<Finals>(cache:Cache,settings:Settings,identifier:string){
+	let temp:any={}
+
+	//@ts-ignore
+	if(settings.mode=="manual"){
+		//we let them control but also we FORCe them to control all my precious
+		const id=Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(identifier))]
+		//we handle nothing actually. kys.
+
+
+		return settings[id]
+
+	}
+	else{
+//it is KNOWN that categories will not be undefined cuz it'll be either set explicitly or generated 
+		//in the preparse
+		const categories=[]
+		for(let category of settings[identifier].finals.categories){
+			if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
+				const index=cache[category.mp].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==identifier) //the many to one idea would require a custom data structure that would store poorly in json so how about, no.
+				category.courseIndex=index!=-1 ? index : NaN //gunna kms fr fr
+
+			}
+			categories.push(category)
+		}
+		
+		//mk so there's still the semester shit righhhhhhhht
+
+		//sigh...
+
+		for(let categories of settings[identifier].finals.semesters){
+					const categories=[]
+			for(let category of settings[identifier].finals.categories){
+				if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
+					const index=cache[category.mp].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==identifier) //the many to one idea would require a custom data structure that would store poorly in json so how about, no.
+					category.courseIndex=index!=-1 ? index : NaN //gunna kms fr fr
+
+				}
+				categories.push(category)
+			}
+		}
+
+		//that oughta do it I guess. now for el manuel
+
+		return {...settings[identifier],...temp} //over ride manual hell yeah biatch
+
+	}
+
+
+}
+
+
+
+
+
+
+
+
+
 
 function initalizeFinals<Finals>(grades:Grades,index:number,courseSettings:CourseSettings){
 			let temp:any={}
@@ -360,19 +426,79 @@ function initalizeFinals<Finals>(grades:Grades,index:number,courseSettings:Cours
 
 
 
+function getRealMarkingPeriods(periods:Grades["periods"]){
+	let reals=[]
+	for(let i=0;i<periods.length;i++){
+		let flag=true
+		for(let j=0;j<periods.length;j++){
+			if(j==i){continue}
+			if(periods[j].date.start<=periods[i].date.start&&periods[j].date.end>periods[i].date.end){
+				flag=false
+			}
+		}
+		if(flag){reals.push(periods[i])}
+	}
+	return reals
+}
+
+
+
+
+function templateFinals(mode,periods){
+      if(mode=="automatic"){
+			let mps=getRealMarkingPeriods(periods)
+			let weight=1/mps.length
+			let categories=mps.map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))
+			
+			return {show:true,categories:categories,isSemester:false,semester:{show:true,semesters:[mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight})),mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))]}}
+		}
+
+	else{
+		return {show:false,categories:[],isSemester:false,semester:{show:false,semesters:[]}}
+	}
+  
+
+}
 
 
 
 function getCache(books:Gradebook[]):Cache{
-	let gradesCache:any=books.map(book=>parseGrades(book))
-	gradesCache.settings=books[0].gradingScale //idgaf fuck off i'll do whatever the fuck I want. it's fucking javascript. why have a ridiculous language that does ridiculous things if I can't abuse any of its stupid properties.
-	return gradesCache as Cache
+	//pre parsing
+	const settings=books[0].gradingScale
+
+	const periods=books[0].reportingPeriod.available.map(({ name, index, date }) => ({
+			name:name,
+			date:date,
+			index: index,
+		}))
+
+	settings.finals=templateFinals(settings.mode,books)
+	let gradesCache:any=books.map(book=>parseGrades(book,settings))
+
+	for(let key in settings){
+		if(key=="default"){continue}
+		else{
+			for(let prop in settings[key]){
+				if(settings[key][prop]==false){
+					settings[key][prop]=settings.default[prop] //fallback to default if a class's settings props are set to false
+				}
+			}
+		}
+		settings[key]=initalizeFinals2(gradesCache,settings,key)
+	}
+
+	for(let grades of gradesCache){
+		grades.settings=settings
+	}
+
+
+return gradesCache as Cache
 }
 
 
-const parseGrades = (grades: Gradebook): Grades => {
+const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
 	//@ts-ignore
-	const settings:Settings=grades.gradingScale;
+	const settings:Settings=override ? override : grades.gradingScale;
 	const decimalPlaces=settings?.default?.rounding.percent===true ? settings?.default.rounding.percentPlaces : (settings?.default?.rounding.percent===false ? false : 2)
 	for (let i = 0; i < grades.courses.length; i++) {
 		if (grades.courses[i].marks.length === 0) {
@@ -410,7 +536,8 @@ const parseGrades = (grades: Gradebook): Grades => {
 			*/
 
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
-			const courseSettings=settings[courseID.substring(0,courseID.length-1)] ? settings[courseID.substring(0,courseID.length-1)] : structuredClone(settings.default)
+				const identifier=settings.mode=="manual" ? (ReplaceUnderscores(stripParens(title))+period+staff.name) : courseID.substring(0,courseID.length-1)
+				const courseSettings=settings[identifier] ? settings[identifier] : structuredClone(settings.default)
 		//this is a dumb hotfix but we ARE not refactoring again. why i let some settings be global and finals not be global and now the default and reset system is fucked to hell. 
 			if(!courseSettings.letterScale||!courseSettings.rounding){courseSettings.rounding=settings.default.rounding;courseSettings.letterScale=settings.default.letterScale}
 			const places=courseSettings.rounding.percent===true ? courseSettings.rounding.percentPlaces : (courseSettings.rounding.percent===false ? false : 2)
@@ -423,8 +550,8 @@ const parseGrades = (grades: Gradebook): Grades => {
 			layoutID:null,
 			courseID:courseID,
 			room: room,
+			identifer:identifier,
 			weighted: isWeighted(title),
-			settings:courseSettings,
 			grade: {
 				letter: (marks[0].calculatedScore.string!=="N/A" ? letterGrade(marks[0].calculatedScore.raw,courseSettings) : "N/A"),
 				raw: marks[0].calculatedScore.string!=="N/A" ? marks[0].calculatedScore.raw : NaN,
@@ -512,20 +639,6 @@ const parseGrades = (grades: Gradebook): Grades => {
 	parsedGrades.courses.forEach((course:Course,index) => {
 		course.layoutID=index;
 	});
-
-
-	//beginning some test calculations for the Global
-
-	
-
-	//tech debt tech debt tech debt tech debt
-
-
-
-for(let i=0;i<parsedGrades.courses.length;i++){
-	parsedGrades.courses[i].settings.finals=initalizeFinals(parsedGrades,i,structuredClone(parsedGrades.courses[i].settings))
-	parsedGrades.settings[parsedGrades.courses[i].courseID]=parsedGrades.courses[i].settings
-}
 
 
 	
@@ -629,8 +742,8 @@ const genTable = (
 	return [...solutions];
 };
 
-const calculateCategory = (course: Course, categoryId: number): Course => {
-	const gradingScale=course.settings;
+const calculateCategory = (course: Course, categoryId: number,settings): Course => {
+	const gradingScale=settings;
 	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	course.categories[categoryId].points.earned = course.assignments
 		.filter(
@@ -676,10 +789,7 @@ const calculateCategory = (course: Course, categoryId: number): Course => {
 function reCalculateAll(grades:Grades,settings:Settings){
 	grades.settings=settings;
 	const copy=structuredClone(grades)
-	for(let course of copy.courses){
-		course.settings=copy.settings[course.courseID.substring(0,course.courseID.length-1)] ? copy.settings[course.courseID.substring(0,course.courseID.length-1)] : copy.settings.default
-		course=reCalculateCourse(course)
-	}	
+	
 	return copy
 	
 
@@ -879,7 +989,7 @@ function abbreviate(category) {
 				console.log(categories,"calc final type shit")
                 for(let category of categories){
 					
-					const grade=cache[category.period].courses[category.courseIndex].grade
+					const grade=cache[category.mp].courses[category.courseIndex].grade
                     //@ts-ignore
 					if(Number(grade.raw)!=NaN){
                     realCat.push(category);
@@ -889,7 +999,7 @@ function abbreviate(category) {
                     }
                 }
 				console.log("bro what",currPoints,currWeight)
-                return {raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[categories[0].period].courses[categories[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[categories[0].period].courses[categories[0].courseIndex].settings),cache[categories[0].period].courses[categories[0].courseIndex].settings)}
+                return {raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[categories[0].mp].courses[categories[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[categories[0].mp].courses[categories[0].courseIndex].settings),cache[categories[0].mp].courses[categories[0].courseIndex].settings)}
             
             }
 
@@ -910,6 +1020,6 @@ export {
 //	calculateGPA,
 //	updateGPA,
 	abbreviate,
-	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights
+	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals,initalizeFinals2
 };
 export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings };

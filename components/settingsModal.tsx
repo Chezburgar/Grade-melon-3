@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
 import {colorShit} from "./colors"
-import {Settings,Grades,parseDate,Cache,CourseSettings,GlobalSettings,simplifyWeights} from "../utils/grades"
+import {Settings,Grades,parseDate,Cache,CourseSettings,GlobalSettings,simplifyWeights,initalizeFinals2} from "../utils/grades"
 import { count } from "console";
 import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
@@ -179,7 +179,7 @@ function resetFinals(){
 
 
 
-
+/*
 async function reset(allClasses=false,field="letter"){ //god I should really spereate this out into different functions jesus christ
   if(index==-1&&!allClasses){
   const result=await getSettings(client.district,"pleaseGodLetNobodySomehowMagicallyHashToThisHashOrItBreaks")
@@ -250,6 +250,57 @@ async function reset(allClasses=false,field="letter"){ //god I should really spe
 }
 
 
+*/
+
+function templateFinals(mode){
+    let settings = grades.settings as any
+      if(mode=="automatic"){
+		if(!settings.default.finals){
+      //@ts-ignore
+			let mps=getRealMarkingPeriods(periods)
+			let weight=1/mps.length
+			let categories=mps.map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))
+			
+			settings.default.finals={show:true,categories:categories,isSemester:false,semester:{show:true,semesters:[mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight})),mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))]}}
+		}
+
+	}else{
+		settings.default.finals={show:false,categories:[],isSemester:false,semester:{show:false,semesters:[]}}
+	}
+
+  return settings.default.finals
+  
+
+}
+
+
+
+
+
+
+
+
+function showDefaults(field){
+  let settings = grades.settings as any
+  if(index!=-1){
+    console.log("intialize finals 2 from show defaults props log",grades,settings,grades[period].courses[index].identifier)
+    const template={...settings.default,finals:initalizeFinals2(grades,settings,grades[period].courses[index].identifier)}
+    if(field=="finals"){
+      setFinals(template[finals])
+    }
+    else if(field=="letter"){
+      setLetterScale(template["letterScale"])
+    }
+    else if(field=="rounding"){
+      setRounding(template["rounding"])
+    }
+  }
+  else{
+
+  }
+
+
+}
 
 
 
@@ -287,6 +338,7 @@ function hasDuplicatesSorted(arr) {
   }
   return false;
 }
+
 
 
 
@@ -489,9 +541,9 @@ className="overflow-y-auto"
         type="button"
         className="text-white md:p-2 md:text-base bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 py-1 rounded-lg text-sm"
         style={{}}
-        onClick={()=>{reset()}}
+        onClick={()=>{showDefaults("letterScale")}}
       >
-        {index==-1 ? "Show Defaults" : "Show Defaults"} 
+        {"Show Defaults"} 
       </button>
 
       </div> 
@@ -537,7 +589,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         type="button"
         className=" mt-2 py-1 text-white px-2 bg-primary-600 hover:bg-primary-800 active:bg-primary-500 rounded-lg text-sm"
         style={{}}
-        onClick={()=>{reset(false,"rounding")}}
+        onClick={()=>{showDefaults("rounding")}}
       >
        Reset
       </button>
