@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from "react";
 import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
-import { reCalculateAll,parseGrades,letterGradeColor} from "../utils/grades";
+import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse} from "../utils/grades";
 import {colorShit} from "./colors"
 import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2} from "../utils/grades"
 import { count } from "console";
@@ -50,7 +50,7 @@ interface props{
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period}:props){
           const settings= grades?.[0]?.settings
   const course = index==-1 ? {courseID:"default",settings:{finals:undefined},name:"",identifier:""} : grades?.[period]?.courses[parseInt(index)];
-        const courseSettings=settings[course.identifier]  
+        const courseSettings=course.settings
   const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : settings.default.letterScale)
         const [rounding,setRounding]=useState<CourseSettings["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : settings.default.rounding)
         const [active,setActive]=useState<[string,string]>(['',''])
@@ -148,7 +148,7 @@ async function saveNew(){
   rounding: rounding,
   letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse() //need to ad shi for the new shi type shi
 };
-        const augmentedGrades=structuredClone(grades)
+        const tempGrades=structuredClone(grades)
         const tempSettings=structuredClone(settings)
 
         //now we examine, did shi really change? is shi rlly diff?
@@ -158,8 +158,8 @@ async function saveNew(){
         if(index!=-1){
             //finals
           let flag=true
-        for(let key in settings.default.finals){
-            if(JSON.stringify(settings.default.finals[key])!=JSON.stringify(finals[key])){
+        for(let key in tempSettings.default.finals){
+            if(JSON.stringify(tempSettings.default.finals[key])!=JSON.stringify(finals[key])){
               flag=false;
             }
           }
@@ -173,12 +173,12 @@ async function saveNew(){
 
 
         //letterScale
-        if(JSON.stringify(settings.default.letterScale)==JSON.stringify(newScale.letterScale)){
+        if(JSON.stringify(tempSettings.default.letterScale)==JSON.stringify(newScale.letterScale)){
           newScale.letterScale=false; //fuck off mate
         }
       
         //rounding
-        if(JSON.stringify(rounding)==JSON.stringify(settings.default.rounding)){
+        if(JSON.stringify(rounding)==JSON.stringify(tempSettings.default.rounding)){
           newScale.rounding=false
         }
 
@@ -191,16 +191,47 @@ async function saveNew(){
 
 
 
-        tempSettings[course.identifier]=newScale
+        tempSettings[course.identifier]=newScale //cause fuck ur manual mode
 
     const result=await setSettings(client.district,client.username,client.encrypted,client.password,tempSettings)
     if(result.status){
         console.log("success")
-        
-      console.log("i sohuldn't have tried to do weird bullshit...",tempSettings)
-      let m:any=augmentedGrades.map(grades=>reCalculateAll(grades,tempSettings))
-        setGrades(m)
-        setShowModal(false)
+       
+
+        //oh boy. new runtime settings!!! basically need to recalculate and parse everything.
+
+
+        	for(let key in tempSettings){
+		        if(key=="default"||key=="mode"){continue}
+		        else{
+			    for(let prop in tempSettings[key]){
+				    if(tempSettings[key][prop]==false){
+					    tempSettings[key][prop]=tempSettings.default[prop] //fallback to default if a class's settings props are set to false
+				}
+			}
+		}
+		tempSettings[key]=initalizeFinals2(gradesCache,tempSettings,key)
+	}
+       console.log(tempSettings,"sigh a million sighs")
+        for(let grade of tempGrades){
+            grade.settings=tempSettings
+            for(let ncourse of grade.courses){
+              //our settings obj isn't raw here so we actually have much less processing to do
+              if(!tempSettings[ncourse.identifier]){ //fuck your manual mode, for now
+                ncourse.settings=initalizeFinals2(grades,tempSettings,ncourse.identifier)
+              }
+              else{ncourse.settings=tempSettings[ncourse.identifier]} //fuck ur manual mode
+              
+              ncourse=reCalculateCourse(ncourse)
+            }
+        }
+
+      const ham=index!=-1 ? tempGrades[period].courses[index].settings : tempSettings.default
+      setLetterScale(ham.letterScale)
+      setRounding(ham.rounding)
+      setFinals(ham.finals)
+      setGrades(tempGrades)
+      setShowModal(false)
 
 
     }
@@ -213,7 +244,7 @@ async function saveNew(){
     }
     else{
        
-        createError("Malformed Scale")
+        createError("Malformed Grading Scale")
     }
 
 
@@ -314,7 +345,8 @@ async function reset(allClasses=false,field="letter"){ //god I should really spe
 
 function showDefaults(field){
   if(index!=-1){
-    let hoopDreams=initalizeFinals2(grades,settings,grades[period].courses[index].identifier).finals
+    //@ts-ignore
+    let hoopDreams=initalizeFinals2(grades,{mode:settings.mode,"default":settings.default},course.identifier).finals
  const template={...settings.default,finals:hoopDreams}
     if(field=="finals"){
       console.log(template["finals"],"rock lobster")
@@ -788,7 +820,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
               temp.categories[i].weight=parseFloat(e.target.value)/100
               setFinals(temp)
             }}
-            value={f.weight*100}
+            value={Number((f.weight*100).toFixed(4))}
             />
             <p>%</p>
             </div>

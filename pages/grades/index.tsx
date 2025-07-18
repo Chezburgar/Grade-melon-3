@@ -336,7 +336,7 @@ export default function Grades({
 													layoutId={`final-${layoutID}`}
 													layout="preserve-aspect"
 													style={{color:finalGrade.color.includes("#") && finalGrade.color}}
-													className={`text-md md:text-xl font-bold text-${grade.color}-400`}
+													className={`text-md md:text-xl font-bold text-${finalGrade.color}-400`}
 												>
 													Final {finalGrade.letter} ({!isNaN(finalGrade.raw) ? (`${settings.rounding.percent ? (finalGrade.raw).toFixed(settings.rounding.percentPlaces) : finalGrade.raw}%`) : ""})
 												</motion.div>}

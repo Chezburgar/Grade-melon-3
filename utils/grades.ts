@@ -323,8 +323,8 @@ function simplifyWeights(categories:Category[]){
 	const seen=[]
 	const real=[]
 	for(let category of categories){
-		if(!seen.includes(category.mp+category.type)){
-			seen.push(category.mp+category.type)
+		if(!seen.includes(""+category.mp+category.type)){
+			seen.push(""+category.mp+category.type)
 			real.push(category)
 		}
 	}
@@ -341,10 +341,12 @@ function simplifyWeights(categories:Category[]){
 
 }
 
-function initalizeFinals2<Finals>(cache:Cache,settings:Settings,identifier:string){
-	settings=structuredClone(settings)
+function initalizeFinals2<Finals>(cache:Cache,raw_settings:Settings,identifier:string){
+
+
+	const settings=structuredClone(raw_settings)
 	console.log("I want a perfect body",settings)
-	let temp:any={}
+
 
 	//@ts-ignore
 	if(settings.mode=="manual"){
@@ -353,12 +355,13 @@ function initalizeFinals2<Finals>(cache:Cache,settings:Settings,identifier:strin
 		//we handle nothing actually. kys.
 
 
-		return settings[id]
+		return settings[id] || settings.defualt
 
 	}
 	else{
-//it is KNOWN that categories will not be undefined cuz it'll be either set explicitly or generated 
-		//in the preparse
+//it is KNOWN that categories will not be undefined cuz it'll be either set explicitly right here right now
+		if(!settings[identifier]){settings[identifier]=settings.default;}
+
 		const categories=[]
 		for(let category of settings[identifier].finals.categories){
 			if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
@@ -368,7 +371,8 @@ function initalizeFinals2<Finals>(cache:Cache,settings:Settings,identifier:strin
 			}
 			categories.push(category)
 		}
-		
+		settings[identifier].finals.categories=categories
+
 		//mk so there's still the semester shit righhhhhhhht
 
 		//sigh...
@@ -383,11 +387,12 @@ function initalizeFinals2<Finals>(cache:Cache,settings:Settings,identifier:strin
 				}
 				categories.push(category)
 			}
+			semester.categories=categories
 		}
 
 		//that oughta do it I guess. now for el manuel
 
-		return {...settings[identifier],...temp} //over ride manual hell yeah biatch
+		return {...settings[identifier]} //over ride manual hell yeah biatch
 
 	}
 
@@ -480,6 +485,9 @@ function templateFinals(mode,periods){
 function getCache(books:Gradebook[]):Cache{
 	//pre parsing
 	const settings=books[0].gradingScale
+
+	//this is for setting the default entry for finals obj. eventually, this should be moved to the 
+	//backend. but for now, since it changes so often in dev, we process it here.
 	if(settings.mode==undefined){settings.mode="automatic"}
 
 	const periods=books[0].reportingPeriod.available.map(({ name, index, date }) => ({
@@ -500,30 +508,7 @@ function getCache(books:Gradebook[]):Cache{
 	*/
 
 
-
-/*This is dumb. It exists twice because we're operating with the assumption that EVERY 
-class will have an entry in setttings
-
-whereas before we operated under the assumption that while every class
-would have an entry in COUSRE.SETTINGS, it wouldn't necessarily
-have an entry in the global grades.settings, which, frnakly, though it's lost of some its value,
-remains the superior design choice
-
-
-*/
-	for(let grades of gradesCache){
-		grades.settings=settings
-		for(let course of grades.courses){
-			const id = settings.mode=="automatic" ? course.identifier : Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(course.identifier))]
-			if(settings[id]==undefined){
-				settings[id]=settings.default
-			}
-			course.settings=settings[id]
-		}
-	}
-
-
-
+	
 		//basically this is the handling for if a course needs to have some settings set explicit but others 
 	//remain at the default, it is thus essential whenever we be revamping type shit type shit type shit
 	//type shit. 
@@ -540,16 +525,20 @@ remains the superior design choice
 	}
 
 
-		for(let grades of gradesCache){
+//this will ensure every course has a runtime settings obj in course.settings while only leaving 
+//real swag players with one's in the top level settings objects
+	for(let grades of gradesCache){
 		grades.settings=settings
 		for(let course of grades.courses){
 			const id = settings.mode=="automatic" ? course.identifier : Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(course.identifier))]
 			if(settings[id]==undefined){
-				settings[id]=settings.default
+				course.settings=initalizeFinals2(gradesCache,settings,course.identifier)
+				console.log(course.setttings,"electric avenue")
 			}
-			course.settings=settings[id]
+		
 		}
 	}
+
 
 
 	console.log("he's officially lost it chat",settings)
