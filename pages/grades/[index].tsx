@@ -549,7 +549,7 @@ export default function Grades({
 					
 												{
 						course.settings.finals.show &&
-						<div className="mt-2.5 mb-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700">
+						<div className="mt-2.5 mb-2.5 w-full bg-gray-200 rounded-full dark:bg-gray-700 relative">
 						<div
 							className={ `bg-${finalGrade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-5 md:h-6`}
 							style={{
@@ -557,7 +557,7 @@ export default function Grades({
 							}}
 						>
 									<p className="absolute">
-									Final Calc ({!isNaN(finalGrade.raw) ? `${course.settings.rounding.percent ? (finalGrade.raw.toFixed(course.settings.rounding.percentPlaces))+"%" : finalGrade.raw}%` : "N/A"})
+									Final Calc ({!isNaN(finalGrade.raw) ? `${course.settings.rounding.percent ? (finalGrade.raw.toFixed(course.settings.rounding.percentPlaces)) : finalGrade.raw}%` : "N/A"})
 								</p>
 						</div>
 					</div>}

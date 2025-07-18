@@ -23,8 +23,8 @@ export default function GradeField({ value, onChange,onBlur=()=>{} }: GradeField
 		await onChange(e);
 	};
 
-	async function onBlurFunc(){
-		await onBlur();
+	async function onBlurFunc(e){
+		await onBlur(e);
 	}
 
 
@@ -49,7 +49,7 @@ export default function GradeField({ value, onChange,onBlur=()=>{} }: GradeField
 					type="number"
 					value={valasString}
 					onChange={onUpdate}
-					onBlur={onBlurFunc}
+					onBlur={(e)=>onBlurFunc(e)}
 					className="w-12 inline-block bg-gray-50 border-none bg-transparent p-2 md:p-1 text-gray-900 sm:text-xs rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 				/>
 			)}

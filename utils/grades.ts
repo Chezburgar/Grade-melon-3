@@ -320,6 +320,18 @@ const parseAssignmentName = (name: string): string => {
 
 
 function simplifyWeights(categories:Category[]){
+	const seen=[]
+	const real=[]
+	for(let category of categories){
+		if(!seen.includes(category.mp+category.type)){
+			seen.push(category.mp+category.type)
+			real.push(category)
+		}
+	}
+	categories=real
+
+
+
 	let totalWeight:number=categories.reduce((a,b)=>(a+b.weight),0)
 	for(let category of categories){
 		category.weight=category.weight/totalWeight

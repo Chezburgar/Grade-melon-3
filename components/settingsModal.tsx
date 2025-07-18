@@ -43,10 +43,15 @@ interface props{
 
 }
 
+
+
+
+
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period}:props){
-          const settings= grades?.[0]?.settings  	  
-  const course = index==-1 ? {courseID:"default",settings:{finals:undefined},name:""} : grades?.[period]?.courses[parseInt(index)];
-        const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : settings.default.letterScale)
+          const settings= grades?.[0]?.settings
+  const course = index==-1 ? {courseID:"default",settings:{finals:undefined},name:"",identifier:""} : grades?.[period]?.courses[parseInt(index)];
+        const courseSettings=settings[course.identifier]  
+  const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : settings.default.letterScale)
         const [rounding,setRounding]=useState<CourseSettings["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : settings.default.rounding)
         const [active,setActive]=useState<[string,string]>(['',''])
         const [advancedOpen,setAdvancedOpen]=useState(false)
@@ -55,7 +60,9 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [accordion,setAccordion]=useState([index==-1,index!=-1])
 
 
-      console.log("quick output",gradesCache,grades)
+      console.log("quick output",finals)
+
+
 
 
 
@@ -136,14 +143,55 @@ async function saveNew(){
   
     if(validate()){
         
-        const newScale:CourseSettings | GlobalSettings = {
-  finals:{...finals,categories:simplifyWeights(finals.categories)},
+        const newScale:CourseSettings | any = {
+  finals:{...finals,categories:simplifyWeights(finals.categories).sort((a,b)=>a.mp-b.mp)},
   rounding: rounding,
   letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse() //need to ad shi for the new shi type shi
 };
         const augmentedGrades=structuredClone(grades)
         const tempSettings=structuredClone(settings)
-        tempSettings[course.courseID.substring(0,course.courseID.length-1)]=newScale
+
+        //now we examine, did shi really change? is shi rlly diff?
+      
+
+
+        if(index!=-1){
+            //finals
+          let flag=true
+        for(let key in settings.default.finals){
+            if(JSON.stringify(settings.default.finals[key])!=JSON.stringify(finals[key])){
+              flag=false;
+            }
+          }
+          if(flag){
+            newScale.finals=false;
+          }
+        
+
+
+
+
+
+        //letterScale
+        if(JSON.stringify(settings.default.letterScale)==JSON.stringify(newScale.letterScale)){
+          newScale.letterScale=false; //fuck off mate
+        }
+      
+        //rounding
+        if(JSON.stringify(rounding)==JSON.stringify(settings.default.rounding)){
+          newScale.rounding=false
+        }
+
+
+
+}
+
+
+
+
+
+
+        tempSettings[course.identifier]=newScale
 
     const result=await setSettings(client.district,client.username,client.encrypted,client.password,tempSettings)
     if(result.status){
@@ -266,13 +314,15 @@ async function reset(allClasses=false,field="letter"){ //god I should really spe
 
 function showDefaults(field){
   if(index!=-1){
-    console.log("intialize finals 2 from show defaults props log",grades,settings,grades[period].courses[index].identifier)
-    const template={...settings.default,finals:initalizeFinals2(grades,settings,grades[period].courses[index].identifier)}
+    let hoopDreams=initalizeFinals2(grades,settings,grades[period].courses[index].identifier).finals
+ const template={...settings.default,finals:hoopDreams}
     if(field=="finals"){
-      setFinals(template[finals])
+      console.log(template["finals"],"rock lobster")
+      setFinals(template["finals"])
     }
     else if(field=="letter"){
       setLetterScale(template["letterScale"])
+
     }
     else if(field=="rounding"){
       setRounding(template["rounding"])
@@ -320,6 +370,11 @@ function hasDuplicatesSorted(arr) {
     if (arr[i] === arr[i - 1]) return true;
   }
   return false;
+
+
+
+
+
 }
 
 
@@ -524,7 +579,7 @@ className="overflow-y-auto"
         type="button"
         className="text-white md:p-2 md:text-base bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 py-1 rounded-lg text-sm"
         style={{}}
-        onClick={()=>{showDefaults("letterScale")}}
+        onClick={()=>{showDefaults("letter")}}
       >
         {"Show Defaults"} 
       </button>
@@ -609,8 +664,22 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
         }} checked={finals.show}></input>
     </div>
+{
+  /*
+    <div style={{alignItems:"center"}} className="mt-2 flex gap-2">
+        <p className="dark:text-white">Single Semester Class?</p>
+        <input type="checkbox" onChange={(e)=>{
+          let temp=structuredClone(finals)
+          temp.isSemester=!temp.isSemester
+          setFinals(temp)
 
-    <p className="-ml-2 dark:text-white text-lg mt-4">Final Grade Calculation</p>
+        }} checked={finals.isSemester}></input>
+    </div>
+    */
+}
+    
+
+    <p className="-ml-2 dark:text-white text-lg mt-4">Final Grade Categories</p>
 
 
 
@@ -665,11 +734,12 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-            <select value={f.period} onChange={(e)=>{
+            <select value={f.mp} onChange={(e)=>{
               let temp=structuredClone(finals)
-              temp.categories[i].period=parseInt(e.target.value)
+              temp.categories[i].mp=parseInt(e.target.value)
+              const index=grades[parseInt(e.target.value)].courses.findIndex(c=>c.identifier==course.identifier)
+              temp.categories[i].courseIndex=index!=-1 ? index : NaN
               let t=temp.categories[i]
-              t.grade=gradesCache[t.perod].courses[t.courseIndex].grade //uninteded interference behavior with the "live" one
               setFinals(temp)
 
             }}
@@ -684,17 +754,18 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           >
          
             <select value={f.courseIndex}
+            disabled={settings.mode=="automatic"}
               className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
               onChange={(e)=>{
                 let temp=structuredClone(finals)
                 temp.categories[i].courseIndex=parseInt(e.target.value)
                 let t=temp.categories[i]
-                t.grade=gradesCache[t.period].courses[t.courseIndex].grade // will cause da interference 
                 setFinals(temp)
 
               }}
             >
-        {gradesCache[f.period].courses.map((c,j)=>(
+        <option className="bg-gray-600" value={NaN}>Auto/Unknown</option>
+        {gradesCache[f.mp].courses.map((c,j)=>(
           <option className="bg-gray-600" value={j}>{c.name.trim()}</option>
 
         ))}
@@ -714,7 +785,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             onChange={(e)=>{}}
             onBlur={(e)=>{
               let temp=structuredClone(finals)
-              finals.categories[i].weight=parseFloat(e.target.value)/100
+              temp.categories[i].weight=parseFloat(e.target.value)/100
               setFinals(temp)
             }}
             value={f.weight*100}
@@ -752,10 +823,18 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
       </tbody>
     </table>
     </div>
+    <div className="flex justify-between">
      <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
      onClick={()=>{addFinalCategory()}}>Add+</button>
    
+       <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+     onClick={()=>{showDefaults("finals")}}>Show Defaults</button>
+   
+
+
+   </div>
     </div>
+
 </details>}
 
 </Modal.Body>
