@@ -1,6 +1,5 @@
 import { Gradebook } from "studentvue";
 import Grades from "../pages/grades";
-import { gradesCache } from "./tempCache";
 
 interface Assignment {
 	name: string;
@@ -407,42 +406,6 @@ function initalizeFinals2<Finals>(cache:Cache,raw_settings:Settings,identifier:s
 
 
 
-
-function initalizeFinals<Finals>(grades:Grades,index:number,courseSettings:CourseSettings){
-			let temp:any={}
-			//temp hardSet
-			temp.show=courseSettings.finals?.show != undefined ? courseSettings.finals?.show : true //this will need to implement a check for mcps later;
-
-			//the defualt settings system if no overides given
- 
-			if((courseSettings.finals?.categories==undefined)){
-
-			let categories=[]
-
-			for(let i=0;i<gradesCache.length;i++){ //will be different when coded for mcps indeces
-			//by default we gunna not assume anything about final exams. we'll assume 4-term avg with error handling
-			//for 2-term classes
-
-				console.log("let's diagnose it I guess",index,grades?.courses[index].courseID,i,grades.courses[index].courseID,gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[index].courseID.substring(0,grades.courses[(index)].courseID.length-1)),)
-				let tempCat={period:i,weight:0.25,type:"course"}
-				const specIndex=gradesCache[i].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==grades?.courses[index].courseID.substring(0,grades.courses[index].courseID.length-1))
-				if(specIndex==-1){continue}
-				else{
-					categories.push({courseIndex:specIndex,...tempCat})
-				
-			}
-			}
-			
-			temp.categories=categories
-		}else{
-			console.log("wait what")
-			temp.categories=courseSettings.finals.categories.map(category=>({...category}))
-		}
-
-		temp.categories=simplifyWeights(temp.categories)
-		return temp as Finals
-
-	  }
 
 
 
@@ -1075,6 +1038,6 @@ export {
 //	calculateGPA,
 //	updateGPA,
 	abbreviate,
-	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals,initalizeFinals2
+	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals2
 };
 export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings };
