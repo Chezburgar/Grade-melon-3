@@ -5,7 +5,6 @@ import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse} from ".
 import {colorShit} from "./colors"
 import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2} from "../utils/grades"
 import { count } from "console";
-import {gradesCache} from "../utils/tempCache"
 import GradeField from "./GradeField";
 import StudentVue from "studentvue";
 
@@ -30,7 +29,7 @@ We'll presume for now that semester grades are no more
 
 
 interface props{
-  client:Awaited<ReturnType<typeof StudentVue.login>>[0]
+  client:Awaited<ReturnType<typeof StudentVue.login>>["client"]
   index:string|-1;
   showModal:boolean;
   setShowModal:(boolean:boolean)=>void;
@@ -42,6 +41,7 @@ interface props{
   setFinals?:any;
 
 }
+
 
 
 
@@ -63,7 +63,14 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
       console.log("quick output",finals)
 
 
+useEffect(()=>{console.log("where's your head at?")
+  setLetterScale(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : settings.default.letterScale)
+  setRounding(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : settings.default.rounding)
+  setFinals(course.settings.finals)    
 
+
+
+},[period])
 
 
 function mutate(e,letter,bound){
@@ -102,7 +109,7 @@ function addLetter(){
 function addFinalCategory(){
   let temp=structuredClone(finals);
 
-  temp.categories.unshift({period:grades?.[period]?.period.index,courseIndex:index,weight:0,type:"exam"})
+  temp.categories.unshift({mp:grades?.[period]?.period.index,courseIndex:index,weight:0,type:"exam"})
   setFinals(temp)
 }
 
@@ -210,7 +217,7 @@ async function saveNew(){
 				}
 			}
 		}
-		tempSettings[key]=initalizeFinals2(gradesCache,tempSettings,key)
+		tempSettings[key]=initalizeFinals2(grades,tempSettings,key)
 	}
        console.log(tempSettings,"sigh a million sighs")
         for(let grade of tempGrades){
@@ -797,7 +804,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
               }}
             >
         <option className="bg-gray-600" value={NaN}>Auto/Unknown</option>
-        {gradesCache[f.mp].courses.map((c,j)=>(
+        {grades[f.mp].courses.map((c,j)=>(
           <option className="bg-gray-600" value={j}>{c.name.trim()}</option>
 
         ))}

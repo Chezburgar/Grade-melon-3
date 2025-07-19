@@ -6,7 +6,8 @@ import Head from "next/head";
 import { TbRefresh, TbMathSymbols } from "react-icons/tb";
 import {
 	parseGrades,
-	Grades as GradesType,parseDate,findCurrentPeriod,getCache,Cache,calcFinal
+	Grades as GradesType,parseDate,findCurrentPeriod,getCache,Cache,calcFinal,
+	initalizeFinals2
 	//calculateGPA,
 	//updateGPA,
 } from "../../utils/grades";
@@ -15,12 +16,11 @@ import { motion } from "framer-motion";
 import CustomAd from "../../components/customAd";
 import { BsGearWideConnected } from "react-icons/bs";
 import SettingsModal from "../../components/settingsModal"
-import { gradesCache as g } from "../../utils/tempCache";
-import {rawsCache as killMe} from "../../utils/tempCache2"
 import StudentVue from "studentvue";
+import {getGradebooks} from "../../utils/soap"
 
 interface GradesProps {
-	client: Awaited<ReturnType<typeof StudentVue.login>>[0];
+	client: Awaited<ReturnType<typeof StudentVue.login>>["client"];
 	grades: Cache;
 	setGrades: (grades: Cache) => void;
 	period: number;
@@ -81,6 +81,22 @@ export default function Grades({
 			if (!grades && client) {
 				//setLoading(true);
 				try {
+					getGradebooks(client,null,null).then(raws=>{
+						setGrades(getCache(raws))
+						setPeriod(findCurrentPeriod(getCache(raws)))
+						setLoading(false)
+					})				
+
+
+
+
+
+
+
+
+
+
+					/*
 					client.gradebook().then(([res,extra]) => {
 						res.gradingScale=extra?.gradingScale
 						let parsedGrades = parseGrades(res);
@@ -94,7 +110,9 @@ export default function Grades({
 						console.log(parsedGrades)
 						setPeriod(findCurrentPeriod(getCache(killMe)));
 						setLoading(false);
+						
 					});
+					*/
 				} catch (err) {
 					console.log(err);
 					createError(err.message);
@@ -118,11 +136,15 @@ export default function Grades({
 			.then(([res,extra]) => {
 				res.gradingScale=extra?.gradingScale
 				console.log(res);
-			//	setGrades(parseGrades(res));
-			//again BS
-				//let g = somebs 
-				//@ts-ignore
-				setGrades(getCache(killMe))
+				const parsed=parseGrades(res,grades[0].settings)
+				const temp=structuredClone(grades)
+				temp[p]=parsed;
+				//not rlly done, are we...
+				for(let i=0;i<temp[p].courses.length;i++){
+					temp[p].courses[i].settings=grades[p].courses[i].settings
+				}
+
+				setGrades(temp)
 				setPeriod(p);
 				setLoading(false);
 			
@@ -338,7 +360,7 @@ export default function Grades({
 													style={{color:finalGrade.color.includes("#") && finalGrade.color}}
 													className={`text-md md:text-xl font-bold text-${finalGrade.color}-400`}
 												>
-													Final {finalGrade.letter} ({!isNaN(finalGrade.raw) ? (`${settings.rounding.percent ? (finalGrade.raw).toFixed(settings.rounding.percentPlaces) : finalGrade.raw}%`) : ""})
+													Final {finalGrade.letter} {!isNaN(finalGrade.raw) ? (`(${settings.rounding.percent ? (finalGrade.raw).toFixed(settings.rounding.percentPlaces) : finalGrade.raw}%)`) : ""}
 												</motion.div>}
 												</div>
 

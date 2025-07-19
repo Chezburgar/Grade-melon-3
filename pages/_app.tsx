@@ -7,7 +7,6 @@ import Topbar from "../components/TopBar";
 import SideBar from "../components/SideBar";
 import MobileBar from "../components/MobileBar";
 import CustomAd from "../components/customAd";
-import {gradesCache as g} from "../utils/tempCache"
 import { Grades,parseGrades,findCurrentPeriod,getCache} from "../utils/grades";
 import Head from "next/head";
 import { HiX } from "react-icons/hi";
@@ -16,8 +15,6 @@ import Cookies from "js-cookie";
 import useWindowSize from '../hooks/useWindowSize';
 import { Analytics } from "@vercel/analytics/react";
 import allDistricts from "../lib/districts";
-import {rawsCache as killMe} from "../utils/tempCache2"
-
 
 interface Toast {
 	title: string;
@@ -31,12 +28,12 @@ function MyApp({ Component, pageProps }) {
 	const [districtURL, setDistrictURL] = useState(
 		undefined
 	);
-	const [client, setClient] = useState<Awaited<ReturnType<typeof StudentVue.login>>[0]>(undefined);
+	const [client, setClient] = useState<Awaited<ReturnType<typeof StudentVue.login>>["client"]>(undefined);
 	 
 	const [studentInfo, setStudentInfo] = useState(undefined);
 	const [toasts, setToasts] = useState<Toast[]>([]);
+	const [cacheLoading,setCacheLoading]=useState(true)
 	const [grades, setGrades] = useState<Grades[]>();
-	const [gradesCache,setGradesCache] = useState<Grades[]>(g)
 	const [period, setPeriod] = useState<number>();
 	const [loading, setLoading] = useState(false);
 	const [referal,setReferal]=useState(false);
@@ -107,15 +104,18 @@ it would probably be a good idea to show the final grade also on the Home Screen
 			encrypted:encrypted ||false
 		},apiUrl)
 			.then(async (res) => {
-				const gradebook=res[1];
-				const fetchedClient=res[0];
+				const fetchedClient=res.client;
+				let extraData:any={}
+				for(let resp of res.responses){
+					extraData={...extraData,...resp[1]}
+				}
 				//@ts-ignore
-				gradebook.gradingScale=res[2].gradingScale
+				
 				//@ts-ignore
-				Cookies.set("token",res[2].token,{expires:5/(60*24)})
+				Cookies.set("token",extraData.token,{expires:5/(60*24)})
 				console.log("para me?")
 				console.log(fetchedClient);
-				await setClient(fetchedClient);
+				setClient(fetchedClient);
 				
 				districts.forEach(district=>{
 					if(district.parentVueUrl==districtURL){Cookies.set("districtURL",JSON.stringify(district),{expires:14})}
@@ -137,7 +137,6 @@ it would probably be a good idea to show the final grade also on the Home Screen
 					Cookies.remove("password");
 					Cookies.remove("districtURL");
 				}
-				const parsedGrades=parseGrades(gradebook);
 				/*sigh. I could implement lazy loading here so that we do this inital fetch of no report period
 				and display that and put up blockers for the finals elements that need the full gradesCache
 				that get chagned asynchronossly via an additional useState hook call it loading2 or smthn
@@ -151,9 +150,9 @@ it would probably be a good idea to show the final grade also on the Home Screen
 
 				//let g=parseGrades(gradebook[]) or smthn so its a list of them or whatever. 
 
-		 
-				setGrades(getCache(killMe));
-				setPeriod(findCurrentPeriod(getCache(killMe)));
+				res.responses[0][0].gradingScale=extraData.gradingScale;
+				setGrades(getCache(res.responses.map(resp=>resp[0])));
+				setPeriod(findCurrentPeriod(getCache(res.responses.map(resp=>resp[0]))));
 
 
 				if(router.pathname=="/"||router.pathname=="/login"){router.push("/grades")}
@@ -415,8 +414,6 @@ const logout = async () => {
 								ad={ad}
 								setAd={setAd}
 								width={width}
-								gradesCache={gradesCache}
-								setGradesCache={setGradesCache}
 						 
 
 							/>
@@ -452,8 +449,6 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
-										gradesCache={gradesCache}
-										setGradesCache={setGradesCache}
 							 
 									/>
 								</AnimateSharedLayout>
@@ -485,8 +480,6 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
-										gradesCache={gradesCache}
-										setGradesCache={setGradesCache}
 	 
 									/>
 								</AnimateSharedLayout>

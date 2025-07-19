@@ -28,7 +28,7 @@ import { BsGearWideConnected } from "react-icons/bs";
 import { BsGraphUp } from "react-icons/bs";
 import CustomAd from "../../components/customAd";
 import SettingsModal from "../../components/settingsModal"
-import {rawsCache as killMe} from "../../utils/tempCache2"
+import {getGradebooks} from "../../utils/soap"
 
 
 
@@ -115,6 +115,17 @@ export default function Grades({
 			if (!grades&&client&&ad!==undefined) {
 				//oh my fucking god just fucking stop for fucks sake
 
+									getGradebooks(client,null,null).then(raws=>{
+										setGrades(getCache(raws))
+										setPeriod(findCurrentPeriod(getCache(raws)))
+										setLoading(false)
+									})				
+				
+				
+				
+
+
+/*
 				client.gradebook().then(([res,extras]) => {
 					res.gradingScale=extras?.gradingScale
 					console.log(typeof index);
@@ -126,6 +137,7 @@ export default function Grades({
 					setPeriod(findCurrentPeriod(realShi));
 					setLoading(false);
 				});
+				*/
 			}
 		} catch {
 			if (localStorage.getItem("remember") === "false") {
@@ -229,17 +241,21 @@ export default function Grades({
 		if(getFresh){
 		client
 			.gradebook(p)
-			.then(([res,extra]) => {
-				res.gradingScale=extra?.gradingScale
-				console.log(res);
-			//	setGrades(parseGrades(res));
-			//@ts-ignore
-				setGrades(getCache(killMe))	
-
-
-				setPeriod(p);
-				setLoading(false);
-			})
+						.then(([res,extra]) => {
+							res.gradingScale=extra?.gradingScale
+							console.log(res);
+							const parsed=parseGrades(res,grades[0].settings)
+							const temp=structuredClone(grades)
+							temp[p]=parsed;
+							//not rlly done, are we...
+							for(let i=0;i<temp[p].courses.length;i++){
+								temp[p].courses[i].settings=grades[p].courses[i].settings
+							}
+			
+							setGrades(temp)
+							setPeriod(p);
+							setLoading(false);
+						})
 			.catch((err) => {
 				createError(err.message);
 				setLoading(false);

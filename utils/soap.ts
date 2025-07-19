@@ -1,6 +1,90 @@
-import {Grades,gradingScale,parseGrades} from "./grades"
-import {Client as C} from "studentvue"
+import {Grades,parseGrades} from "./grades"
+import StudentVue,{Gradebook,Client} from "studentvue"
 
+
+
+const url=""; //dw it'll get passed in
+
+
+async function inital(params:ConstructorParameters<typeof Client>){
+
+}
+
+
+
+
+export async function getGradebooks(client:Awaited<ReturnType<typeof StudentVue.login>>["client"],lock,setLock):Promise<Gradebook[]>{
+
+    const periods=localStorage.getItem("mps");
+    if(!periods){
+        //cacheLoading
+        const result=await client.gradebook();
+        //setLock(true); if we did a lazy loading implementation
+        	const periods=result[0].reportingPeriod.available.map(({ name, index, date }) => ({
+			name:name,
+			date:date,
+			index: index,
+		}))
+
+        localStorage.setItem("mps",JSON.stringify(periods))
+        const remainder=await Promise.all(periods.map(mp=>client.gradebook(mp.index)))
+        for(let extra of remainder.map(res=>res[1])){
+            result[1]={...result[1],...extra}
+        }
+        const final=[result[0],...remainder.map(resp=>resp[0])]
+        final[0].gradingScale=result[1].gradingScale //this is all dumb shi but I don't wanna do a refactor rn
+        const extraData=result[1];
+        return final
+    }
+    else{
+        const mps=JSON.parse(periods);
+        const result=await Promise.all(mps.map(mp=>client.gradebook(mp.index)))
+        return result
+    }
+
+}
+
+
+
+//un-used unless I really commit to restructuring the underlying library which right now I don't wanna do
+async function proxyAxios(xmls,params){
+    const result = await (await fetch(url,{
+        "headers":{
+            "content-type":"application/json",
+        },
+        "method":"POST",
+        "body":JSON.stringify(params)
+    })).json()
+
+    return result
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+fuck all that shit.
+You should always buidl the front end first.
+
+    const client = new Client(
+      {
+        username: credentials.username,
+        password: credentials.password,
+        districtUrl: endpoint,
+        isParent: credentials.isParent,
+        encrypted:credentials.encrypted
+      },
+      proxyUrl,url
+    );
 
 
 
@@ -72,3 +156,6 @@ async function login(districtURL,credentials,proxyUrl){
 
 
 export {Client,login}
+
+
+*/
