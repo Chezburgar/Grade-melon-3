@@ -89,8 +89,8 @@ export default function Grades({
 	
 }: GradesProps) {
 	const router = useRouter();
-	const { index }: { index?: string } = router.query; //you could've just parseInt'd it here but u didnt' and now i'm too lazy to refactor i hate u
-	const course = grades?.[period]?.courses[parseInt(index)];
+	const index = parseInt(String(router.query.index)); //you could've just parseInt'd it here but u didnt' and now i'm too lazy to refactor i hate u
+	const course = grades?.[period]?.courses[index];
 	const [loading, setLoading] = useState(grades ? false : true);
 	const [showModal, setShowModal] = useState(false);
 	const [modalDetails, setModalDetails] = useState(0);
@@ -151,7 +151,7 @@ export default function Grades({
 		const deleteLast=(event)=>{
 			if (event.ctrlKey && event.key === "z") {
 				event.preventDefault(); // Prevent default undo behavior if needed
-				let temp=grades?.[period]?.courses[parseInt(index as string)];
+				let temp=grades?.[period]?.courses[index];
 		
 
 			if(temp.assignments[0].custom==true){
@@ -160,7 +160,7 @@ export default function Grades({
 		}
 		}
 		
-		if(grades?.[period]?.courses[parseInt(index as string)]?.assignments?.length>1){
+		if(grades?.[period]?.courses[index]?.assignments?.length>1){
 			window.addEventListener("keydown", deleteLast);
 		}
 		return () => {
@@ -172,8 +172,8 @@ export default function Grades({
 	const updateGrade = (val: string, assignmentId: number, update: string) => {
 		let tempCache=structuredClone(grades)
 		let temp=tempCache?.[period]
-		temp.courses[parseInt(index as string)] = updateCourse(
-			temp.courses[parseInt(index as string)],
+		temp.courses[index] = updateCourse(
+			temp.courses[index],
 			assignmentId,
 			update,
 			parseFloat(val)
@@ -189,7 +189,7 @@ export default function Grades({
 		const newTitle =assignmentTitle.current.value=='' ? "New Assignment" : assignmentTitle.current.value
 		let tempCache = structuredClone(grades);
 		let temp = tempCache?.[period]
-		temp.courses[parseInt(index as string)].assignments[modalDetails].name=newTitle;
+		temp.courses[index].assignments[modalDetails].name=newTitle;
 		setGrades(tempCache);
 		
 		setIsEditing(false);
@@ -198,8 +198,8 @@ export default function Grades({
 	const add = () => {
 		let tempCache = grades;
 		let temp=tempCache?.[period]
-		temp.courses[parseInt(index as string)] = addAssignment(
-			temp.courses[parseInt(index as string)]
+		temp.courses[index] = addAssignment(
+			temp.courses[index]
 		);
 		setGrades({ ...tempCache }); //yeah that works too I guess. I like structuredClone better though. that way no mutations.
 		
@@ -208,8 +208,8 @@ export default function Grades({
 	const del = (id: number) => {
 		let tempCache = structuredClone(grades);
 		let temp = tempCache?.[period]
-		temp.courses[parseInt(index as string)] = delAssignment(
-			temp.courses[parseInt(index as string)],
+		temp.courses[index] = delAssignment(
+			temp.courses[index],
 			id
 		);
 		setGrades(tempCache);
@@ -219,8 +219,8 @@ export default function Grades({
 	const updateCat = (val: string, assignmentId: number) => {
 		let tempCache = structuredClone(grades)
 		let temp = tempCache?.[period]
-		temp.courses[parseInt(index as string)] = updateCategory(
-			temp.courses[parseInt(index as string)],
+		temp.courses[index] = updateCategory(
+			temp.courses[index],
 			assignmentId,
 			val
 		);
@@ -461,6 +461,7 @@ export default function Grades({
 					createError={createError}
 					showModal={showSettingsModal}
 					setShowModal={setShowSettingsModal}
+					isMediumOrLarger={isMediumOrLarger}
 				
 				/>
 				<Modal.Footer>
@@ -655,7 +656,7 @@ export default function Grades({
 							<tbody>
 								{(()=>{
 									var stopBreakingTheIndexSystems;
-									let temp=structuredClone(grades?.[period].courses[parseInt(index as string)]);	
+									let temp=structuredClone(grades?.[period].courses[index]);	
 									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){
 										stopBreakingTheIndexSystems=true; //disabled for [name-redacted]
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false,included:false,notes:""})

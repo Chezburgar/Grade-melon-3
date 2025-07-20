@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse} from "../utils/grades";
 import {colorShit} from "./colors"
-import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2} from "../utils/grades"
+import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2,Finals} from "../utils/grades"
 import { count } from "console";
 import GradeField from "./GradeField";
 import StudentVue from "studentvue";
@@ -30,7 +30,7 @@ We'll presume for now that semester grades are no more
 
 interface props{
   client:Awaited<ReturnType<typeof StudentVue.login>>["client"]
-  index:string|-1;
+  index:number;
   showModal:boolean;
   setShowModal:(boolean:boolean)=>void;
   grades:Cache;
@@ -39,6 +39,7 @@ interface props{
   period:number
   finals?:any;
   setFinals?:any;
+  isMediumOrLarger:boolean;
 
 }
 
@@ -47,16 +48,16 @@ interface props{
 
 
 
-export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period}:props){
+export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period,isMediumOrLarger}:props){
           const settings= grades?.[0]?.settings
-  const course = index==-1 ? {courseID:"default",settings:{finals:undefined},name:"",identifier:""} : grades?.[period]?.courses[parseInt(index)];
+  const course = index==-1 ? {courseID:"default",settings:settings.default,name:"",identifier:"default"} : grades?.[period]?.courses[index];
         const courseSettings=course.settings
-  const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : settings.default.letterScale)
-        const [rounding,setRounding]=useState<CourseSettings["rounding"]>(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : settings.default.rounding)
+  const [letterScale,setLetterScale]=useState<CourseSettings["letterScale"]>(index!=-1 ? (grades?.[period]?.courses[index].settings?.letterScale || undefined) : settings.default.letterScale)
+        const [rounding,setRounding]=useState<CourseSettings["rounding"]>(index!=-1 ? (grades?.[period]?.courses[index].settings?.rounding || undefined) : settings.default.rounding)
         const [active,setActive]=useState<[string,string]>(['',''])
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
-        const [finals,setFinals]=useState(course.settings.finals)
+        const [finals,setFinals]=useState<Finals>(course.settings.finals)
         const [accordion,setAccordion]=useState([index==-1,index!=-1])
 
 
@@ -64,8 +65,8 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
 
 
 useEffect(()=>{console.log("where's your head at?")
-  setLetterScale(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.letterScale || undefined) : settings.default.letterScale)
-  setRounding(index!=-1 ? (grades?.[period]?.courses[parseInt(index)].settings?.rounding || undefined) : settings.default.rounding)
+  setLetterScale(index!=-1 ? (grades?.[period]?.courses[index].settings?.letterScale || undefined) : settings.default.letterScale)
+  setRounding(index!=-1 ? (grades?.[period]?.courses[index].settings?.rounding || undefined) : settings.default.rounding)
   setFinals(course.settings.finals)    
 
 
@@ -109,7 +110,7 @@ function addLetter(){
 function addFinalCategory(){
   let temp=structuredClone(finals);
 
-  temp.categories.unshift({mp:grades?.[period]?.period.index,courseIndex:index,weight:0,type:"exam"})
+  temp.categories.unshift({mp:grades?.[period]?.period.index,courseIndex:index!=-1 ? index : NaN,weight:0,type:"exam"})
   setFinals(temp)
 }
 
@@ -146,66 +147,17 @@ async function setSettings(url, userHash,encrypted,passHash,settings){
 }
 
 
-async function saveNew(){
-  
-    if(validate()){
-        
-        const newScale:CourseSettings | any = {
-  finals:{...finals,categories:simplifyWeights(finals.categories).sort((a,b)=>a.mp-b.mp)},
-  rounding: rounding,
-  letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse() //need to ad shi for the new shi type shi
-};
-        const tempGrades=structuredClone(grades)
-        const tempSettings=structuredClone(settings)
-
-        //now we examine, did shi really change? is shi rlly diff?
-      
-
-
-        if(index!=-1){
-            //finals
-          let flag=true
-        for(let key in tempSettings.default.finals){
-            if(JSON.stringify(tempSettings.default.finals[key])!=JSON.stringify(finals[key])){
-              flag=false;
-            }
-          }
-          if(flag){
-            newScale.finals=false;
-          }
-        
 
 
 
+async function saveAndApply(tempSettings){
+  console.log("these are our theortetical temp settings",tempSettings)
+  const result=await setSettings(client.district,client.username,client.encrypted,client.password,tempSettings)
 
+  if(result.status){
 
-        //letterScale
-        if(JSON.stringify(tempSettings.default.letterScale)==JSON.stringify(newScale.letterScale)){
-          newScale.letterScale=false; //fuck off mate
-        }
-      
-        //rounding
-        if(JSON.stringify(rounding)==JSON.stringify(tempSettings.default.rounding)){
-          newScale.rounding=false
-        }
-
-
-
-}
-
-
-
-
-
-
-        tempSettings[course.identifier]=newScale //cause fuck ur manual mode
-
-    const result=await setSettings(client.district,client.username,client.encrypted,client.password,tempSettings)
-    if(result.status){
-        console.log("success")
-       
-
-        //oh boy. new runtime settings!!! basically need to recalculate and parse everything.
+  const tempGrades=structuredClone(grades);
+            //oh boy. new runtime settings!!! basically need to recalculate and parse everything.
 
 
         	for(let key in tempSettings){
@@ -233,124 +185,101 @@ async function saveNew(){
             }
         }
 
+          setGrades(tempGrades)
+          return tempGrades;
+        }
+        else{
+          return false
+        }
+
+}
+
+
+
+
+
+
+
+async function saveNew(){
+  if(validate()){ 
+    const newScale:CourseSettings | any = {
+        finals:{...finals,categories:simplifyWeights(finals.categories).sort((a,b)=>a.mp-b.mp)},
+        rounding: rounding,
+        letterScale: [...letterScale].sort((a, b) => a[1][1] - b[1][1]).reverse() //need to ad shi for the new shi type shi
+    };
+
+    const tempSettings=structuredClone(settings)
+
+
+
+    //now we examine, did shi really change? is shi rlly diff?
+      
+    if(index!=-1){
+      //finals
+      let flag=true
+
+      for(let key in tempSettings.default.finals){
+        if(JSON.stringify(tempSettings.default.finals[key])!=JSON.stringify(finals[key])){
+          flag=false;
+        }
+      }
+
+      if(flag){
+        newScale.finals=false;
+      }
+        
+      //letterScale
+      if(JSON.stringify(tempSettings.default.letterScale)==JSON.stringify(newScale.letterScale)){
+        newScale.letterScale=false; //fuck off mate
+      }
+      
+      //rounding
+      if(JSON.stringify(rounding)==JSON.stringify(tempSettings.default.rounding)){
+        newScale.rounding=false
+      }
+
+    }
+
+    tempSettings[course.identifier]=newScale //cause fuck ur manual mode
+
+    const tempGrades=await saveAndApply(tempSettings)
+    if(tempGrades){
       const ham=index!=-1 ? tempGrades[period].courses[index].settings : tempSettings.default
       setLetterScale(ham.letterScale)
       setRounding(ham.rounding)
       setFinals(ham.finals)
       setGrades(tempGrades)
-      setShowModal(false)
-
-
-    }
+      setShowModal(false)}
+    
     else{
-        console.log(result)
         createError("Failed to sync settings with server, try again?")
     }
 
-
-    }
-    else{
-       
-        createError("Malformed Grading Scale")
-    }
-
-
-}
-
-
-
-function resetFinals(){
-  setFinals(grades[period].courses[index].settings.finals);
-
-
-}
-
-
-
-
-/*
-async function reset(allClasses=false,field="letter"){ //god I should really spereate this out into different functions jesus christ
-  if(index==-1&&!allClasses){
-  const result=await getSettings(client.district,"pleaseGodLetNobodySomehowMagicallyHashToThisHashOrItBreaks")
-  if(result.status){
-    const countyDefault=result.settings.default;
-    console.log("success")
-    let temp=structuredClone(grades)
-    temp.settings.default=countyDefault
-    if(field=="letter"){
-    setLetterScale(countyDefault.letterScale)
-    }
-    else if(field=="rounding"){
-    setRounding(countyDefault.rounding)
-    setDecimalPlaces(undefined)
-    }
-
   }
   else{
-    createError("Failed to retrieve default settings")
+    createError("Malformed Grading Scale")
   }
 
 
-
-
-
-  }
-  else{
-    let temp=structuredClone(grades)
-    if(allClasses){
-      for(let key in temp.settings){
-        if(key=="default"){continue} //this is NOT scalable. could at least ad a "global" flag or something oh my god
-        temp.settings[key].rounding=undefined
-        temp.settings[key].letterScale=undefined
-      }
-
-
- 
-    }
-    else{
-      //this is a dumb ah solution to globals. dumb ah. u can feel the pain in his 
-    temp.settings[course.courseID.substring(0,course.courseID.length-1)] = {...temp.settings[course.courseID.substring(0,course.courseID.length-1)],letterScale:undefined,rounding:undefined}
-    }
-
-    if(allClasses){
-    const result = await setSettings(client.district,client.username,client.encrypted,client.password,temp.settings)
-    if(result.status){
-        console.log("success")
-       
-    setLetterScale(grades.settings.default.letterScale)
-    let m:any=temp.map(grades=>reCalculateAll(grades,temp.settings))
-    m.settings=temp.settings
-
-    setGrades(m)
-    setShowModal(false)
-  }
-  else{
-    createError("Failed to set settings")
-  }
-    }
-    else{
-      if(field=="letter"){
-      setLetterScale(grades.settings.default.letterScale)}
-      else{
-        setRounding(grades.settings.default.rounding)
-      }
-    }
-}
 }
 
 
-*/
+async function resetAllClasses(){
+  const tempSettings:Settings={mode:settings.mode,"default":settings.default} as Settings
+  const tempGrades=await saveAndApply(tempSettings)
+  if(tempGrades){
+  setShowModal(false)}
+  else{
+    createError("Failed to Sync Changes with Server")
+  }
+
+}
 
 
 
 
 
-
-
-
-
-
-function showDefaults(field){
+async function showDefaults(field){
   if(index!=-1){
     //@ts-ignore
     let hoopDreams=initalizeFinals2(grades,{mode:settings.mode,"default":settings.default},course.identifier).finals
@@ -368,6 +297,30 @@ function showDefaults(field){
     }
   }
   else{
+    //template finals
+
+
+    const result=await getSettings(client.district,"pleaseGodLetNobodySomehowMagicallyHashToThisHashOrItBreaks")
+    if(!result.status){
+      createError("Failed to fetch Default Settings")
+    }
+    else{
+      const countyDefault=result.settings.default;
+      if(field=="letter"){
+        setLetterScale(countyDefault["letterScale"])
+      }
+      else if(field=="rounding"){
+        setRounding(countyDefault["rounding"])
+      }
+      else if(field=="finals"){ //this CANNOT happen. and will not happen. wait. yes it can. NOOOOOOO
+        setFinals(templateFinals(settings.mode,grades[0].periods))
+      }
+
+
+
+    }
+
+
 
   }
 
@@ -467,21 +420,25 @@ className="overflow-y-auto"
           <th className="px-4 py-2 font-semibold text-black dark:text-white">Letter</th>
           <th className="px-4 py-2 font-semibold text-black dark:text-white">Lower</th>
           <th className="px-4 py-2 font-semibold text-black dark:text-white">Upper</th>
-          {/* empty heading to keep the delete column aligned */}
-          <th className="px-4 py-2" />
+
+          {/* empty heading to keep the delete column aligned */
+      isMediumOrLarger && <th className="px-4 py-2" />
+
+}
         </tr>
       </thead>
 
       {/* ── body ───────────────────────────────────────────── */}
       <tbody>
         {letterScale.map((letter,i) => (
+          <>
           <tr
             key={`${i}--23`}
             className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}
           >
             {/* letter cell */}
             <td className="px-4 py-2">
-              <div style={{alignItems:"center"}} className="flex">
+              <div style={{alignItems:"center"}} className="flex -mt-1 -ml-2">
               <input 
               type="text"
                key={`${i}-0`}
@@ -587,7 +544,9 @@ className="overflow-y-auto"
               />
             </td>
 
-            {/* delete button */}
+
+                       {/* delete button */
+         isMediumOrLarger &&
             <td className="px-4 py-2">
               <button
                 onClick={() => {
@@ -607,16 +566,44 @@ className="overflow-y-auto"
                 <HiOutlineTrash size="1.2rem" />
               </button>
             </td>
+          
+              }
+
+      
           </tr>
+          {!isMediumOrLarger   && <tr className={`bg-gray-${i%2!=0 ? "800" : "900"}`}>
+        <td colSpan={4}>
+           <button
+                onClick={() => {deleteLetter(i)}}
+                className="
+                  flex items-center gap-1 ml-2 -mt-3 mb-2
+                  rounded-lg bg-primary-500
+                  text-xs font-medium text-white
+                  hover:bg-primary-600
+                  px-1
+                  focus:outline-none focus:ring-4 focus:ring-primary-300
+                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  sm:text-sm
+                "
+              >
+                <p className="dark:text-white">Delete</p>
+              </button>
+        </td>
+          
+
+
+
+        </tr>}
+          </>
         ))}
       </tbody>
     </table>
   </div>
  <div className="flex   mt-2 justify-between">
-    <button className="p-2 px-2 md:text-base bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onClick={addLetter}>Add+</button>
+    <button className="p-2 px-2 text-sm md:text- bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onClick={addLetter}>Add+</button>
       <button
         type="button"
-        className="text-white md:p-2 md:text-base bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-3 py-1 rounded-lg text-sm"
+        className="text-white p-2 text-sm md:text- bg-primary-600 hover:bg-primary-800 active:bg-primary-500 rounded-lg text-sm"
         style={{}}
         onClick={()=>{showDefaults("letter")}}
       >
@@ -680,7 +667,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
  //Final Grade
 }
 
-{ index!=-1 &&
+{ 
 <details
   open={accordion[1]}
 >
@@ -756,13 +743,14 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
            value={f.type}
            onChange={(e)=>{
             let temp=structuredClone(finals)
-            temp.categories[i].type==e.target.value
+            //@ts-ignore
+            temp.categories[i].type=e.target.value
             setFinals(temp)
 
            }}
            className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
             >
-              <option className="bg-gray-600" value={"course"}>Course</option>
+              <option className="bg-gray-600" value="course">Course</option>
               <option className="bg-gray-600" value="exam">Exam</option>
             </select>
 
@@ -818,7 +806,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             style={{textAlign:"center"}}
           >
             <div
-              className="text-center dark:text-white flex items-center"
+              className="text-center dark:text-white flex items-center mt-2"
             >
             <GradeField
             onChange={(e)=>{}}
@@ -908,7 +896,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         type="button"
         className="ml-auto -mr-2  md:text-base text-white bg-primary-600 hover:bg-primary-800 active:bg-primary-500 px-2  rounded-lg text-sm"
         style={{}}
-        onClick={()=>{setShowModal(false)}}
+        onClick={()=>{resetAllClasses()}}
       >
         Reset Classes
       </button>

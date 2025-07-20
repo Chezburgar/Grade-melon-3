@@ -54,14 +54,14 @@ interface GlobalSettings{
 }
 
 type Settings = {
+	mode:"automatic" | "manual"
+} & {
   default: CourseSettings;
 } & {
   [key:string]:CourseSettings
-}
-&
-{
-	mode:"automatic" | "manual"
 };
+
+
 
 
 
@@ -340,7 +340,7 @@ function simplifyWeights(categories:Category[]){
 
 }
 
-function initalizeFinals2<Finals>(cache:Cache,raw_settings:Settings,identifier:string){
+function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):CourseSettings{
 
 
 	const settings=structuredClone(raw_settings)
@@ -427,17 +427,17 @@ function getRealMarkingPeriods(periods:Grades["periods"]){
 
 
 
-function templateFinals(mode,periods){
+function templateFinals(mode,periods):Finals{
       if(mode=="automatic"){
 			let mps=getRealMarkingPeriods(periods).map(mp=>mp.index)
 			let weight=1/mps.length
-			let categories=mps.map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))
+			let categories:Category[]=mps.map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))
 			
-			return {show:true,categories:categories,isSemester:false,semesters:[{show:true,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))},{show:true,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:undefined,weight:weight}))}]}
+			return {show:true,categories:categories,isSemester:false,semesters:[{show:true,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))},{show:true,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))}]}
 		}
 
 	else{
-		return {show:false,categories:[],isSemester:false,semester:{show:false,semesters:[]}}
+		return {show:false,categories:[],isSemester:false,semesters:[]}
 	}
   
 
@@ -459,7 +459,8 @@ function getCache(books:Gradebook[]):Cache{
 			index: index,
 		}))
 
-	settings.default.finals=templateFinals(settings.mode,periods)
+	if(!settings.default.finals){
+	settings.default.finals=templateFinals(settings.mode,periods)}
 	let gradesCache:any=books.map(book=>parseGrades(book,settings))
 
 		
@@ -1000,6 +1001,8 @@ function abbreviate(category) {
 
 
 		     function calcFinal(categories:Category[],cache:Cache){
+
+
                 let realCat=[]
 				let currPoints=0
 				let currWeight=0
@@ -1016,6 +1019,7 @@ function abbreviate(category) {
                     }
                 }
 				console.log("bro what",currPoints,currWeight)
+					if(realCat.length==0){return {raw:NaN,letter:"N/A",color:"gray"}}
                 return {raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
             
             }
@@ -1040,4 +1044,4 @@ export {
 	abbreviate,
 	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals2
 };
-export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings };
+export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings,Finals };

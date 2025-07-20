@@ -247,6 +247,7 @@ export default function Grades({
 				setGrades={setGrades}
 				period={period}
 				createError={createError}
+				isMediumOrLarger={isMediumOrLarger}
 			
 			/>
 					<div className="flex gap-2 mb-5">
