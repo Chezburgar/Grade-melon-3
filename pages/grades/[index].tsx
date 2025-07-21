@@ -302,7 +302,9 @@ export default function Grades({
 	};
 
 	return (
-		<motion.div className="p-5 md:p-10 flex-1">
+		<motion.div 
+		style={showSettingsModal ? {overflowY:"hidden",maxHeight:500} : {}}
+		className="p-5 md:p-10 flex-1">
 			<Head>
 				<title>
 					{course ? `${course?.name} - Grade Melon` : "Grade Melon"}

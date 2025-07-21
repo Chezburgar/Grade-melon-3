@@ -1,12 +1,13 @@
 import React,{useState,useEffect} from "react";
 import {Modal} from "flowbite-react"
-import { HiOutlineTrash,HiArrowCircleRight, HiArrowCircleDown } from "react-icons/hi";
+import { HiOutlineTrash,HiArrowCircleRight,HiArrowCircleLeft, HiArrowCircleDown } from "react-icons/hi";
 import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse} from "../utils/grades";
 import {colorShit} from "./colors"
 import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2,Finals} from "../utils/grades"
 import { count } from "console";
 import GradeField from "./GradeField";
 import StudentVue from "studentvue";
+import { AnimatePresence,motion } from "framer-motion";
 
 
 
@@ -58,7 +59,19 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
         const [finals,setFinals]=useState<Finals>(course.settings.finals)
-        const [accordion,setAccordion]=useState([index==-1,index!=-1])
+
+        //new stack based view version
+        const [viewStack,setViewStack] = useState(["home"])
+        const currentView=viewStack.at(-1)
+
+        const animationPropsHome = {
+          initial: { x: "100%", opacity: 0 },
+          animate: { x: 0, opacity: 1 },
+          exit: { x: "-100%", opacity: 0 },
+          transition: { duration: 0.15 },
+        };
+
+        const animationPropsPage=animationPropsHome //for now
 
 
       console.log("quick output",finals)
@@ -72,6 +85,33 @@ useEffect(()=>{console.log("where's your head at?")
 
 
 },[period])
+
+
+
+/*
+yet to implement:
+  semester grades support
+
+  absoltely nothing right now for supporitng optimization, the MOST
+  important and MOST useful feature is right now left hanging to dry
+
+
+
+  Users will CRAVE a way to quickly and easily check this shit. optimizaiton modal 
+  needs a HUGE overhaul. We gotta FINISH this settings shit up. UI doesn't need to be compltely perfect, tho 
+  i've basically done most of that already tho. 
+
+  then we go STRAIGHT to brainstorming this whole 
+  sudo optimization, secondary grades page for full final type shit tpye thing, viewing it all
+  all over
+
+  all over at once. everwhere. everywhere all the time. all at once. forever. everywhere.
+
+
+  we'll want to 
+
+
+*/
 
 
 function mutate(e,letter,bound){
@@ -393,26 +433,87 @@ className="dark:bg-gray-700"
 
 
 <Modal.Body
-style={{maxHeight:500,minHeight:500}}
+style={{maxHeight:isMediumOrLarger ? 400 : 500,minHeight:400}}
 className="overflow-y-auto"
 >
-  {
-    //Letter Scale
-  }
-  <details
-  open={accordion[0]}
-  >
-  <summary 
-  className="mb-4 text-xl font-bold text-white"
-    onClick={(e)=>{
-    e.preventDefault()
-    let temp=structuredClone(accordion)
-    temp[0]=!accordion[0]
-    setAccordion(temp)
-  }}
-  >Letter Scale</summary>
+{
 
-  <div className="w-full flex justify-center overflow-x-auto rounded-lg border border-gray-600">
+//Settings Select Page
+
+  true && <>
+  <AnimatePresence
+    mode="wait"
+    initial={false}
+  >
+   {currentView=="home" && <motion.div
+      className="flex flex-col gap-4"
+    >
+      <motion.button 
+      {...animationPropsHome}
+      key="letter"
+      style={{borderWidth:1}}
+      onClick={()=>{setViewStack(["letter"])}} 
+      className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg  border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold"> 
+        <div className="flex justify-between items-center">
+          Letter Scale
+          <HiArrowCircleRight/>
+        </div>
+
+      </motion.button>
+
+     <motion.button
+      {...animationPropsHome} 
+      key="finals"
+      onClick={()=>{setViewStack(["finals"])}}
+      style={{borderWidth:1}}
+      className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold">
+      
+        <div className="flex justify-between items-center">
+          Final Grade
+          <HiArrowCircleRight/>
+        </div>
+
+      </motion.button>
+
+   <motion.button
+      {...animationPropsHome} 
+      key="semester"
+      style={{borderWidth:1}}
+      className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold">
+        <div className="flex justify-between items-center">
+          Semester Grade
+          <HiArrowCircleRight/>
+      </div>
+
+    </motion.button>
+    
+    
+  </motion.div>}
+
+  
+  {
+  //Letter Scale Page
+  currentView=="letter" && 
+<motion.div
+  {...animationPropsPage}
+  key="letterPage"
+>
+  <button
+    style={{borderWidth:1,padding:5,borderRadius:12}}
+    className="-ml-3 mb-2 dark:text-white font-semibold border-gray-400 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100   dark:hover:bg-gray-800 dark:bg-[#2d3847]"
+    onClick={()=>{setViewStack(["home"])}}
+  >
+    <div
+      className="flex items-center"
+    >
+      <HiArrowCircleLeft/>
+      <p>Letter Scale</p>
+    </div>
+  </button>
+
+  <div 
+  style={{maxHeight:350}}
+  className="w-full flex justify-center overflow-x-auto overflow-y-auto rounded-lg border border-gray-600">
     <table className="flex-1 mx-auto min-w-max text-left">
       {/* ── header ─────────────────────────────────────────── */}
       <thead>
@@ -456,8 +557,8 @@ className="overflow-y-auto"
                     setActive(['',''])
                     mutate(e,i,0)}
               }
-              style={{borderWidth:0,textOverflow:"ellipsis"}}
-              className="w-12 text-center font-bold bg-transparent dark:text-white md:text-lg  ">
+              style={{borderRadius:10,marginRight:5,padding:0,textOverflow:"ellipsis"}}
+              className="w-12 text-center rounded-lg font-bold bg-transparent dark:text-white md:text-lg  focus:ring-primary-500 focus:border-primary-500 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                 
               </input>
               <input
@@ -571,7 +672,7 @@ className="overflow-y-auto"
 
       
           </tr>
-          {!isMediumOrLarger   && <tr className={`bg-gray-${i%2!=0 ? "800" : "900"}`}>
+          {!isMediumOrLarger   && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
         <td colSpan={4}>
            <button
                 onClick={() => {deleteLetter(i)}}
@@ -659,79 +760,55 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
       </button>
   </div>
 
-</details>
-</details>
+  </details>
+</motion.div>
+
+  }
 
 
-{
- //Final Grade
-}
 
-{ 
-<details
-  open={accordion[1]}
+
+  {
+    //Final Grade Page
+    currentView=="finals" && 
+<motion.div
+  {...animationPropsPage}
+  key="finalsPage"
 >
-  <summary 
-  className="dark:text-white font-bold mt-4  mb-2 text-xl"
-    onClick={(e)=>{
-    e.preventDefault()
-    let temp=structuredClone(accordion)
-    temp[1]=!accordion[1]
-    setAccordion(temp)
-  }}
-  >Final Grade</summary>
-    <div className="ml-2">
-    <div style={{alignItems:"center"}} className="flex gap-2">
-        <p className="dark:text-white">Show Final Grade</p>
-        <input type="checkbox" onChange={(e)=>{
-          let temp=structuredClone(finals)
-          temp.show=!temp.show
-          setFinals(temp)
-
-        }} checked={finals.show}></input>
-    </div>
-{
-  /*
-    <div style={{alignItems:"center"}} className="mt-2 flex gap-2">
-        <p className="dark:text-white">Single Semester Class?</p>
-        <input type="checkbox" onChange={(e)=>{
-          let temp=structuredClone(finals)
-          temp.isSemester=!temp.isSemester
-          setFinals(temp)
-
-        }} checked={finals.isSemester}></input>
-    </div>
-    */
-}
-    
-
-    <p className="-ml-2 dark:text-white text-lg mt-4">Final Grade Categories</p>
-
-
-
+  <button
+    style={{borderWidth:1,padding:5,borderRadius:12}}
+    className="-ml-3 mb-2 dark:text-white font-semibold border-neutral-200 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100 dark:hover:bg-gray-800 dark:bg-[#2d3847]"
+    onClick={()=>{setViewStack(["home"])}}
+  >
     <div
-      className="border-gray-600 rounded-lg border mt-2 overflow-x-auto -ml-2"
+      className="flex items-center"
     >
-    <table 
-    className="w-full">
+      <HiArrowCircleLeft/>
+      <p>Final Grade Catagories</p>
+    </div>
+  </button>
+
+
+  <div
+    style={{maxHeight:350}}
+    className="border-gray-600 rounded-lg border mt-2 overflow-x-auto overflow-y-auto -ml-2"
+  >
+    <table className="w-full">
       <thead>
         <tr className="dark:bg-slate-700">
-          <th          style={{textAlign:"center"}} className="py-2 dark:text-white">Type</th>
-          <th          style={{textAlign:"center"}} className="py-2 dark:text-white">Marking Period</th>
-          <th          style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>
-          <th          style={{textAlign:"center"}} className="py-2 pr-4 dark:text-white">Weight</th>
+          <th style={{textAlign:"center"}} className="py-2 dark:text-white">Type</th>
+          <th style={{textAlign:"center"}} className="py-2 dark:text-white">Marking Period</th>
+          {settings.mode=="manual" && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
+          <th style={{textAlign:"center"}} className="py-2 pr-4 md:pr-0 dark:text-white">Weight</th>
+          {isMediumOrLarger && <th style={{textAlign:"center"}} className="py-2 dark:text-white"></th>}
         </tr>
       </thead>
       
   
       <tbody>
-       
-
        {finals.categories.map((f,i)=>(
         <>
-        <tr className={`bg-gray-${i%2==0 ? "800" : 
-          "900"
-        }`}>
+        <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
           <td 
           style={{textAlign:"center"}}
           >
@@ -770,19 +847,20 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
               setFinals(temp)
 
             }}
-              className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
+              className="bg-transparent dark:text-white border-0 text-elipses focus:outline-none focus:ring-0"
             >
               {grades?.[period]?.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.name}</option>))}
             </select>
           </td>
 
-          <td
+
+{settings.mode=="manual"  && <td
             style={{textAlign:"center"}}
           >
          
             <select value={f.courseIndex}
             disabled={settings.mode=="automatic"}
-              className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
+              className={`bg-transparent ${settings.mode=="automatic" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
               onChange={(e)=>{
                 let temp=structuredClone(finals)
                 temp.categories[i].courseIndex=parseInt(e.target.value)
@@ -800,13 +878,13 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             </select>
             
             
-          </td>
+          </td>}
 
           <td
             style={{textAlign:"center"}}
           >
             <div
-              className="text-center dark:text-white flex items-center mt-2"
+              className="text-center dark:text-white flex items-center mt-2 md:ml-5"
             >
             <GradeField
             onChange={(e)=>{}}
@@ -821,11 +899,31 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             </div>
    
           </td>
+
+  {isMediumOrLarger && <td>
+            <button
+              onClick={() => {deleteFinalCategory(i)}}
+              className="
+                  flex items-center gap-1
+                  rounded-lg bg-primary-500
+                  px-2.5 py-2.5
+                  text-xs font-medium text-white
+                  hover:bg-primary-600
+                  focus:outline-none focus:ring-4 focus:ring-primary-300
+                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  sm:text-sm
+                "
+            >
+              <HiOutlineTrash size="1.2rem" />
+            </button>
+          </td>}
+
+
         </tr>
 
 
-        <tr className={`bg-gray-${i%2==0 ? "800" : "900"}`}>
-        <td colSpan={4}>
+   {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
+        <td colSpan={settings.mode=="manual" ? 3 : 4}>
            <button
                 onClick={() => {deleteFinalCategory(i)}}
                 className="
@@ -843,7 +941,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
               </button>
         </td>
 
-        </tr>
+        </tr>}
         </>
 ))}
 
@@ -860,9 +958,30 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
    </div>
-    </div>
+    </motion.div>
 
-</details>}
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </AnimatePresence>
+  
+  
+  </>
+
+
+}
+
 
 </Modal.Body>
 

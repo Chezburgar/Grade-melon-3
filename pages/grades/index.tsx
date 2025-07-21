@@ -184,7 +184,9 @@ export default function Grades({
 
 
 	return (
-		<motion.div className="p-5 md:p-10 md:flex-1">
+		<motion.div 
+		style={settingsModal ? {overflowY:"hidden",maxHeight:500} : {}}
+		className="p-5 md:p-10 md:flex-1">
 			<Head>
 				<title>Gradebook - Grade Melon</title>
 			</Head>
