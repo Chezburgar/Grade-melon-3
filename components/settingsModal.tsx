@@ -859,8 +859,8 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           >
          
             <select value={f.courseIndex}
-            disabled={settings.mode=="automatic"}
-              className={`bg-transparent ${settings.mode=="automatic" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
+       //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
+              className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
               onChange={(e)=>{
                 let temp=structuredClone(finals)
                 temp.categories[i].courseIndex=parseInt(e.target.value)
