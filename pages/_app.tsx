@@ -34,7 +34,7 @@ function MyApp({ Component, pageProps }) {
 	const [toasts, setToasts] = useState<Toast[]>([]);
 	const [cacheLoading,setCacheLoading]=useState(true)
 	const [grades, setGrades] = useState<Grades[]>();
-	const [period, setPeriod] = useState<number>();
+	const [mp, setMP] = useState<number>();
 	const [loading, setLoading] = useState(false);
 	const [referal,setReferal]=useState(false);
 	const [districts, setDistricts] = useState(allDistricts);
@@ -152,7 +152,7 @@ it would probably be a good idea to show the final grade also on the Home Screen
 
 				res.responses[0][0].gradingScale=extraData.gradingScale;
 				setGrades(getCache(res.responses.map(resp=>resp[0])));
-				setPeriod(findCurrentPeriod(getCache(res.responses.map(resp=>resp[0]))));
+				setMP(findCurrentPeriod(getCache(res.responses.map(resp=>resp[0]))));
 
 
 				if(router.pathname=="/"||router.pathname=="/login"){router.push("/grades")}
@@ -403,8 +403,8 @@ const logout = async () => {
 								setGrades={setGrades}
 								setToasts={setToasts}
 								loading={loading}
-								period={period}
-								setPeriod={setPeriod}
+								mp={mp}
+								setMP={setMP}
 								createError={createError}
 								districts={districts}
 								setDistricts={setDistricts}
@@ -438,8 +438,8 @@ const logout = async () => {
 										setGrades={setGrades}
 										setToasts={setToasts}
 										loading={loading}
-										period={period}
-										setPeriod={setPeriod}
+										mp={mp}
+										setMP={setMP}
 										createError={createError}
 										districts={districts}
 										setDistricts={setDistricts}
@@ -469,8 +469,8 @@ const logout = async () => {
 										setGrades={setGrades}
 										setToasts={setToasts}
 										loading={loading}
-										period={period}
-										setPeriod={setPeriod}
+										mp={mp}
+										setMP={setMP}
 										createError={createError}
 										districts={districts}
 										setDistricts={setDistricts}

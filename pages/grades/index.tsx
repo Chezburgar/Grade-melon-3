@@ -23,8 +23,8 @@ interface GradesProps {
 	client: Awaited<ReturnType<typeof StudentVue.login>>["client"];
 	grades: Cache;
 	setGrades: (grades: Cache) => void;
-	period: number;
-	setPeriod: (period: number) => void;
+	mp: number;
+	setMP: (period: number) => void;
 	createError:(message:string)=>void;
 	ad:any;
 	setAd:(ad:any)=>void;
@@ -41,8 +41,8 @@ export default function Grades({
 	client,
 	grades,
 	setGrades,
-	period,
-	setPeriod,
+	mp,
+	setMP,
 	createError,
 	ad,
 	setAd,
@@ -54,7 +54,7 @@ export default function Grades({
 	const router = useRouter();
 	const [loading, setLoading] = useState(grades ? false : true);
 	const [defaultView, setDefaultView] = useState("card");
-	//const [period, setPeriod] = useState<number>();
+	//const [period, setMP] = useState<number>();
 	const [gpaModal, setGpaModal] = useState(false);
 	const view = (router.query.view as string) || defaultView;
 	const [settingsModal,setSettingsModal]=useState<boolean>(false);
@@ -83,7 +83,7 @@ export default function Grades({
 				try {
 					getGradebooks(client,null,null).then(raws=>{
 						setGrades(getCache(raws))
-						setPeriod(findCurrentPeriod(getCache(raws)))
+						setMP(findCurrentPeriod(getCache(raws)))
 						setLoading(false)
 					})				
 
@@ -108,7 +108,7 @@ export default function Grades({
 						//@ts-ignore
 						setGrades(getCache(killMe))
 						console.log(parsedGrades)
-						setPeriod(findCurrentPeriod(getCache(killMe)));
+						setMP(findCurrentPeriod(getCache(killMe)));
 						setLoading(false);
 						
 					});
@@ -145,7 +145,7 @@ export default function Grades({
 				}
 
 				setGrades(temp)
-				setPeriod(p);
+				setMP(p);
 				setLoading(false);
 			
 			})
@@ -156,7 +156,7 @@ export default function Grades({
 			});
 
 		}else{
-			setPeriod(p)
+			setMP(p)
 			setLoading(false)
 		}
 
@@ -247,7 +247,7 @@ export default function Grades({
 				setShowModal={setSettingsModal}
 				grades={grades}
 				setGrades={setGrades}
-				period={period}
+				mp={mp}
 				createError={createError}
 				isMediumOrLarger={isMediumOrLarger}
 			
@@ -255,7 +255,7 @@ export default function Grades({
 					<div className="flex gap-2 mb-5">
 						<button
 							type="button"
-							onClick={() => update(period,true)}
+							onClick={() => update(mp,true)}
 							className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm p-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
 						>
 							<TbRefresh size={"1.3rem"} />
@@ -263,10 +263,10 @@ export default function Grades({
 						<select
 							id="periods"
 							onChange={(e) => update(parseInt(e.target.value))}
-							value={period}
+							value={mp}
 							className="block w-full p-2 text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 						>
-							{grades[period]?.periods.map((period) => (
+							{grades[mp]?.periods.map((period) => (
 								<option value={period.index} key={period.index}//
 								>
 									{`${period.name} (${parseDate(period.date)})`}
@@ -300,17 +300,24 @@ export default function Grades({
 						>
 							{(()=>{
 								const temp=structuredClone(grades);
-								if(temp?.[period]?.courses&&ad&&client.username!="10016976"&&!isMediumOrLarger){ //disalbe for [name redacted] cuz i aint buildin a subscription service rn gang
+								if(temp?.[mp]?.courses&&ad&&client.username!="10016976"&&!isMediumOrLarger){ //disalbe for [name redacted] cuz i aint buildin a subscription service rn gang
 									console.log("is my life real?")
 									//@ts-ignore
 									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
 
 								}
 							
-								return (temp?.[period]?.courses.map(({ name, period, grade, teacher, settings,layoutID}, i) => {
+								return (temp?.[mp]?.courses.map(({ name, period, grade, teacher, settings,layoutID}, i) => {
 								if(name=="ad goes here"){return (<div key={i} className="flex shrink justify-center max-h-64"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
 								const finalGrade=settings?.finals?.show ? calcFinal(settings.finals.categories,grades) : undefined
-								return(
+								const semesters=settings?.finals?.semesters
+								const semCats=semesters.map(semester=>semester.categories)
+								const indexX=semCats.findIndex(categories=>categories.some(category=>category.mp==mp))
+
+								const semesterGrade=settings?.finals?.semesters[indexX].show ? (indexX==-1 ? undefined : calcFinal(settings?.finals?.semesters[indexX].categories,grades)) : undefined
+								
+								
+							return(
 								<div className="mx-2 flex justify-center w-full md:w-96" key={i}>
 									<motion.div
 										layout="preserve-aspect"
@@ -365,6 +372,15 @@ export default function Grades({
 												>
 													Final {finalGrade.letter} {!isNaN(finalGrade.raw) ? (`(${settings.rounding.percent ? (finalGrade.raw).toFixed(settings.rounding.percentPlaces) : finalGrade.raw}%)`) : ""}
 												</motion.div>}
+													{semesterGrade &&
+												<motion.div
+													layoutId={`semester-${layoutID}`}
+													layout="preserve-aspect"
+													style={{color:semesterGrade.color.includes("#") && semesterGrade.color}}
+													className={`text-md md:text-xl font-bold text-${semesterGrade.color}-400`}
+												>
+													Semester {semesterGrade.letter} {!isNaN(semesterGrade.raw) ? (`(${settings.rounding.percent ? (semesterGrade.raw).toFixed(settings.rounding.percentPlaces) : semesterGrade.raw}%)`) : ""}
+												</motion.div>}
 												</div>
 
 												<Link href={`/grades/${layoutID}`} legacyBehavior>
@@ -400,7 +416,7 @@ export default function Grades({
 									</tr>
 								</thead>
 								<tbody>
-									{grades?.[period]?.courses.map(
+									{grades?.[mp]?.courses.map(
 										({ name, period, grade, teacher }, i) => (
 											<tr
 												className={`bg-${

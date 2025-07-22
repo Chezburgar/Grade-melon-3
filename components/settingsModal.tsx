@@ -37,7 +37,7 @@ interface props{
   grades:Cache;
   setGrades:(grades:Cache)=>void;
   createError:(message:string)=>void;
-  period:number
+  mp:number
   finals?:any;
   setFinals?:any;
   isMediumOrLarger:boolean;
@@ -49,7 +49,7 @@ interface props{
 
 
 
-export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,period,isMediumOrLarger}:props){
+export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,mp:period,isMediumOrLarger}:props){
           const settings= grades?.[0]?.settings
   const course = index==-1 ? {courseID:"default",settings:settings.default,name:"",identifier:"default"} : grades?.[period]?.courses[index];
         const courseSettings=course.settings
@@ -63,6 +63,15 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         //new stack based view version
         const [viewStack,setViewStack] = useState(["home"])
         const currentView=viewStack.at(-1)
+
+
+        function ordinalSuffix(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+
 
         const animationPropsHome = {
           initial: { x: "100%", opacity: 0 },
@@ -154,12 +163,28 @@ function addFinalCategory(){
   setFinals(temp)
 }
 
+function addSemesterCategory(semesterIndex){
+  let temp=structuredClone(finals);
+
+  temp.semesters[semesterIndex].categories.unshift({mp:grades?.[period]?.period.index,courseIndex:index!=-1 ? index : NaN,weight:0,type:"exam"})
+  setFinals(temp)
+}
+
+
+
 
 function deleteFinalCategory(index){
   let temp = structuredClone(finals)
   temp.categories.splice(index,1)
   setFinals(temp)
 
+}
+
+
+function deleteSemesterCategory(semesterIndex,categoryIndex){
+  let temp=structuredClone(finals)
+  temp.semesters[semesterIndex].categories.splice(categoryIndex,1)
+  setFinals(temp);
 }
 
 
@@ -316,7 +341,7 @@ async function resetAllClasses(){
 }
 
 
-
+type field="finals" | "letter" | "rounding" | "semester"
 
 
 async function showDefaults(field){
@@ -334,6 +359,14 @@ async function showDefaults(field){
     }
     else if(field=="rounding"){
       setRounding(template["rounding"])
+    }
+
+    else{
+      const temp=structuredClone(finals)
+      //@ts-ignore
+      const defSem=initalizeFinals2(grades,{mode:settings.mode,"default":settings.default},course.identifier).finals.semesters
+      temp.semesters=defSem
+      setFinals(temp)
     }
   }
   else{
@@ -479,6 +512,7 @@ className="overflow-y-auto"
       {...animationPropsHome} 
       key="semester"
       style={{borderWidth:1}}
+      onClick={()=>{setViewStack(["semester"])}}
       className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold">
         <div className="flex justify-between items-center">
           Semester Grade
@@ -498,18 +532,27 @@ className="overflow-y-auto"
   {...animationPropsPage}
   key="letterPage"
 >
+
+
+  <div className="flex justify-between items-center mb-3">
   <button
     style={{borderWidth:1,padding:5,borderRadius:12}}
-    className="-ml-3 mb-2 dark:text-white font-semibold border-gray-400 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100   dark:hover:bg-gray-800 dark:bg-[#2d3847]"
+    className="-ml-3 dark:text-white font-semibold border-neutral-200 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100 dark:hover:bg-gray-800 dark:bg-[#2d3847]"
     onClick={()=>{setViewStack(["home"])}}
   >
     <div
       className="flex items-center"
     >
       <HiArrowCircleLeft/>
-      <p>Letter Scale</p>
+      <p>Back</p>
     </div>
   </button>
+  {!isMediumOrLarger && <p className="dark:text-white text-xl font-bold">Letter Scale</p>}
+  </div>
+
+   {isMediumOrLarger && <p className="dark:text-white text-lg font-semibold mb-2">Letter Scale</p>}
+
+
 
   <div 
   style={{maxHeight:350}}
@@ -775,18 +818,34 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   {...animationPropsPage}
   key="finalsPage"
 >
+   <div className="flex justify-between items-center mb-3">
   <button
     style={{borderWidth:1,padding:5,borderRadius:12}}
-    className="-ml-3 mb-2 dark:text-white font-semibold border-neutral-200 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100 dark:hover:bg-gray-800 dark:bg-[#2d3847]"
+    className="-ml-3 dark:text-white font-semibold border-neutral-200 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100 dark:hover:bg-gray-800 dark:bg-[#2d3847]"
     onClick={()=>{setViewStack(["home"])}}
   >
     <div
       className="flex items-center"
     >
       <HiArrowCircleLeft/>
-      <p>Final Grade Catagories</p>
+      <p>Back</p>
     </div>
   </button>
+  {!isMediumOrLarger && <p className="dark:text-white text-xl font-bold">Final Grade Categories</p>}
+  </div>
+
+   {isMediumOrLarger && <p className="dark:text-white text-lg font-semibold mb-2">Final Grade Categories</p>}
+
+
+      <div style={{alignItems:"center"}} className="flex gap-2">
+        <p className="dark:text-white">Show Final Grade</p>
+        <input type="checkbox" onChange={(e)=>{
+          let temp=structuredClone(finals)
+          temp.show=!temp.show
+          setFinals(temp)
+
+        }} checked={finals.show}></input>
+    </div>
 
 
   <div
@@ -964,7 +1023,218 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
 
+  {
+    //Semester Grade
+    currentView=="semester" && <motion.div
+  {...animationPropsPage}
+  key="semesterPage"
+>
+  <div className="flex justify-between items-center mb-3">
+  <button
+    style={{borderWidth:1,padding:5,borderRadius:12}}
+    className="-ml-3 dark:text-white font-semibold border-neutral-200 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100 dark:hover:bg-gray-800 dark:bg-[#2d3847]"
+    onClick={()=>{setViewStack(["home"])}}
+  >
+    <div
+      className="flex items-center"
+    >
+      <HiArrowCircleLeft/>
+      <p>Back</p>
+    </div>
+  </button>
+  {!isMediumOrLarger && <p className="dark:text-white text-xl font-bold">Semesters</p>}
+  </div>
 
+   {isMediumOrLarger && <p className="dark:text-white text-lg font-semibold mb-2">Semesters</p>}
+
+{finals.semesters.map((semester,j)=>{
+  return(<div className="mb-8">
+  <div>
+      <p className="dark:text-white font-semibold">{ordinalSuffix(j+1) +" Semester"}</p>
+      <div style={{alignItems:"center"}} className="flex gap-2">
+        <p className="dark:text-white text-sm">Show Semester Grade</p>
+        <input type="checkbox" onChange={(e)=>{
+          let temp=structuredClone(finals)
+          temp.semesters[j].show=!semester.show
+          setFinals(temp)
+
+        }} checked={semester.show}></input>
+    </div>
+
+        
+  </div>
+
+  <div
+    style={{maxHeight:350}}
+    className="border-gray-600 rounded-lg border mt-2 overflow-x-auto overflow-y-auto -ml-2"
+  >
+    <table className="w-full">
+      <thead>
+        <tr className="dark:bg-slate-700">
+          <th style={{textAlign:"center"}} className="py-2 dark:text-white">Type</th>
+          <th style={{textAlign:"center"}} className="py-2 dark:text-white">Marking Period</th>
+          {settings.mode=="manual" && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
+          <th style={{textAlign:"center"}} className="py-2 pr-4 md:pr-0 dark:text-white">Weight</th>
+          {isMediumOrLarger && <th style={{textAlign:"center"}} className="py-2 dark:text-white"></th>}
+        </tr>
+      </thead>
+      
+  
+      <tbody>
+       {semester.categories.map((f,i)=>(
+        <>
+        <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
+          <td 
+          style={{textAlign:"center"}}
+          >
+
+                {
+            //temporarily doing this really stupidly
+           }
+            <select 
+           value={f.type}
+           onChange={(e)=>{
+            let temp=structuredClone(finals)
+            //@ts-ignore
+            temp.semesters[j].categories[i].type=e.target.value
+            setFinals(temp)
+
+           }}
+           className="bg-transparent dark:text-white border-0 focus:outline-none focus:ring-0"
+            >
+              <option className="bg-gray-600" value="course">Course</option>
+              <option className="bg-gray-600" value="exam">Exam</option>
+            </select>
+
+                
+
+          </td>
+
+          <td
+            style={{textAlign:"center"}}
+          >
+            <select value={f.mp} onChange={(e)=>{
+              let temp=structuredClone(finals)
+              temp.semesters[j].categories[i].mp=parseInt(e.target.value)
+              const index=grades[parseInt(e.target.value)].courses.findIndex(c=>c.identifier==course.identifier)
+              temp.semesters[j].categories[i].courseIndex=index!=-1 ? index : NaN
+              setFinals(temp)
+
+            }}
+              className="bg-transparent dark:text-white border-0 text-elipses focus:outline-none focus:ring-0"
+            >
+              {grades?.[period]?.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.name}</option>))}
+            </select>
+          </td>
+
+
+{settings.mode=="manual"  && <td
+            style={{textAlign:"center"}}
+          >
+         
+            <select value={f.courseIndex}
+       //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
+              className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
+              onChange={(e)=>{
+                let temp=structuredClone(finals)
+                temp.semesters[j].categories[i].courseIndex=parseInt(e.target.value)
+                setFinals(temp)
+
+              }}
+            >
+        <option className="bg-gray-600" value={NaN}>Auto/Unknown</option>
+        {grades[f.mp].courses.map((c,k)=>(
+          <option className="bg-gray-600" value={k}>{c.name.trim()}</option>
+
+        ))}
+            
+            </select>
+            
+            
+          </td>}
+
+          <td
+            style={{textAlign:"center"}}
+          >
+            <div
+              className="text-center dark:text-white flex items-center mt-2 md:ml-5"
+            >
+            <GradeField
+            onChange={(e)=>{}}
+            onBlur={(e)=>{
+              let temp=structuredClone(finals)
+              temp.semesters[j].categories[i].weight=parseFloat(e.target.value)/100
+              setFinals(temp)
+            }}
+            value={Number((f.weight*100).toFixed(4))}
+            />
+            <p>%</p>
+            </div>
+   
+          </td>
+
+  {isMediumOrLarger && <td>
+            <button
+              onClick={() => {deleteSemesterCategory(j,i)}}
+              className="
+                  flex items-center gap-1
+                  rounded-lg bg-primary-500
+                  px-2.5 py-2.5
+                  text-xs font-medium text-white
+                  hover:bg-primary-600
+                  focus:outline-none focus:ring-4 focus:ring-primary-300
+                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  sm:text-sm
+                "
+            >
+              <HiOutlineTrash size="1.2rem" />
+            </button>
+          </td>}
+
+
+        </tr>
+
+
+   {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
+        <td colSpan={settings.mode=="manual" ? 3 : 4}>
+           <button
+                onClick={() => {deleteSemesterCategory(j,i)}}
+                className="
+                  flex items-center gap-1 ml-2 -mt-1 mb-1
+                  rounded-lg bg-primary-500
+                  text-xs font-medium text-white
+                  hover:bg-primary-600
+                  px-1
+                  focus:outline-none focus:ring-4 focus:ring-primary-300
+                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  sm:text-sm
+                "
+              >
+                <p className="dark:text-white">Delete</p>
+              </button>
+        </td>
+
+        </tr>}
+        </>
+))}
+
+      </tbody>
+    </table>
+    </div>
+    <div className="flex justify-between">
+     <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+     onClick={()=>{addSemesterCategory(j)}}>Add+</button>
+   
+       <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+     onClick={()=>{showDefaults("semester")}}>Show Defaults</button>
+   
+
+
+   </div></div>
+  )})}
+  
+    </motion.div>
+  }
 
 
 

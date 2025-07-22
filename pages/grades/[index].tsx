@@ -36,8 +36,8 @@ interface GradesProps {
 	client: any;
 	grades: Cache;
 	setGrades: React.Dispatch<React.SetStateAction<Cache | undefined>>;
-	period: number;
-	setPeriod: (period: number) => void;
+	mp: number;
+	setMP: (period: number) => void;
 	isMediumOrLarger:boolean;
 	createError:(message:string)=>void;
 	ad:any;
@@ -47,8 +47,6 @@ interface GradesProps {
 	width:any;
 	courseSettings:any;
 	setCourseSettings:any;
-	gradesCache:GradesType[]
-	setGradesCache:(grades:GradesType[])=>void;
 	markingPeriod:number;
 	setMarkingPeriod:(p:number)=>void;
 }
@@ -77,20 +75,20 @@ export default function Grades({
 	client,
 	grades,
 	setGrades,
-	period,
-	setPeriod,
+	mp,
+	setMP,
 	isMediumOrLarger,
 	createError,
 	ad,
 	setAd,
 	setTime,
 	timestamp,
-	width,gradesCache,setGradesCache,markingPeriod,setMarkingPeriod
+	width,markingPeriod,setMarkingPeriod
 	
 }: GradesProps) {
 	const router = useRouter();
 	const index = parseInt(String(router.query.index)); //you could've just parseInt'd it here but u didnt' and now i'm too lazy to refactor i hate u
-	const course = grades?.[period]?.courses[index];
+	const course = grades?.[mp]?.courses[index];
 	const [loading, setLoading] = useState(grades ? false : true);
 	const [showModal, setShowModal] = useState(false);
 	const [modalDetails, setModalDetails] = useState(0);
@@ -107,8 +105,8 @@ export default function Grades({
 		
 		
 	const finalGrade=course != undefined ? calcFinal(course?.settings.finals.categories,grades) : undefined
-	
-
+	const semesterIndex=course?.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>category.mp==mp))
+	const semesterGrade = semesterIndex!=-1 ? calcFinal(course?.settings.finals.semesters[semesterIndex].categories,grades) : undefined
 	
 	useEffect(() => {
 		try {
@@ -117,7 +115,7 @@ export default function Grades({
 
 									getGradebooks(client,null,null).then(raws=>{
 										setGrades(getCache(raws))
-										setPeriod(findCurrentPeriod(getCache(raws)))
+										setMP(findCurrentPeriod(getCache(raws)))
 										setLoading(false)
 									})				
 				
@@ -134,7 +132,7 @@ export default function Grades({
 					//@ts-ignore
 					let realShi=getCache(killMe) //this sucks so much. it would almost be easier to just actually finish the backend. so many fucking tmep layers.
 					setGrades(realShi);
-					setPeriod(findCurrentPeriod(realShi));
+					setMP(findCurrentPeriod(realShi));
 					setLoading(false);
 				});
 				*/
@@ -151,7 +149,7 @@ export default function Grades({
 		const deleteLast=(event)=>{
 			if (event.ctrlKey && event.key === "z") {
 				event.preventDefault(); // Prevent default undo behavior if needed
-				let temp=grades?.[period]?.courses[index];
+				let temp=grades?.[mp]?.courses[index];
 		
 
 			if(temp.assignments[0].custom==true){
@@ -160,7 +158,7 @@ export default function Grades({
 		}
 		}
 		
-		if(grades?.[period]?.courses[index]?.assignments?.length>1){
+		if(grades?.[mp]?.courses[index]?.assignments?.length>1){
 			window.addEventListener("keydown", deleteLast);
 		}
 		return () => {
@@ -171,7 +169,7 @@ export default function Grades({
 
 	const updateGrade = (val: string, assignmentId: number, update: string) => {
 		let tempCache=structuredClone(grades)
-		let temp=tempCache?.[period]
+		let temp=tempCache?.[mp]
 		temp.courses[index] = updateCourse(
 			temp.courses[index],
 			assignmentId,
@@ -188,7 +186,7 @@ export default function Grades({
 	const handleTitleChange = () => {
 		const newTitle =assignmentTitle.current.value=='' ? "New Assignment" : assignmentTitle.current.value
 		let tempCache = structuredClone(grades);
-		let temp = tempCache?.[period]
+		let temp = tempCache?.[mp]
 		temp.courses[index].assignments[modalDetails].name=newTitle;
 		setGrades(tempCache);
 		
@@ -197,7 +195,7 @@ export default function Grades({
 
 	const add = () => {
 		let tempCache = grades;
-		let temp=tempCache?.[period]
+		let temp=tempCache?.[mp]
 		temp.courses[index] = addAssignment(
 			temp.courses[index]
 		);
@@ -207,7 +205,7 @@ export default function Grades({
 
 	const del = (id: number) => {
 		let tempCache = structuredClone(grades);
-		let temp = tempCache?.[period]
+		let temp = tempCache?.[mp]
 		temp.courses[index] = delAssignment(
 			temp.courses[index],
 			id
@@ -218,7 +216,7 @@ export default function Grades({
 
 	const updateCat = (val: string, assignmentId: number) => {
 		let tempCache = structuredClone(grades)
-		let temp = tempCache?.[period]
+		let temp = tempCache?.[mp]
 		temp.courses[index] = updateCategory(
 			temp.courses[index],
 			assignmentId,
@@ -253,7 +251,7 @@ export default function Grades({
 							}
 			
 							setGrades(temp)
-							setPeriod(p);
+							setMP(p);
 							setLoading(false);
 						})
 			.catch((err) => {
@@ -261,8 +259,8 @@ export default function Grades({
 				setLoading(false);
 			});
 		}else{
-			console.log(gradesCache[p],"astroworld")
-			setPeriod(p)
+			console.log(grades[p],"what about 	astroworld")
+			setMP(p)
 			setLoading(false)
 		}
 		//this could prob be a useEffect. the temp Cache sets could also be a useEffect tbh
@@ -457,7 +455,7 @@ export default function Grades({
 				<SettingsModal
 					client={client}
 					grades={grades}
-					period={period}
+					mp={mp}
 					setGrades={setGrades}
 					index={index}
 					createError={createError}
@@ -581,6 +579,21 @@ export default function Grades({
 						</div>
 					</div>}
 
+						{course?.settings.finals.semesters[semesterIndex].show
+						 &&
+						<div className="mt-2.5 mb-4 w-full bg-gray-200 rounded-full dark:bg-gray-700 relative">
+						<div
+							className={ `bg-${semesterGrade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-5 md:h-6`}
+							style={{
+								width: `${semesterGrade.raw < 100 ? semesterGrade.raw  : 100}%`,backgroundColor:(semesterGrade.color.includes("#") && `${semesterGrade.color}`)
+							}}
+						>
+									<p className="absolute">
+									Semester Calc ({!isNaN(semesterGrade.raw) ? `${course.settings.rounding.percent ? (semesterGrade.raw.toFixed(course.settings.rounding.percentPlaces)) : semesterGrade.raw}%` : "N/A"})
+								</p>
+						</div>
+					</div>}
+
 			
 					{course?.categories.map(({ name, grade, points }, i) => (
 						<div
@@ -603,18 +616,18 @@ export default function Grades({
 					<div className="flex gap-2 mt-5 w-full">
 						<button
 							type="button"
-							onClick={() => update(period,true)}
+							onClick={() => update(mp,true)}
 							className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm p-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
 						>
 							<TbRefresh size={"1.3rem"} />
 						</button>
 						<select
 							id="periods"
-							value={period}
+							value={mp}
 							onChange={(e) => update(parseInt(e.target.value))}
 							className="block w-full p-2 text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 						>
-							{grades?.[period]?.periods.map((period) => (
+							{grades?.[mp]?.periods.map((period) => (
 								<option value={period.index} key={period.index}>
 									{`${period.name} (${parseDate(period.date)})`}
 								</option>
@@ -658,7 +671,7 @@ export default function Grades({
 							<tbody>
 								{(()=>{
 									var stopBreakingTheIndexSystems;
-									let temp=structuredClone(grades?.[period].courses[index]);	
+									let temp=structuredClone(grades?.[mp].courses[index]);	
 									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){
 										stopBreakingTheIndexSystems=true; //disabled for [name-redacted]
 										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false,included:false,notes:""})

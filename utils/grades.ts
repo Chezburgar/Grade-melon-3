@@ -433,7 +433,7 @@ function templateFinals(mode,periods):Finals{
 			let weight=1/mps.length
 			let categories:Category[]=mps.map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))
 			
-			return {show:true,categories:categories,isSemester:false,semesters:[{show:true,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))},{show:true,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))}]}
+			return {show:true,categories:categories,isSemester:false,semesters:[{show:true,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))},{show:true,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))}]}
 		}
 
 	else{
@@ -1008,6 +1008,12 @@ function abbreviate(category) {
 				let currWeight=0
 				console.log(categories,"calc final type shit")
                 for(let category of categories){
+					if(category.type=="exam"){
+						//idk yet chat. synergy might actually have this tracked/trackable so
+						//yeah...
+
+					}
+					else{
 					if(isNaN(category.courseIndex)||category.courseIndex==null){continue}
 					const grade=cache[category.mp].courses[category.courseIndex].grade
                     //@ts-ignore
@@ -1016,12 +1022,12 @@ function abbreviate(category) {
 					currPoints+=grade.raw*category.weight
 					currWeight+=category.weight
  
-                    }
+                    }}
                 }
-				console.log("bro what",currPoints,currWeight)
 					if(realCat.length==0){return {raw:NaN,letter:"N/A",color:"gray"}}
-                return {raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
-            
+                const grade ={raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
+				console.log(grade)
+				return grade
             }
 
 
