@@ -315,7 +315,8 @@ export default function Grades({
 								const indexX=semCats.findIndex(categories=>categories.some(category=>category.mp==mp))
 
 								const semesterGrade=settings?.finals?.semesters[indexX].show ? (indexX==-1 ? undefined : calcFinal(settings?.finals?.semesters[indexX].categories,grades)) : undefined
-								
+								console.log("hey is my finals showing?",name,settings.finals)
+
 								
 							return(
 								<div className="mx-2 flex justify-center w-full md:w-96" key={i}>

@@ -12,18 +12,7 @@ import { AnimatePresence,motion } from "framer-motion";
 
 
 /*
-//if we still have semester grades that will complicate things. 
-/*
-I think I'd just make it so that each courseID is strictly correspondant to its own settings
-then people can manually input other shit I guess. type shit. 
-I'd still use loose courseID's for marking period change mapping u to the same course though I guess
-
-
-like it very much depends on whether or not we're still gunna have semester grades. I'm gunna 
-assume we're not. i'll change it if i'm wrong ig.
-
-
-We'll presume for now that semester grades are no more
+Should probably add an Add and Delete for adding semesters
 
 */
 
@@ -867,7 +856,10 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
       <tbody>
        {finals.categories.map((f,i)=>(
         <>
-        <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
+        <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}
+        key={i+"body"}
+        >
+        
           <td 
           style={{textAlign:"center"}}
           >
@@ -877,6 +869,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
            }
             <select 
            value={f.type}
+           disabled={!finals.show}
            onChange={(e)=>{
             let temp=structuredClone(finals)
             //@ts-ignore
@@ -897,7 +890,9 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-            <select value={f.mp} onChange={(e)=>{
+            <select 
+            disabled={!finals.show}
+            value={f.mp} onChange={(e)=>{
               let temp=structuredClone(finals)
               temp.categories[i].mp=parseInt(e.target.value)
               const index=grades[parseInt(e.target.value)].courses.findIndex(c=>c.identifier==course.identifier)
@@ -920,6 +915,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             <select value={f.courseIndex}
        //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
               className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
+              disabled={!finals.show}
               onChange={(e)=>{
                 let temp=structuredClone(finals)
                 temp.categories[i].courseIndex=parseInt(e.target.value)
@@ -942,10 +938,9 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-            <div
-              className="text-center dark:text-white flex items-center mt-2 md:ml-5"
-            >
-            <GradeField
+        <div
+              className="text-center dark:text-white flex items-center mt-2 md:ml-5">
+         {finals.show ? <GradeField
             onChange={(e)=>{}}
             onBlur={(e)=>{
               let temp=structuredClone(finals)
@@ -953,15 +948,22 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
               setFinals(temp)
             }}
             value={Number((f.weight*100).toFixed(4))}
-            />
-            <p>%</p>
-            </div>
+            /> : <p
+            style={{...!finals?.show && {color:"gray"}}}
+            className="dark:text-white p-2 w-auto text-center">{Number((f.weight*100).toFixed(4))}</p>
+            }
+            <p
+            style={{...!finals?.show && {color:"gray"}}}
+            className="dark:text-white and stuff">{"%"}</p>
+          
+          </div>
    
           </td>
 
   {isMediumOrLarger && <td>
             <button
               onClick={() => {deleteFinalCategory(i)}}
+              disabled={!finals?.show}
               className="
                   flex items-center gap-1
                   rounded-lg bg-primary-500
@@ -981,10 +983,14 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         </tr>
 
 
-   {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
+   {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"
+   }
+      key={i+"extra"}
+   >
         <td colSpan={settings.mode=="manual" ? 3 : 4}>
            <button
                 onClick={() => {deleteFinalCategory(i)}}
+                disabled={!finals?.show}
                 className="
                   flex items-center gap-1 ml-2 -mt-1 mb-1
                   rounded-lg bg-primary-500
@@ -1048,7 +1054,9 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
    {isMediumOrLarger && <p className="dark:text-white text-lg font-semibold mb-2">Semesters</p>}
 
 {finals.semesters.map((semester,j)=>{
-  return(<div className="mb-8">
+  return(<div className="mb-8"
+      key={"balls"+j}
+  >
   <div>
       <p className="dark:text-white font-semibold">{ordinalSuffix(j+1) +" Semester"}</p>
       <div style={{alignItems:"center"}} className="flex gap-2">
@@ -1092,6 +1100,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             //temporarily doing this really stupidly
            }
             <select 
+           disabled={!semester.show}
            value={f.type}
            onChange={(e)=>{
             let temp=structuredClone(finals)
@@ -1113,7 +1122,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-            <select value={f.mp} onChange={(e)=>{
+            <select disabled={!semester.show} value={f.mp} onChange={(e)=>{
               let temp=structuredClone(finals)
               temp.semesters[j].categories[i].mp=parseInt(e.target.value)
               const index=grades[parseInt(e.target.value)].courses.findIndex(c=>c.identifier==course.identifier)
@@ -1132,7 +1141,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             style={{textAlign:"center"}}
           >
          
-            <select value={f.courseIndex}
+            <select value={f.courseIndex} disabled={!semester.show}
        //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
               className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
               onChange={(e)=>{
@@ -1159,7 +1168,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             <div
               className="text-center dark:text-white flex items-center mt-2 md:ml-5"
             >
-            <GradeField
+              {semester.show ? <GradeField
             onChange={(e)=>{}}
             onBlur={(e)=>{
               let temp=structuredClone(finals)
@@ -1167,15 +1176,22 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
               setFinals(temp)
             }}
             value={Number((f.weight*100).toFixed(4))}
-            />
-            <p>%</p>
+            /> : <p
+            style={{...!semester?.show && {color:"gray"}}}
+            className="dark:text-white p-2 w-auto text-center">{Number((f.weight*100).toFixed(4))}</p>
+            }
+            <p
+            style={{...!semester?.show && {color:"gray"}}}
+            className="dark:text-white and stuff">{"%"}</p>
             </div>
-   
+  
+
           </td>
 
   {isMediumOrLarger && <td>
             <button
               onClick={() => {deleteSemesterCategory(j,i)}}
+              disabled={!semester.show}
               className="
                   flex items-center gap-1
                   rounded-lg bg-primary-500
@@ -1199,6 +1215,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         <td colSpan={settings.mode=="manual" ? 3 : 4}>
            <button
                 onClick={() => {deleteSemesterCategory(j,i)}}
+                disabled={!semester.show}
                 className="
                   flex items-center gap-1 ml-2 -mt-1 mb-1
                   rounded-lg bg-primary-500

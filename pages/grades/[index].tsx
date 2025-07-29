@@ -29,6 +29,7 @@ import { BsGraphUp } from "react-icons/bs";
 import CustomAd from "../../components/customAd";
 import SettingsModal from "../../components/settingsModal"
 import {getGradebooks} from "../../utils/soap"
+import OptimizationModal from "../../components/optimizationModal";
 
 
 
@@ -51,10 +52,7 @@ interface GradesProps {
 	setMarkingPeriod:(p:number)=>void;
 }
 
-interface OptimizeProps {
-	[key: string]: number;
-	
-}
+
 
 
 
@@ -90,23 +88,23 @@ export default function Grades({
 	const index = parseInt(String(router.query.index)); //you could've just parseInt'd it here but u didnt' and now i'm too lazy to refactor i hate u
 	const course = grades?.[mp]?.courses[index];
 	const [loading, setLoading] = useState(grades ? false : true);
-	const [showModal, setShowModal] = useState(false);
+	const [assignmentsModal, setAssignmentsModal] = useState(false);
+	const [optimizationModal,setOptimizationModal] = useState(false)
 	const [modalDetails, setModalDetails] = useState(0);
-	const [modalType, setModalType] = useState("assignment");
-	const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({});
-	const [solutions, setSolution] = useState<[number[], number][]>([]);
 	const [isEditing, setIsEditing]=useState(false);
 	const [title,setTitle]=useState(undefined);
 	const [showSettingsModal,setShowSettingsModal]=useState(false);
 	const assignmentTitle = useRef(null);
-	//right so if it's not mcps the default will be off, but this is other default case
 
 
+	useEffect(()=>{
+		console.log("FUCK CHRIST",optimizationModal)
+	},[optimizationModal])
 		
 		
 	const finalGrade=course != undefined ? calcFinal(course?.settings.finals.categories,grades) : undefined
 	const semesterIndex=course?.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>category.mp==mp))
-	const semesterGrade = semesterIndex!=-1 ? calcFinal(course?.settings.finals.semesters[semesterIndex].categories,grades) : undefined
+	const semesterGrade = (semesterIndex!=-1 && course!=undefined) ? calcFinal(course?.settings.finals.semesters[semesterIndex].categories,grades) : undefined
 	
 	useEffect(() => {
 		try {
@@ -227,10 +225,10 @@ export default function Grades({
 	};
 
 	const OpenModal = (assignmnetId: number) => {
-		setModalType("assignment");
+		
 		setModalDetails(assignmnetId);
 		setTitle(course?.assignments[assignmnetId]?.name)
-		setShowModal(true);
+		setAssignmentsModal(true);
 	};
 
 	function update(p: number,getFresh=false){
@@ -272,32 +270,12 @@ export default function Grades({
 		setIsEditing(true);
 	}
 
-	const optimize = () => {
-		setModalType("optimize");
-		let tempProps = {};
-		tempProps["desiredGrade"] = course.settings.letterScale[0][1][0]
-;
-		course.categories.forEach((cat) => {
-			tempProps[cat.name] = cat.weight * 100;
-		});
-		setOptimizeProps(tempProps);
-		setShowModal(true);
-	};
 
-	const updateOptimize = (val: string, field: string) => {
-		setOptimizeProps((prev) => {
-			return { ...prev, [field]: parseFloat(val) };
-		});
-	};
+
 	const handleFocus = () => {
 		if(title=="New Assignment"){setTitle("")}}
 
-	const optimizeGrades = () => {
-		let points = Object.values(optimizeProps);
-		points.splice(0, 1);
-		let results = genTable(course, optimizeProps.desiredGrade, points);
-		setSolution(results);
-	};
+
 
 	return (
 		<motion.div 
@@ -308,15 +286,13 @@ export default function Grades({
 					{course ? `${course?.name} - Grade Melon` : "Grade Melon"}
 				</title>
 			</Head>
-			{!loading &&
-			<Modal show={showModal} onClose={() => setShowModal(false)}>
+			{!loading && <>
+			<Modal show={assignmentsModal} onClose={() => setAssignmentsModal(false)}>
 				<Modal.Header className="text-xl font-medium text-gray-900 dark:text-white">
-					{modalType === "assignment"
-						? (isEditing ? (<input onFocus={handleFocus} className="border-none bg-transparent focus:outline-none focus:ring-0 p-0 text-xl font-medium" type="text" onChange={handleChange} ref={assignmentTitle} autoFocus onBlur={handleTitleChange} value={title}></input>) : (<p onClick={course?.assignments[modalDetails]?.custom ? editTitle : ()=>{}}>{title}</p>))
-						: "Optimize Grade"}
+					{ (isEditing ? (<input onFocus={handleFocus} className="border-none bg-transparent focus:outline-none focus:ring-0 p-0 text-xl font-medium" type="text" onChange={handleChange} ref={assignmentTitle} autoFocus onBlur={handleTitleChange} value={title}></input>) : (<p onClick={course?.assignments[modalDetails]?.custom ? editTitle : ()=>{}}>{title}</p>))
+					}
 				</Modal.Header>
 				<Modal.Body>
-					{modalType === "assignment" && (
 						<div id="assignment-details">
 							<p className="font-bold text-black dark:text-white">Grade</p>
 							<p
@@ -352,123 +328,11 @@ export default function Grades({
 								{course?.assignments[modalDetails]?.category}
 							</p>
 						</div>
-					)}
-					{modalType === "optimize" && (
-						<div>
-							<div className="flex flex-col gap-3">
-								<div>
-									<label
-										htmlFor="email"
-										className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-									>
-										Desired Grade (1-100)
-									</label>
-									<div className="flex gap-2">
-										<input
-											type="number"
-											min={1}
-											max={100}           
-											value={optimizeProps?.desiredGrade}
-											onChange={(e) =>
-												updateOptimize(e.target.value, "desiredGrade")
-											}
-											className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-											placeholder={String(course.settings.letterScale[0][1][0])}
-										/>
-									</div>
-								</div>
-								{course?.categories.map(({ name }, i) => (
-									<div key={i}>
-										<label
-											htmlFor="email"
-											className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-										>
-											Points Left ({name})
-										</label>
-										<div className="flex gap-2">
-											<input
-												type="number"
-												min={1}
-												max={100}
-												value={optimizeProps[name]}
-												onChange={(e) => updateOptimize(e.target.value, name)}
-												className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-												placeholder="50"
-											/>
-										</div>
-									</div>
-								))}
-							</div>
-							<div className="overflow-x-auto shadow-md rounded-lg mt-5 border border-gray-300 dark:border-gray-600">
-								<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-									<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-										<tr>
-											{course?.categories.map(({ name }, i) => (
-												<th scope="col" className="py-3 pl-6" key={i}>
-													{name}
-												</th>
-											))}
-											<th scope="col" className="py-3 px-6">
-												Grade
-											</th>
-										</tr>
-									</thead>
-									<tbody>
-										{solutions.map((sol, i) => (
-											<tr
-												className={`bg-${
-													i % 2 == 0 ? "white" : "gray-50"
-												} border-b dark:bg-gray-${
-													i % 2 == 0 ? 900 : 800
-												} dark:border-gray-700`}
-												key={i}
-											>
-												{course?.categories.map((cat, i) => (
-													<td scope="col" className="py-3 pl-6" key={i}>
-														{sol[0][i]} / {optimizeProps[cat.name]}
-													</td>
-												))}
-												<td
-													scope="row"
-													className="py-4 pl-6 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-												>
-													{sol[1].toFixed(2)}%
-												</td>
-											</tr>
-										))}
-										{!solutions.length && (
-											<tr className="text-red-600 font-bold">
-												<td
-													className="text-center align-center py-3"
-													colSpan={course?.categories.length + 1}
-												>
-													No Solutions Found!
-												</td>
-											</tr>
-										)}
-									</tbody>
-								</table>
-							</div>
-						</div>
-					)}
 				</Modal.Body>
-				<SettingsModal
-					client={client}
-					grades={grades}
-					mp={mp}
-					setGrades={setGrades}
-					index={index}
-					createError={createError}
-					showModal={showSettingsModal}
-					setShowModal={setShowSettingsModal}
-					isMediumOrLarger={isMediumOrLarger}
-				
-				/>
 				<Modal.Footer>
-					{modalType === "assignment" && (
 						<div className="flex gap-2">
 							<button
-								onClick={() => setShowModal(false)}
+								onClick={() => setAssignmentsModal(false)}
 								className="rounded-lg bg-gray-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
 							>
 								Close
@@ -476,7 +340,7 @@ export default function Grades({
 							<button
 								onClick={() => {
 									del(modalDetails);
-									setShowModal(false);
+									setAssignmentsModal(false);
 								}}
 								className="rounded-lg bg-primary-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
 							>
@@ -486,25 +350,30 @@ export default function Grades({
 								</div>
 							</button>
 						</div>
-					)}
-					{modalType === "optimize" && (
-						<div className="flex gap-2">
-							<button
-								onClick={() => setShowModal(false)}
-								className="rounded-lg bg-gray-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
-							>
-								Close
-							</button>
-							<button
-								onClick={optimizeGrades}
-								className="rounded-lg bg-primary-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-							>
-								Optimize
-							</button>
-						</div>
-					)}
+
 				</Modal.Footer>
 			</Modal>
+
+			<SettingsModal
+				client={client}
+				grades={grades}
+				mp={mp}
+				setGrades={setGrades}
+				index={index}
+				createError={createError}
+				showModal={showSettingsModal}
+				setShowModal={setShowSettingsModal}
+				isMediumOrLarger={isMediumOrLarger}	
+			/>
+
+			<OptimizationModal
+				cache={grades}
+				course={course}
+				setShowModal={setOptimizationModal}
+				showModal={optimizationModal}
+
+			/>
+			</>
 }
 			{loading ? (
 				<div className="flex justify-center">
@@ -574,7 +443,7 @@ export default function Grades({
 							}}
 						>
 									<p className="absolute">
-									Final Calc ({!isNaN(finalGrade.raw) ? `${course.settings.rounding.percent ? (finalGrade.raw.toFixed(course.settings.rounding.percentPlaces)) : finalGrade.raw}%` : "N/A"})
+									Final Grade ({!isNaN(finalGrade.raw) ? `${course.settings.rounding.percent ? (finalGrade.raw.toFixed(course.settings.rounding.percentPlaces)) : finalGrade.raw}%` : "N/A"})
 								</p>
 						</div>
 					</div>}
@@ -589,7 +458,7 @@ export default function Grades({
 							}}
 						>
 									<p className="absolute">
-									Semester Calc ({!isNaN(semesterGrade.raw) ? `${course.settings.rounding.percent ? (semesterGrade.raw.toFixed(course.settings.rounding.percentPlaces)) : semesterGrade.raw}%` : "N/A"})
+									Semester Grade ({!isNaN(semesterGrade.raw) ? `${course.settings.rounding.percent ? (semesterGrade.raw.toFixed(course.settings.rounding.percentPlaces)) : semesterGrade.raw}%` : "N/A"})
 								</p>
 						</div>
 					</div>}
@@ -635,7 +504,7 @@ export default function Grades({
 						</select>
 						<button
 							type="button"
-							onClick={optimize}
+							onClick={()=>setOptimizationModal(true)}
 							className=" bg-primary-500 border border-primary-500 focus:outline-none hover:bg-primary-600 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm p-2.5 dark:bg-primary-600 text-white dark:hover:bg-primary-700 dark:focus:ring-primary-400"
 						>
 							<BsGraphUp size={"1.3rem"} />
