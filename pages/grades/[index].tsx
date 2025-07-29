@@ -301,7 +301,7 @@ export default function Grades({
 
 	return (
 		<motion.div 
-		style={showSettingsModal ? {overflowY:"hidden",maxHeight:500} : {}}
+		style={showSettingsModal && !isMediumOrLarger? {overflowY:"hidden",maxHeight:500} : {}}
 		className="p-5 md:p-10 flex-1">
 			<Head>
 				<title>
