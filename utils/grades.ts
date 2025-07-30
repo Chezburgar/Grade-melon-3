@@ -1000,7 +1000,7 @@ function abbreviate(category) {
 }
 
 
-		     function calcFinal(categories:Category[],cache:Cache){
+		     function calcFinal(categories:Category[],cache:Cache):{letter:string,color:string,raw:number}{
 
 
                 let realCat=[]
@@ -1025,7 +1025,7 @@ function abbreviate(category) {
                     }}
                 }
 					if(realCat.length==0){return {raw:NaN,letter:"N/A",color:"gray"}}
-                const grade ={raw:currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
+                const grade ={raw:cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percent ? parseFloat((currPoints/currWeight).toFixed(cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces)) : currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
 				console.log(grade)
 				return grade
             }

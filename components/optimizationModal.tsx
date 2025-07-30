@@ -1,6 +1,7 @@
 import React, {useState,useEffect} from "react";
-import {genTable} from "../utils/grades"
+import {calcFinal, genTable,Course, Finals, Cache,simplifyWeights, letterGrade, letterGradeColor} from "../utils/grades"
 import {Modal} from "flowbite-react"
+import QuarterField from "./QuarterField";
 
 
 interface OptimizeProps {
@@ -8,13 +9,62 @@ interface OptimizeProps {
 	
 }
 
-export default function OptimizationModal({showModal,setShowModal,course,cache}){
+
+interface ModalProps{
+    showModal:boolean;
+    setShowModal:any;
+    course:Course;
+    cache:Cache;
+}
+
+
+
+/*
+i still wanna make it try to navigate to same course on mp change
+
+still need to think how exams will feed in
+
+and need to think how semesters should be modeled. deletable? (cuz it gets in the way)
+
+To DO: 7/30
+
+  - make it so it tries to navigate to same course on mp change
+  - how do exams feed in to everything
+  - how should semesters be modeled. they be getting in the way dont they. divorce showing from existing.
+  - finish optimization modal, include og functionality and make it work for this too
+
+*/
+
+interface Score{
+    raw:number,
+    letter:string,
+    color:string
+}
+
+export default function OptimizationModal({showModal,setShowModal,course,cache}:ModalProps){
+    const [cacheCopy,setCacheCopy] = useState(structuredClone(cache));
     const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({});
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
 
 
+//what should this even do if finals is disabled chat lmoa
 
 
+    const finalGrade:Score=course != undefined ? calcFinal(course?.settings.finals.categories,cacheCopy) : undefined
+    const semesterGrades:Score[] = course?.settings.finals.semesters.map(semester=>calcFinal(semester.categories,cacheCopy))
+    const all=(course?.settings.finals.show ? course?.settings.finals.categories : []).concat(course?.settings.finals.semesters.map((semester)=>semester.show ? semester.categories : []).flat())
+    
+    //not actually using this for the weights, but it will return the unique marking periods. so. swag.
+    const uniqueCats=simplifyWeights(all)   
+ 
+
+ 
+
+    function ordinalSuffix(n: number): string {
+        const s = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
 
     	function optimize(){
 		let tempProps = {};
@@ -38,19 +88,110 @@ export default function OptimizationModal({showModal,setShowModal,course,cache})
 	};
 	
 
-	const optimizeGrades = () => {
+	function optimizeGrades(){
 		let points = Object.values(optimizeProps);
 		points.splice(0, 1);
 		let results = genTable(course, optimizeProps.desiredGrade, points);
 		setSolutions(results);
 	};
 
+
+
     return(
-        <Modal show={showModal} onClose={()=>{setShowModal(false)}}>
+        <Modal show={showModal} onClose={()=>{
+            
+        }}>
                 <Modal.Header className="text-xl font-medium text-gray-900 dark:text-white">
                     Optimize Grade
                 </Modal.Header>
                 <Modal.Body>
+                <div>
+                <div
+                className="flex justify-between mx-4"
+                >
+                    {uniqueCats.map((category,i)=>{
+                        //fuck me is it ever null? that's dumb
+                        console.log(category,"suck me off")
+                        const grade=!Number.isNaN(category.courseIndex) ? cacheCopy[category.mp].courses[category.courseIndex].grade : {letter:"N/A",color:"gray",raw:NaN}
+
+
+                        return(
+                            <div className="flex flex-col items-center justify-top">
+                             <p className="dark:text-white">{cacheCopy[0].periods[category.mp].name}</p>
+                             
+                            <QuarterField onChange={(e)=>{
+                                console.log("what the FUCK is goin on up there", e.target.value)
+                                const temp=structuredClone(cacheCopy)
+                                temp[category.mp].courses[category.courseIndex].grade={raw:parseFloat(e.target.value),letter:letterGrade(e.target.value,course?.settings),color:letterGradeColor(letterGrade(e.target.value,course?.settings))}
+                                setCacheCopy(temp)
+                            }} cache={cacheCopy}
+                                mp={category.mp}    
+                                courseIndex={category.courseIndex}                        
+                            />
+
+                            </div>
+                        )
+                    })}
+                </div>
+
+                <div className="mx-4 flex justify-center items-center flex-col">
+               {course?.settings.finals.show && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+                        <div
+                            className={ `bg-${finalGrade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
+                            style={{
+                                width: `${finalGrade.raw < 100 ? finalGrade.raw : 100}%`,backgroundColor:(finalGrade.color.includes("#") && `${finalGrade.color}`)
+                            }}
+                        >
+                            <p className="text-sm">Final {!Number.isNaN(finalGrade.raw) && ` (${finalGrade.raw})%`}</p>
+                        </div>
+                    </div>}
+
+                    {semesterGrades.map((grade,i)=>(
+                    <>
+                      {course?.settings.finals.semesters[i].show && <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+                            <div
+                                className={ `bg-${grade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
+                                style={{
+                                    width: `${grade.raw < 100 ? grade.raw : 100}%`,backgroundColor:(grade.color.includes("#") && `${grade.color}`)
+                                }}
+                            >
+                            <p className="text-sm">{ordinalSuffix(i+1)} Semester {!Number.isNaN(grade.raw) && ` (${grade.raw})%`}</p>
+                            </div>
+                        </div>
+                    }
+                    </>
+                    ))}
+
+                </div>
+
+                </div>
+                </Modal.Body>
+                <Modal.Footer>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="rounded-lg bg-gray-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
+                            >
+                                Close
+                            </button>
+                            <button
+                                onClick={optimizeGrades}
+                                className="rounded-lg bg-primary-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                            >
+                                Optimize
+                            </button>
+                        </div>
+                </Modal.Footer>
+            </Modal>
+
+    )
+}
+
+
+
+
+/*
+  <Modal.Body>
                         <div>
                             <div className="flex flex-col gap-3">
                                 <div>
@@ -148,23 +289,4 @@ export default function OptimizationModal({showModal,setShowModal,course,cache})
                             </div>
                         </div>
                 </Modal.Body>
-                <Modal.Footer>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="rounded-lg bg-gray-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
-                            >
-                                Close
-                            </button>
-                            <button
-                                onClick={optimizeGrades}
-                                className="rounded-lg bg-primary-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                            >
-                                Optimize
-                            </button>
-                        </div>
-                </Modal.Footer>
-            </Modal>
-
-    )
-}
+*/
