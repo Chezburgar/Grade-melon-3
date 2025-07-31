@@ -368,7 +368,8 @@ export default function Grades({
 
 			<OptimizationModal
 				cache={grades}
-				course={course}
+				mp={mp}
+				index={index}
 				setShowModal={setOptimizationModal}
 				showModal={optimizationModal}
 

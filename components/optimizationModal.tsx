@@ -13,7 +13,8 @@ interface OptimizeProps {
 interface ModalProps{
     showModal:boolean;
     setShowModal:any;
-    course:Course;
+    mp:number;
+    index:number;
     cache:Cache;
 }
 
@@ -41,8 +42,9 @@ interface Score{
     color:string
 }
 
-export default function OptimizationModal({showModal,setShowModal,course,cache}:ModalProps){
+export default function OptimizationModal({showModal,setShowModal,mp,index,cache}:ModalProps){
     const [cacheCopy,setCacheCopy] = useState(structuredClone(cache));
+    const course=cacheCopy[mp].courses[index]
     const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({});
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
 
@@ -56,7 +58,6 @@ export default function OptimizationModal({showModal,setShowModal,course,cache}:
     
     //not actually using this for the weights, but it will return the unique marking periods. so. swag.
     const uniqueCats=simplifyWeights(all)   
- 
 
  
 
@@ -111,18 +112,38 @@ export default function OptimizationModal({showModal,setShowModal,course,cache}:
                 >
                     {uniqueCats.map((category,i)=>{
                         //fuck me is it ever null? that's dumb
-                        console.log(category,"suck me off")
+
                         const grade=!Number.isNaN(category.courseIndex) ? cacheCopy[category.mp].courses[category.courseIndex].grade : {letter:"N/A",color:"gray",raw:NaN}
 
 
                         return(
-                            <div className="flex flex-col items-center justify-top">
+                            <div key={i} className="flex flex-col items-center justify-top">
                              <p className="dark:text-white">{cacheCopy[0].periods[category.mp].name}</p>
                              
                             <QuarterField onChange={(e)=>{
-                                console.log("what the FUCK is goin on up there", e.target.value)
+                                const val=parseFloat(e.target.value)
+
+                                const newGrade={raw:val,letter:letterGrade(val,course?.settings),color:letterGradeColor(letterGrade(val,course?.settings))}
                                 const temp=structuredClone(cacheCopy)
-                                temp[category.mp].courses[category.courseIndex].grade={raw:parseFloat(e.target.value),letter:letterGrade(e.target.value,course?.settings),color:letterGradeColor(letterGrade(e.target.value,course?.settings))}
+                                if(!Number.isNaN(category.courseIndex)){
+                                temp[category.mp].courses[category.courseIndex].grade=newGrade
+                                }else{
+
+                                    //virtual course
+                                    temp[category.mp].courses[99+i]={grade:newGrade,name:"",period:NaN,courseID:course.courseID,layoutID:NaN,room:"",weighted:course.weighted,identifier:course.identifier,settings:course.settings,teacher:{name:"",email:""},categories:course.categories,assignments:[]}
+                                    
+                                    //insert virtual course into copy's runtime settings
+                                    const dex=course.settings.finals.categories.findIndex(cat=>(isNaN(cat.courseIndex)&&cat.mp==category.mp&&category.type==cat.type))
+                                    if(dex!=-1){
+                                    course.settings.finals.categories[dex].courseIndex=99+i}
+                                    for(let semester of course.settings.finals.semesters){
+                                        const dex=semester.categories.findIndex(cat=>Number.isNaN(cat.courseIndex)&&cat.mp==category.mp&&cat.type==category.type)
+                                        if(dex==-1){continue}
+                                        semester.categories[dex].courseIndex=99+i
+                                    }
+                                    temp[mp].courses[index]=course
+                                }
+                                
                                 setCacheCopy(temp)
                             }} cache={cacheCopy}
                                 mp={category.mp}    

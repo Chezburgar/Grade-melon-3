@@ -10,7 +10,7 @@ interface QuarterFieldProps {
 
 export default function QuarterField({onChange,cache,mp,courseIndex,onBlur=()=>{} }: QuarterFieldProps) {
     const [focus, setFocus] = useState(false);
-     const grade=cache[mp].courses[courseIndex].grade
+    const grade=!Number.isNaN(courseIndex) ? cache[mp].courses[courseIndex].grade : {letter:"N/A",color:"gray",raw:NaN}
     const [valasString, setValasString] = useState(grade.raw.toString());
     const ref = useRef(null);
    

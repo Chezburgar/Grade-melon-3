@@ -1006,7 +1006,7 @@ function abbreviate(category) {
                 let realCat=[]
 				let currPoints=0
 				let currWeight=0
-				console.log(categories,"calc final type shit")
+				//console.log(categories,"calc final type shit")
                 for(let category of categories){
 					if(category.type=="exam"){
 						//idk yet chat. synergy might actually have this tracked/trackable so
@@ -1014,10 +1014,14 @@ function abbreviate(category) {
 
 					}
 					else{
-					if(isNaN(category.courseIndex)||category.courseIndex==null){continue}
-					const grade=cache[category.mp].courses[category.courseIndex].grade
+						//@ts-ignore
+					if((isNaN(category.courseIndex)||category.courseIndex==null)&&!category.grade){
+						continue
+					}
+					//@ts-ignore
+					const grade=category.grade ? category.grade : cache[category.mp].courses[category.courseIndex].grade
                     //@ts-ignore
-					if(Number(grade.raw)!=NaN){
+					if(!Number.isNaN(grade.raw)){
                     realCat.push(category);
 					currPoints+=grade.raw*category.weight
 					currWeight+=category.weight
@@ -1026,7 +1030,7 @@ function abbreviate(category) {
                 }
 					if(realCat.length==0){return {raw:NaN,letter:"N/A",color:"gray"}}
                 const grade ={raw:cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percent ? parseFloat((currPoints/currWeight).toFixed(cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces)) : currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
-				console.log(grade)
+			//	console.log(grade)
 				return grade
             }
 
