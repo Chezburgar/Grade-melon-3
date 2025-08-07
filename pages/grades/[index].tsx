@@ -85,7 +85,7 @@ export default function Grades({
 	
 }: GradesProps) {
 	const router = useRouter();
-	const index = parseInt(String(router.query.index)); //you could've just parseInt'd it here but u didnt' and now i'm too lazy to refactor i hate u
+	const [index,setIndex] = useState(parseInt(String(router.query.index))); //you could've just parseInt'd it here but u didnt' and now i'm too lazy to refactor i hate u
 	const course = grades?.[mp]?.courses[index];
 	const [loading, setLoading] = useState(grades ? false : true);
 	const [assignmentsModal, setAssignmentsModal] = useState(false);
@@ -232,6 +232,7 @@ export default function Grades({
 	};
 
 	function update(p: number,getFresh=false){
+		const identifier=course.identifier
 		console.log(p);
 		setLoading(true);
 		if(getFresh){
@@ -261,7 +262,17 @@ export default function Grades({
 			setMP(p)
 			setLoading(false)
 		}
-		//this could prob be a useEffect. the temp Cache sets could also be a useEffect tbh
+
+		const newIndex=grades[p].courses.findIndex(c=>c.identifier==course?.identifier)
+		console.log("reality is often cruel",newIndex)
+		if(newIndex!=-1){
+	//		setIndex(newIndex) leads to an animation error rn, will re-enable when fixed
+		}
+		else{
+			
+		}
+
+		//this whole thing could prob be a useEffect. the temp Cache sets could also be a useEffect tbh
 
 		
 	};
@@ -367,6 +378,7 @@ export default function Grades({
 			/>
 
 			<OptimizationModal
+				createError={createError}
 				cache={grades}
 				mp={mp}
 				index={index}
@@ -449,7 +461,7 @@ export default function Grades({
 						</div>
 					</div>}
 
-						{course?.settings.finals.semesters[semesterIndex].show
+						{semesterIndex!=-1 && course?.settings.finals.semesters[semesterIndex].show
 						 &&
 						<div className="mt-2.5 mb-4 w-full bg-gray-200 rounded-full dark:bg-gray-700 relative">
 						<div

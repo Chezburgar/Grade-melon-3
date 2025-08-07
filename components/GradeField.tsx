@@ -40,7 +40,7 @@ export default function GradeField({ value, onChange,onBlur=()=>{} }: GradeField
 			className="cursor-pointer"
 		>
 			{!focus ? (
-				<p className="p-2 w-auto text-center">
+				<p className="p-2 w-auto md:w-12 text-center">
 				{!isNaN(value) ? value : "NG"}
 				</p>
 			) : (
@@ -50,7 +50,7 @@ export default function GradeField({ value, onChange,onBlur=()=>{} }: GradeField
 					value={valasString}
 					onChange={onUpdate}
 					onBlur={(e)=>onBlurFunc(e)}
-					className="w-12 inline-block bg-gray-50 border-none bg-transparent p-2 md:p-1 text-gray-900 sm:text-xs rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+					className="w-12 inline-block text-lg bg-gray-50 border-none bg-transparent p-2 md:p-1 text-gray-900 sm:text-xs rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 				/>
 			)}
 		</div>

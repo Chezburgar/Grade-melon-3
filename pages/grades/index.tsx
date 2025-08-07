@@ -314,7 +314,7 @@ export default function Grades({
 								const semCats=semesters.map(semester=>semester.categories)
 								const indexX=semCats.findIndex(categories=>categories.some(category=>category.mp==mp))
 
-								const semesterGrade=settings?.finals?.semesters[indexX].show ? (indexX==-1 ? undefined : calcFinal(settings?.finals?.semesters[indexX].categories,grades)) : undefined
+								const semesterGrade=indexX!=-1 ? (settings?.finals?.semesters[indexX].show ? (calcFinal(settings?.finals?.semesters[indexX].categories,grades)) : undefined):undefined
 								console.log("hey is my finals showing?",name,settings.finals)
 
 								

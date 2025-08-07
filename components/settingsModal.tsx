@@ -4,18 +4,9 @@ import { HiOutlineTrash,HiArrowCircleRight,HiArrowCircleLeft, HiArrowCircleDown 
 import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse} from "../utils/grades";
 import {colorShit} from "./colors"
 import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2,Finals} from "../utils/grades"
-import { count } from "console";
 import GradeField from "./GradeField";
 import StudentVue from "studentvue";
 import { AnimatePresence,motion } from "framer-motion";
-
-
-
-/*
-Should probably add an Add and Delete for adding semesters
-
-*/
-
 
 
 interface props{
@@ -48,6 +39,7 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
         const [finals,setFinals]=useState<Finals>(course.settings.finals)
+        const [kill,setKill]=useState([undefined,undefined])
 
         //new stack based view version
         const [viewStack,setViewStack] = useState(["home"])
@@ -159,7 +151,17 @@ function addSemesterCategory(semesterIndex){
   setFinals(temp)
 }
 
+function deleteSemester(semesterIndex){
+  let temp = structuredClone(finals)
+  temp.semesters.splice(semesterIndex,1)
+  setFinals(temp)
+}
 
+function addSemester(){
+  let temp = structuredClone(finals)
+  temp.semesters.push({show:false,categories:[]})
+  setFinals(temp)
+}
 
 
 function deleteFinalCategory(index){
@@ -467,7 +469,8 @@ className="overflow-y-auto"
     mode="wait"
     initial={false}
   >
-   {currentView=="home" && <motion.div
+   {currentView=="home" && 
+   <motion.div
       className="flex flex-col gap-4"
     >
       <motion.button 
@@ -507,6 +510,20 @@ className="overflow-y-auto"
           Semester Grade
           <HiArrowCircleRight/>
       </div>
+
+    </motion.button>
+
+    <motion.button
+      {...animationPropsHome} 
+      key="cats"
+      onClick={()=>{setViewStack(["cats"])}}
+      style={{borderWidth:1}}
+      className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold">
+      
+        <div className="flex justify-between items-center">
+          Categories and Quarter Exams
+        <HiArrowCircleRight/>
+        </div>
 
     </motion.button>
     
@@ -688,7 +705,7 @@ className="overflow-y-auto"
                 className="
                   flex items-center gap-1
                   rounded-lg bg-primary-500
-                  px-2.5 py-2.5
+                  px-2 py-2 my-1
                   text-xs font-medium text-white
                   hover:bg-primary-600
                   focus:outline-none focus:ring-4 focus:ring-primary-300
@@ -856,10 +873,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
       <tbody>
        {finals.categories.map((f,i)=>(
         <>
-        <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}
-        key={i+"body"}
-        >
-        
+        <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
           <td 
           style={{textAlign:"center"}}
           >
@@ -869,7 +883,6 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
            }
             <select 
            value={f.type}
-           disabled={!finals.show}
            onChange={(e)=>{
             let temp=structuredClone(finals)
             //@ts-ignore
@@ -890,9 +903,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-            <select 
-            disabled={!finals.show}
-            value={f.mp} onChange={(e)=>{
+            <select value={f.mp} onChange={(e)=>{
               let temp=structuredClone(finals)
               temp.categories[i].mp=parseInt(e.target.value)
               const index=grades[parseInt(e.target.value)].courses.findIndex(c=>c.identifier==course.identifier)
@@ -915,7 +926,6 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             <select value={f.courseIndex}
        //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
               className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
-              disabled={!finals.show}
               onChange={(e)=>{
                 let temp=structuredClone(finals)
                 temp.categories[i].courseIndex=parseInt(e.target.value)
@@ -938,36 +948,37 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-        <div
-              className="text-center dark:text-white flex items-center mt-2 md:ml-5">
-         {finals.show ? <GradeField
-            onChange={(e)=>{}}
-            onBlur={(e)=>{
-              let temp=structuredClone(finals)
-              temp.categories[i].weight=parseFloat(e.target.value)/100
-              setFinals(temp)
+            <div
+              className="text-center dark:text-white flex items-center mt-2 md:ml-5"
+            >
+            <input
+            type="text"
+            className="bg-transparent w-12 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 rounded-lg border-none p-0 md:ml-5"
+            onFocus={(e)=>setKill([i,e.target.value.replaceAll("%","")])}
+            onChange={(e)=>{
+              setKill([i,e.target.value.replaceAll("%","")])
             }}
-            value={Number((f.weight*100).toFixed(4))}
-            /> : <p
-            style={{...!finals?.show && {color:"gray"}}}
-            className="dark:text-white p-2 w-auto text-center">{Number((f.weight*100).toFixed(4))}</p>
-            }
-            <p
-            style={{...!finals?.show && {color:"gray"}}}
-            className="dark:text-white and stuff">{"%"}</p>
-          
-          </div>
+            onBlur={(e)=>{
+           
+              let temp=structuredClone(finals)
+              temp.categories[i].weight=parseFloat(e.target.value.replaceAll("%",""))/100
+              setFinals(temp)
+              setKill([NaN,""])
+
+            }}
+            value={kill[0] == i ? kill[1] : Number((f.weight*100).toFixed(4)) + "%"}
+            />
+            </div>
    
           </td>
 
   {isMediumOrLarger && <td>
             <button
               onClick={() => {deleteFinalCategory(i)}}
-              disabled={!finals?.show}
               className="
                   flex items-center gap-1
                   rounded-lg bg-primary-500
-                  px-2.5 py-2.5
+                  px-2 py-2 my-1
                   text-xs font-medium text-white
                   hover:bg-primary-600
                   focus:outline-none focus:ring-4 focus:ring-primary-300
@@ -983,14 +994,10 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         </tr>
 
 
-   {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"
-   }
-      key={i+"extra"}
-   >
+   {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
         <td colSpan={settings.mode=="manual" ? 3 : 4}>
            <button
                 onClick={() => {deleteFinalCategory(i)}}
-                disabled={!finals?.show}
                 className="
                   flex items-center gap-1 ml-2 -mt-1 mb-1
                   rounded-lg bg-primary-500
@@ -1014,10 +1021,10 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
     </table>
     </div>
     <div className="flex justify-between">
-     <button disabled={!finals?.show} className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+     <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
      onClick={()=>{addFinalCategory()}}>Add+</button>
    
-       <button disabled={!finals?.show} className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+       <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
      onClick={()=>{showDefaults("finals")}}>Show Defaults</button>
    
 
@@ -1030,7 +1037,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
   {
-    //Semester Grade
+    //Semester Grades page
     currentView=="semester" && <motion.div
   {...animationPropsPage}
   key="semesterPage"
@@ -1054,20 +1061,21 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
    {isMediumOrLarger && <p className="dark:text-white text-lg font-semibold mb-2">Semesters</p>}
 
 {finals.semesters.map((semester,j)=>{
-  return(<div className="mb-8"
-      key={"balls"+j}
-  >
-  <div>
-      <p className="dark:text-white font-semibold">{ordinalSuffix(j+1) +" Semester"}</p>
-      <div style={{alignItems:"center"}} className="flex gap-2">
-        <p className="dark:text-white text-sm">Show Semester Grade</p>
-        <input type="checkbox" onChange={(e)=>{
-          let temp=structuredClone(finals)
-          temp.semesters[j].show=!semester.show
-          setFinals(temp)
+  return(<div className="mb-8">
+  <div className="flex items-center justify-between">
+    <div>
+        <p className="dark:text-white font-semibold">{ordinalSuffix(j+1) +" Semester"}</p>
+        <div style={{alignItems:"center"}} className="flex gap-2">
+          <p className="dark:text-white text-sm">Show Semester Grade</p>
+          <input type="checkbox" onChange={(e)=>{
+            let temp=structuredClone(finals)
+            temp.semesters[j].show=!semester.show
+            setFinals(temp)
 
-        }} checked={semester.show}></input>
+          }} checked={semester.show}></input>
+      </div>
     </div>
+
 
         
   </div>
@@ -1100,7 +1108,6 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             //temporarily doing this really stupidly
            }
             <select 
-           disabled={!semester.show}
            value={f.type}
            onChange={(e)=>{
             let temp=structuredClone(finals)
@@ -1122,7 +1129,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-            <select disabled={!semester.show} value={f.mp} onChange={(e)=>{
+            <select value={f.mp} onChange={(e)=>{
               let temp=structuredClone(finals)
               temp.semesters[j].categories[i].mp=parseInt(e.target.value)
               const index=grades[parseInt(e.target.value)].courses.findIndex(c=>c.identifier==course.identifier)
@@ -1141,7 +1148,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             style={{textAlign:"center"}}
           >
          
-            <select value={f.courseIndex} disabled={!semester.show}
+            <select value={f.courseIndex}
        //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
               className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
               onChange={(e)=>{
@@ -1168,34 +1175,32 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             <div
               className="text-center dark:text-white flex items-center mt-2 md:ml-5"
             >
-              {semester.show ? <GradeField
-            onChange={(e)=>{}}
+            <input
+            className="bg-transparent w-12 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 rounded-lg border-none p-0 md:ml-5"
+            type="text"
+            onFocus={(e)=>setKill([i,e.target.value.replaceAll("%","")])}
+            onChange={(e)=>{
+              setKill([i,e.target.value.replaceAll("%","")])
+            }}
             onBlur={(e)=>{
               let temp=structuredClone(finals)
-              temp.semesters[j].categories[i].weight=parseFloat(e.target.value)/100
+              temp.semesters[j].categories[i].weight=parseFloat(e.target.value.replaceAll("%",""))/100
               setFinals(temp)
+              setKill([NaN,""])
             }}
-            value={Number((f.weight*100).toFixed(4))}
-            /> : <p
-            style={{...!semester?.show && {color:"gray"}}}
-            className="dark:text-white p-2 w-auto text-center">{Number((f.weight*100).toFixed(4))}</p>
-            }
-            <p
-            style={{...!semester?.show && {color:"gray"}}}
-            className="dark:text-white and stuff">{"%"}</p>
+            value={kill[0]==i ? kill[1] : Number((f.weight*100).toFixed(4)) + "%"}
+            />
             </div>
-  
-
+   
           </td>
 
   {isMediumOrLarger && <td>
             <button
               onClick={() => {deleteSemesterCategory(j,i)}}
-              disabled={!semester.show}
               className="
                   flex items-center gap-1
                   rounded-lg bg-primary-500
-                  px-2.5 py-2.5
+                  px-2 py-2 my-1
                   text-xs font-medium text-white
                   hover:bg-primary-600
                   focus:outline-none focus:ring-4 focus:ring-primary-300
@@ -1215,7 +1220,6 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         <td colSpan={settings.mode=="manual" ? 3 : 4}>
            <button
                 onClick={() => {deleteSemesterCategory(j,i)}}
-                disabled={!semester.show}
                 className="
                   flex items-center gap-1 ml-2 -mt-1 mb-1
                   rounded-lg bg-primary-500
@@ -1239,10 +1243,10 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
     </table>
     </div>
     <div className="flex justify-between">
-     <button disabled={!semester.show} className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+     <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
      onClick={()=>{addSemesterCategory(j)}}>Add+</button>
    
-       <button disabled={!semester.show} className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+       <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
      onClick={()=>{showDefaults("semester")}}>Show Defaults</button>
    
 
@@ -1251,6 +1255,154 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   )})}
   
     </motion.div>
+  }
+
+  {
+    //Categories Page
+    (currentView=="cats" && index!=-1) && <>
+    <motion.div
+      {...animationPropsPage}
+      key="catsPage"
+    >
+      <div className="flex justify-between items-center mb-3">
+        <button
+          style={{borderWidth:1,padding:5,borderRadius:12}}
+          className="-ml-3 dark:text-white font-semibold border-neutral-200 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100 dark:hover:bg-gray-800 dark:bg-[#2d3847]"
+          onClick={()=>{setViewStack(["home"])}}
+        >
+          <div
+            className="flex items-center"
+          >
+            <HiArrowCircleLeft/>
+            <p>Back</p>
+          </div>
+        </button>
+        {false && <p className="dark:text-white text-xl font-bold">Categories and Quarter Exams</p>}
+      </div>
+
+      {true && <p className="dark:text-white text-lg font-semibold mb-2">Categories and Quarter Exams</p>}
+
+    
+      <div className="flex flex-col relative gap-1 w-fit">
+        <p className="dark:text-white text-sm">Marking Period</p>
+        <select
+        value={period}
+
+        className="-ml-1.5 bg-transparent dark:text-white w-fit text-sm rounded-lg !ring-0 outline-none border-1 focus:border-primary-500"
+        >
+          {grades[0].periods.map((mp,k)=>{
+
+            return(
+              <option className="bg-gray-600" value={mp.index}>{mp.name}</option>
+            )
+          })}
+        </select>
+      </div>
+
+   <div
+    style={{maxHeight:350}}
+    className="border-gray-600 rounded-lg border mt-2 overflow-x-auto overflow-y-auto -ml-2"
+  >
+    <table className="w-full">
+      <thead>
+        <tr className="dark:bg-slate-700">
+          <th style={{textAlign:"center"}} className="py-2 dark:text-white">Name</th>
+          <th style={{textAlign:"center"}} className="py-2 pr-4 md:pr-0 dark:text-white">Weight</th>
+          {true && <th style={{textAlign:"center"}} className="py-2 dark:text-white"></th>}
+        </tr>
+      </thead>
+      
+  
+      <tbody>
+       {course.categories.map((f,i)=>(
+        <>
+        <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
+          <td 
+          style={{textAlign:"center",textOverflow:"elipsis"}}
+          >
+            <p className="dark:text-white">
+              {f.name}
+            </p>
+          </td>
+
+          <td
+            style={{textAlign:"center"}}
+          >
+            <div
+              className="text-center dark:text-white flex items-center mt-2"
+            >
+            <input
+            type="text"
+            style={{marginLeft:155}}
+            className="bg-transparent w-12 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 rounded-lg border-none p-0"
+            onFocus={(e)=>setKill([i,e.target.value.replaceAll("%","")])}
+            onChange={(e)=>{
+              setKill([i,e.target.value.replaceAll("%","")])
+            }}
+            onBlur={(e)=>{
+           
+              let temp=structuredClone(finals)
+              temp.categories[i].weight=parseFloat(e.target.value.replaceAll("%",""))/100
+              setFinals(temp)
+              setKill([NaN,""])
+
+            }}
+            value={kill[0] == i ? kill[1] : Number((f.weight*100).toFixed(4)) + "%"}
+            />
+            </div>
+   
+          </td>
+
+  {true && <td>
+            <button
+              onClick={() => {deleteFinalCategory(i)}}
+              className="
+                  flex items-center gap-1
+                  rounded-lg bg-primary-500
+                  px-2 py-2 my-1
+                  text-xs font-medium text-white
+                  hover:bg-primary-600
+                  focus:outline-none focus:ring-4 focus:ring-primary-300
+                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  sm:text-sm
+                "
+            >
+              <HiOutlineTrash size="1.2rem" />
+            </button>
+          </td>}
+
+
+        </tr>
+
+
+   {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
+        <td colSpan={settings.mode=="manual" ? 3 : 4}>
+           <button
+                onClick={() => {deleteFinalCategory(i)}}
+                className="
+                  flex items-center gap-1 ml-2 -mt-1 mb-1
+                  rounded-lg bg-primary-500
+                  text-xs font-medium text-white
+                  hover:bg-primary-600
+                  px-1
+                  focus:outline-none focus:ring-4 focus:ring-primary-300
+                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  sm:text-sm
+                "
+              >
+                <p className="dark:text-white">Delete</p>
+              </button>
+        </td>
+
+        </tr>}
+        </>
+))}
+
+      </tbody>
+    </table>
+      </div>
+    </motion.div>
+    </>
   }
 
 

@@ -20,6 +20,7 @@ interface Assignment {
 		assigned: Date;
 	};
 	category: string;
+	GradebookID:string;
 }
 
 
@@ -45,8 +46,18 @@ interface Category{
 
 interface CourseSettings{
 	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},letterScale:
-	[string,[number,number],string?][],finals?:Finals,categories?:undefined // categories is to be implemented
+	[string,[number,number],string?][],finals?:Finals,categories?:Course["categories"],assignments:MetaAssignments[] // categories is to be implemented
 }
+
+
+interface MetaAssignments{
+	name:string,
+	included:boolean,
+	notes:string,
+	category:string,
+	GradebookID:string
+}
+
 
 interface GlobalSettings{
 	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},letterScale:
@@ -177,13 +188,13 @@ function letterGradeColor(letterGrade: string,gradingScale:CourseSettings|false=
 function letterGrade(grade: number,gradingScale:CourseSettings):string{
 
 	//deprecating rounding unless someone complains chat
-	/*
+	
 	const rounding=gradingScale.rounding;
 if(rounding.percent){
 	grade=Number(grade.toFixed(rounding.percentPlaces))
 
 }
-	*/
+	
 
 
 if(!gradingScale){
@@ -493,11 +504,17 @@ function getCache(books:Gradebook[]):Cache{
 //real swag players with one's in the top level settings objects
 	for(let grades of gradesCache){
 		grades.settings=settings
-		for(let course of grades.courses){
+		for(let course of grades.courses as Course[]){
 			const id = settings.mode=="automatic" ? course.identifier : Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(course.identifier))]
 			if(settings[id]==undefined){
 				course.settings=initalizeFinals2(gradesCache,settings,course.identifier)
-				console.log(course.setttings,"electric avenue")
+				//this one is finna be special cause categories is unique in that it won't have a global
+				//at least not until I look into supporting Gavin-like cases
+
+				if(course.settings.categories){
+			//		course.categories=course.settings.categories //maybe. eventually. for now. FUCK NO.
+				}
+				console.log(course.settings,"electric avenue")
 			}
 		
 		}
@@ -615,9 +632,10 @@ const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
       },
     ],
 
-			assignments: marks[0].assignments.map(({ name, date, points, type,notes }) => ({
+			assignments: marks[0].assignments.map(({ name, date, points, type,notes,gradebookId }) => ({
 				included:notes!="(Not For Grading)",
 				notes:notes,
+				GradebookID:gradebookId,
 				name: parseAssignmentName(name),
 				grade: {
 					letter:  letterGrade(parsePoints(points).grade,courseSettings), 
@@ -850,6 +868,7 @@ const addAssignment = (course: Course): Course => {
 		included:true,
 		notes:"",
 		custom:true,
+		GradebookID:crypto.randomUUID(),
 		grade: {
 			letter: "N/A",
 			raw: NaN,
@@ -1029,7 +1048,10 @@ function abbreviate(category) {
                     }}
                 }
 					if(realCat.length==0){return {raw:NaN,letter:"N/A",color:"gray"}}
-                const grade ={raw:cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percent ? parseFloat((currPoints/currWeight).toFixed(cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces)) : currPoints/currWeight,letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
+                console.log("I'm gunna fucking kill myself", currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)
+					const grade ={raw:cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percent ? parseFloat((currPoints/currWeight).toFixed(cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces)) : currPoints/currWeight,
+					letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),
+					color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
 			//	console.log(grade)
 				return grade
             }
