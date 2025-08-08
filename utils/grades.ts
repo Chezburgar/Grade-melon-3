@@ -1056,6 +1056,292 @@ function abbreviate(category) {
 				return grade
             }
 
+export type SolveSystemParams = {
+  A: number[][];         // m x n matrix
+  targets: number[];     // length m
+  knowns?: number[];     // optional per-equation offsets (length m), default 0
+  decimalPlaces: number; // e.g., 2
+  min?: number;          // default 0
+  max?: number;          // default 100
+  evennessBias?: number; // small tie-break nudger, default 0.15 (0..0.3 reasonable)
+};
+
+export function solveSystemMinSum(params: SolveSystemParams): number[] | null {
+  const { A, targets, knowns, decimalPlaces } = params;
+  const min = params.min ?? 0;
+  const max = params.max ?? 100;
+  const evennessBias = params.evennessBias ?? 0.15; // lower => less spreading, higher => more
+
+  const m = A.length;
+  if (m === 0) return null;
+  const n = A[0].length;
+
+  const precision = 10 ** decimalPlaces;
+  const step = 1 / precision;
+  const halfUlp = 0.5 / precision;
+  const range = Math.max(step, max - min);
+
+  // ---------- helpers ----------
+  const roundGrid = (v: number) => Math.round(v * precision) / precision;
+  const clamp = (v: number) => Math.max(min, Math.min(max, v));
+  const eqDec = (a: number, b: number) => Math.abs(a - b) <= halfUlp;
+
+  const g = targets.map((t, i) => roundGrid(t - (knowns?.[i] ?? 0)));
+
+  function Ax(x: number[]): number[] {
+    const y = new Array(m).fill(0);
+    for (let i = 0; i < m; i++) {
+      let s = 0;
+      const row = A[i];
+      for (let j = 0; j < n; j++) s += row[j] * x[j];
+      y[i] = roundGrid(s);
+    }
+    return y;
+  }
+  const allEq = (y: number[], rhs: number[]) => y.every((v, i) => eqDec(v, rhs[i]));
+  const allGe = (y: number[], rhs: number[]) => y.every((v, i) => v + halfUlp >= rhs[i]);
+
+  // ---------- tiny linear algebra (n <= ~8) ----------
+  function matT(M: number[][]): number[][] {
+    const r = M.length, c = M[0].length;
+    const T = Array.from({ length: c }, () => Array(r).fill(0));
+    for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) T[j][i] = M[i][j];
+    return T;
+  }
+  function matMul(L: number[][], R: number[][]): number[][] {
+    const r = L.length, k = R.length, c = R[0].length;
+    const M = Array.from({ length: r }, () => Array(c).fill(0));
+    for (let i = 0; i < r; i++) {
+      for (let kk = 0; kk < k; kk++) {
+        const lik = L[i][kk];
+        if (lik === 0) continue;
+        for (let j = 0; j < c; j++) M[i][j] += lik * R[kk][j];
+      }
+    }
+    return M;
+  }
+  function matVec(L: number[][], v: number[]): number[] {
+    const r = L.length, k = L[0].length;
+    const out = new Array(r).fill(0);
+    for (let i = 0; i < r; i++) {
+      let s = 0;
+      for (let j = 0; j < k; j++) s += L[i][j] * v[j];
+      out[i] = s;
+    }
+    return out;
+  }
+  // Solve small dense linear system M x = b (Gaussian elimination with partial pivoting)
+  function solveLinear(Min: number[][], bIn: number[]): number[] | null {
+    const n = Min.length;
+    const M = Min.map(r => r.slice());
+    const b = bIn.slice();
+    for (let i = 0; i < n; i++) {
+      let p = i;
+      for (let r = i + 1; r < n; r++) if (Math.abs(M[r][i]) > Math.abs(M[p][i])) p = r;
+      if (Math.abs(M[p][i]) < 1e-12) return null; // singular / ill-conditioned
+      if (p !== i) { [M[i], M[p]] = [M[p], M[i]]; const tb = b[i]; b[i] = b[p]; b[p] = tb; }
+      const piv = M[i][i];
+      for (let r = i + 1; r < n; r++) {
+        const f = M[r][i] / piv;
+        if (!isFinite(f) || Math.abs(f) < 1e-18) continue;
+        for (let c = i; c < n; c++) M[r][c] -= f * M[i][c];
+        b[r] -= f * b[i];
+      }
+    }
+    const x = new Array(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) {
+      let s = b[i];
+      for (let c = i + 1; c < n; c++) s -= M[i][c] * x[c];
+      x[i] = s / M[i][i];
+    }
+    return x;
+  }
+
+  // ---------- Phase 1: exact-first (grid) ----------
+  // Try continuous LS (normal equations) then search ±1 step neighborhood around snapped solution.
+  const AT = matT(A);
+  const ATA = matMul(AT, A);
+  const ATg = matVec(AT, g);
+  const xCont = solveLinear(ATA, ATg);
+
+  if (xCont) {
+    const x0 = xCont.map(v => clamp(roundGrid(v)));
+    // 3^n candidates (±1 step neighborhood) — fine for n ≤ 8
+    const deltas = [-1, 0, 1];
+    let bestExact: number[] | null = null;
+    let bestSum = Infinity;
+
+    const cur = new Array(n).fill(0);
+    function dfs(idx: number) {
+      if (idx === n) {
+        const y = Ax(cur);
+        if (allEq(y, g)) {
+          const sum = cur.reduce((a, v) => a + v, 0);
+          if (sum < bestSum) { bestSum = sum; bestExact = cur.slice(); }
+        }
+        return;
+      }
+      for (const d of deltas) {
+        const v = clamp(roundGrid(x0[idx] + d * step));
+        cur[idx] = v;
+        dfs(idx + 1);
+      }
+    }
+    dfs(0);
+
+    if (bestExact) return bestExact;
+  }
+
+  // ---------- Phase 2: overshoot with minimal Σx ----------
+  // Feasibility builder: Ax >= g (component-wise)
+  let x = new Array(n).fill(min);
+  let y = Ax(x);
+
+  function stepsNeededForVar(j: number, yCur: number[]): number | null {
+    let needed = 0;
+    let helpful = false;
+    for (let i = 0; i < m; i++) {
+      const deficit = g[i] - yCur[i];
+      if (deficit <= 0) continue;
+      const c = A[i][j];
+      if (c <= 0) continue; // cannot help row i
+      helpful = true;
+      const perStep = c * step;
+      const req = Math.ceil(deficit / perStep - 1e-12);
+      if (req > needed) needed = req;
+    }
+    if (!helpful) return null;
+    const roomSteps = Math.floor((max - x[j]) * precision + 1e-9);
+    if (roomSteps <= 0) return null;
+    return Math.min(needed, roomSteps);
+  }
+
+  // Build feasibility with evenness-aware tie breaks
+  {
+    let iter = 0, maxIters = 50000;
+    while (!allGe(y, g) && iter++ < maxIters) {
+      let bestJ = -1;
+      let bestSteps: number | null = null;
+      let bestScore = Infinity;
+      let bestTieX = Infinity;
+      let bestTieProj = Infinity;
+
+      for (let j = 0; j < n; j++) {
+        const s = stepsNeededForVar(j, y);
+        if (s == null) continue;
+        const proj = clamp(roundGrid(x[j] + s * step));
+        // Main criterion: fewest steps; tie-breaks push toward smaller/current x (spread)
+        const score = s + evennessBias * (x[j] - min) / range;
+        if (
+          bestSteps == null || s < bestSteps ||
+          (s === bestSteps && (
+            score < bestScore ||
+            (score === bestScore && (x[j] < bestTieX ||
+             (x[j] === bestTieX && proj < bestTieProj)))
+          ))
+        ) {
+          bestSteps = s;
+          bestJ = j;
+          bestScore = score;
+          bestTieX = x[j];
+          bestTieProj = proj;
+        }
+      }
+
+      if (bestJ === -1 || bestSteps == null) return null; // infeasible overshoot
+      x[bestJ] = clamp(roundGrid(x[bestJ] + bestSteps * step));
+      y = Ax(x);
+    }
+    if (!allGe(y, g)) return null; // safety
+  }
+
+  // Shrink pass: greedily lower Σx while keeping Ax >= g
+  {
+    let improved = true;
+    let guard = 0, maxGuard = 10000;
+    while (improved && guard++ < maxGuard) {
+      improved = false;
+      for (let j = 0; j < n; j++) {
+        if (x[j] <= min) continue;
+        const newX = roundGrid(x[j] - step);
+        if (newX < min) continue;
+        const old = x[j];
+        x[j] = newX;
+        const y2 = Ax(x);
+        if (allGe(y2, g)) {
+          y = y2;
+          improved = true; // Σx strictly smaller
+        } else {
+          x[j] = old; // revert
+        }
+      }
+    }
+  }
+
+  // Redistribution pass: keep Σx constant, but flatten (reduce peaks) without breaking Ax >= g
+  {
+    let leveled = true;
+    let tries = 0, maxTries = 2000;
+
+    while (leveled && tries++ < maxTries) {
+      leveled = false;
+
+      // pick highest variable
+      let jMax = 0;
+      for (let j = 1; j < n; j++) if (x[j] > x[jMax]) jMax = j;
+      if (x[jMax] <= min) break;
+
+      const decVal = roundGrid(x[jMax] - step);
+      if (decVal < min) break;
+
+      // try decrease jMax
+      const xTrial = x.slice();
+      xTrial[jMax] = decVal;
+      let yTrial = Ax(xTrial);
+
+      // if still feasible, accept (Σx drops; usually we've already minimized Σx, but this can still help)
+      if (allGe(yTrial, g)) {
+        x = xTrial; y = yTrial; leveled = true; continue;
+      }
+
+      // else compensate by +1 step to some k ≠ jMax (Σx preserved)
+      let bestK = -1;
+      let bestLift = -Infinity;
+      for (let k = 0; k < n; k++) {
+        if (k === jMax) continue;
+        if (xTrial[k] + step > max) continue;
+        // estimate how much k helps the rows that became tight/violated
+        let lift = 0;
+        for (let i = 0; i < m; i++) {
+          if (yTrial[i] + halfUlp < g[i]) {
+            const c = A[i][k];
+            if (c > 0) lift += c;
+          }
+        }
+        // tie-break: prefer smaller current x to spread
+        if (
+          lift > bestLift ||
+          (lift === bestLift && x[k] < (bestK === -1 ? Infinity : x[bestK]))
+        ) {
+          bestLift = lift;
+          bestK = k;
+        }
+      }
+
+      if (bestK !== -1) {
+        xTrial[bestK] = roundGrid(xTrial[bestK] + step);
+        yTrial = Ax(xTrial);
+        if (allGe(yTrial, g)) {
+          // Σx unchanged, distribution flatter
+          x = xTrial; y = yTrial; leveled = true;
+        }
+      }
+    }
+  }
+
+  return x;
+}
+
 
 
 

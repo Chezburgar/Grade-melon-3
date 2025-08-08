@@ -1,5 +1,5 @@
 import React, {useState,useEffect} from "react";
-import {calcFinal, genTable,Course, Finals, Cache,simplifyWeights, letterGrade, letterGradeColor} from "../utils/grades"
+import {calcFinal, genTable,Course, Finals, Cache,simplifyWeights, letterGrade, letterGradeColor,solveSystemMinSum} from "../utils/grades"
 import {Modal} from "flowbite-react"
 import QuarterField from "./QuarterField";
 import { AnimatePresence,motion } from "framer-motion";
@@ -19,25 +19,13 @@ interface ModalProps{
     index:number;
     cache:Cache;
     createError:(message:string)=>void
+    isMediumOrLarger:boolean;
 }
 
 
 
-/*
-i still wanna make it try to navigate to same course on mp change
 
-still need to think how exams will feed in
-
-and need to think how semesters should be modeled. deletable? (cuz it gets in the way)
-
-To DO: 7/30
-
-  - make it so it tries to navigate to same course on mp change
-  - how do exams feed in to everything
-  - how should semesters be modeled. they be getting in the way dont they. divorce showing from existing.
-  - finish optimization modal, include og functionality and make it work for this too
-
-*/
+//i still wanna make it try to navigate to same course on mp change
 
 interface Score{
     raw:number,
@@ -54,7 +42,7 @@ const animationPropsHome = {
 
 const animationPropsPage=animationPropsHome //for now
 
-export default function OptimizationModal({showModal,setShowModal,mp,index,cache,createError}:ModalProps){
+export default function OptimizationModal({showModal,setShowModal,mp,index,cache,createError,isMediumOrLarger}:ModalProps){
     const [cacheCopy,setCacheCopy] = useState(structuredClone(cache));
     const course=cacheCopy[mp].courses[index]
     const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:course.settings.letterScale[0][1][0]});
@@ -67,7 +55,19 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
 
     const finalGrade:Score=course != undefined ? calcFinal(course?.settings.finals.categories,cacheCopy) : undefined
     console.log("abba",finalGrade)
+
+    //like. you DO NOT want users going into settings if you can avoid it. 
+    /*to provide CLARITY | HOW DO I PROVIDE CLARITY ON THIS? how would a user know
+    that the exams in the settings tab are to be independent of a quarter, as where the other one is for if it 
+    affects the quarter grade in and of itself. I assume at MCPS it'll be the latter, so we'll just
+    DISABLE the semester settings for the time being for mcps. for the freaks at fcps 
+    i'll leave it enabled. */
+
+
     const semesterGrades:Score[] = course?.settings.finals.semesters.map(semester=>calcFinal(semester.categories,cacheCopy))
+    
+    
+    //so this won't ever for mcps users then actually fucking matter or make a difference. whatever.
     const all=(course?.settings.finals.show ? course?.settings.finals.categories : []).concat(course?.settings.finals.semesters.map((semester)=>semester.show ? semester.categories : []).flat())
     
     //not actually using this for the weights, but it will return the unique marking periods. so. swag.
@@ -107,70 +107,120 @@ so we're after a system of equations really
 */
 
 
-function solveFinal(){
-    const categories=course?.settings.finals.categories
-    const variables=[]
-    var known=0
-    const knownCats=[]
-    const unknownCats=[]
-    for(let category of categories){
-        if(!Number.isNaN(category.courseIndex)){
-            //@ts-ignore
-        if(!Number.isNaN(cacheCopy[category.mp].courses[category.courseIndex].grade.raw)&&!cacheCopy[category.mp].courses[category.courseIndex].grade.custom){
-            (category as any).raw=category.weight*cacheCopy[category.mp].courses[category.courseIndex].grade.raw
-            known+=(category as any).raw
-            knownCats.push(category)
-            console.log("mf doom",cacheCopy[category.mp].courses[category.courseIndex].grade)
-            continue
-        }
-        }
-        variables.push(category.weight)
-        unknownCats.push(category)
 
+
+/*
+TODO:
+ -test decimals feature
+
+*/
+function solveFinal(){
+    //we gotta build the matrix
+    const rows=[]
+    const targetVector=[]
+    if(optimizeProps.desiredGrade){ // or maybe i'll use NaN or something
+        const row=Array(uniqueCats.length)
+        var target=optimizeProps.desiredGrade
+        var known=0;
+        for(let [i,cat] of uniqueCats.entries()){
+            const catIndex=course?.settings.finals.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
+            if(catIndex==-1){
+                row[i]=0
+            }
+            else{
+                //@ts-ignore
+                if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
+                    (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
+                    known+=(cat as any).raw
+                    row[i]=0
+                    
+                }else{
+                row[i]=course?.settings.finals.categories[catIndex].weight}
+
+            }
+        }
+        target-=known; //i love floating point math it's awful
+        rows.push(row)
+        targetVector.push(target)
+
+    } 
+    for(let [j,semester] of course?.settings.finals.semesters.entries()){
+        const monicker="desiredGrade"+ordinalSuffix(j+1)
+            if(optimizeProps?.[monicker]){ // or maybe i'll use NaN or something
+        const row=Array(uniqueCats.length)
+        var target=optimizeProps.desiredGrade
+        var known=0;
+        for(let [i,cat] of uniqueCats.entries()){
+            const catIndex=semester.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
+            if(catIndex==-1){
+                row[i]=0
+            }
+            else{
+                //@ts-ignore
+                if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
+                    (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
+                    known+=(cat as any).raw
+                    row[i]=0
+                    
+                }else{
+                row[i]=semester.categories[catIndex].weight}
+
+            }
+        }
+        target-=known; //i love floating point math it's awful
+        rows.push(row)
+        targetVector.push(target)
+
+    } 
     }
 
-    const parms={known:known,target:optimizeProps.desiredGrade,coefficients:variables,decimalPlaces:Number(course?.settings.rounding.percentPlaces)}
-
-    const solutions=solveMinimalLinearEquationDecimal(parms)
-
-    if(solutions==null){
-        createError("No Solution Found!")
-        return []
+    const parms={A:rows,targets:targetVector,decimalPlaces:Number(course?.settings.rounding.percentPlaces)}
+    const solutionVector=solveSystemMinSum(parms)
+    if(solutionVector!=null){
+    console.log("jesus christ",solutionVector,parms)
+    implementSolutionVirtual(solutionVector)
     }
     else{
-        unknownCats.map((cat,i)=>({...cat,raw:solutions[i]}))
-        knownCats.concat(unknownCats)
-        knownCats.toSorted((a,b)=>a.mp-b.mp)
-       // return knownCats; lowk just raw dawg that shi on jitt fuck it type shit ykwim?
+        createError("No Solution")
+        return
+    }
 
-        //fear is the little death that brings total obliteration. I must not fear.
-        const temp=structuredClone(cacheCopy)
-        for(let [i,category] of unknownCats.entries()){
-            const newGrade={raw:solutions[i],letter:letterGrade(solutions[i],course?.settings),color:"#FF13F0",custom:true}
-            if(!Number.isNaN(category.courseIndex)){
-            temp[category.mp].courses[category.courseIndex].grade=newGrade
+}
+
+
+function implementSolutionVirtual(solutionVector){
+    const temp=structuredClone(cacheCopy)
+    for(let [i,cat] of uniqueCats.entries()){
+        if(cat.type=="exam"){
+            continue //god fucking knows how we'll handle exams
+        }
+        const newGrade={raw:solutionVector[i],letter:letterGrade(solutionVector[i],course?.settings),color:"#FF13F0",custom:true}
+        if(!Number.isNaN(cat.courseIndex)){
+            const existing=cacheCopy[cat.mp].courses[cat.courseIndex].grade
+            //@ts-ignore
+            if(Number.isNaN(existing.raw)||existing.custom){
+            temp[cat.mp].courses[cat.courseIndex].grade=newGrade}
             }else{
 
                 //virtual course
-                temp[category.mp].courses[99+i]={grade:newGrade,name:"",period:NaN,courseID:course.courseID,layoutID:NaN,room:"",weighted:course.weighted,identifier:course.identifier,settings:course.settings,teacher:{name:"",email:""},categories:course.categories,assignments:[]}
+                temp[cat.mp].courses[99+i]={grade:newGrade,name:"",period:NaN,courseID:course.courseID,layoutID:NaN,room:"",weighted:course.weighted,identifier:course.identifier,settings:course.settings,teacher:{name:"",email:""},categories:course.categories,assignments:[]}
                 
                 //insert virtual course into copy's runtime settings
-                const dex=course.settings.finals.categories.findIndex(cat=>(isNaN(cat.courseIndex)&&cat.mp==category.mp&&category.type==cat.type))
+                const dex=course.settings.finals.categories.findIndex(cat=>(isNaN(cat.courseIndex)&&cat.mp==cat.mp&&cat.type==cat.type))
                 if(dex!=-1){
                 course.settings.finals.categories[dex].courseIndex=99+i}
                 for(let semester of course.settings.finals.semesters){
-                    const dex=semester.categories.findIndex(cat=>Number.isNaN(cat.courseIndex)&&cat.mp==category.mp&&cat.type==category.type)
+                    const dex=semester.categories.findIndex(cat=>Number.isNaN(cat.courseIndex)&&cat.mp==cat.mp&&cat.type==cat.type)
                     if(dex==-1){continue}
                     semester.categories[dex].courseIndex=99+i
                 }
                 temp[mp].courses[index]=course
             }
-        }
-        setCacheCopy(temp)
-
-
     }
+    setCacheCopy(temp)
 }
+
+
 
 
 function solveMinimalLinearEquationDecimal(params: {
@@ -266,6 +316,7 @@ function solveMinimalLinearEquationDecimal(params: {
 		let points = Object.values(optimizeProps);
 		points.splice(0, 1);
 		let results = genTable(course, optimizeProps.desiredGrade, points);
+        console.log("ur mum",results)
 		setSolutions(results);
 	};
 
@@ -280,7 +331,7 @@ function solveMinimalLinearEquationDecimal(params: {
                 </Modal.Header>
                 <Modal.Body
                 style={{maxHeight:400,minHeight:400}}
-                className=""
+                className="overflow-y-auto"
                 >
 
         <AnimatePresence
@@ -315,7 +366,7 @@ function solveMinimalLinearEquationDecimal(params: {
                   className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold">
                   
                     <div className="flex justify-between items-center">
-                      Final Grade
+                      Final/Semester Grade
                       <HiArrowCircleRight/>
                     </div>
             
@@ -479,10 +530,19 @@ function solveMinimalLinearEquationDecimal(params: {
                           <p>Back</p>
                         </div>
                       </button>
-                      {true && <p className="dark:text-white text-xl font-bold">Final Grade</p>}
+                      {true && <p className="dark:text-white text-xl font-bold">Final/Semester Grade</p>}
                     </div>
                 <div
-                className="flex justify-evenly mx-4"
+               // className="mt-8 flex justify-evenly mx-4"
+                  className="mt-6 mx-4"
+               style={!isMediumOrLarger ? {
+                    display:"grid",
+                    gridTemplateColumns:"1fr 1fr",
+                    rowGap:10
+               } : {
+                  display:"flex",
+                  justifyContent:"space-evenly"
+               }}
                 >
                     {uniqueCats.map((category,i)=>{
                         //fuck me is it ever null? that's dumb
@@ -491,7 +551,9 @@ function solveMinimalLinearEquationDecimal(params: {
 
 
                         return(
-                            <div key={i} className="flex flex-col items-center justify-top">
+                            <div key={i} 
+                            className="flex flex-col items-center justify-top"
+                            >
                              <p className="dark:text-white">{cacheCopy[0].periods[category.mp].name}</p>
                              
                             <QuarterField onChange={(e)=>{
@@ -543,7 +605,7 @@ function solveMinimalLinearEquationDecimal(params: {
 
                     {semesterGrades.map((grade,i)=>(
                     <>
-                      {course?.settings.finals.semesters[i].show && <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+                      {!course?.settings.finals.semesters[i].show && <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800">
                             <div
                                 className={ `bg-${grade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
                                 style={{
@@ -564,7 +626,7 @@ function solveMinimalLinearEquationDecimal(params: {
                             htmlFor="email"
                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
-                            Desired Grade (1-100)
+                            Desired Final Grade (1-100) 
                         </label>
                         <div className="flex gap-2">
                             <input
@@ -580,6 +642,39 @@ function solveMinimalLinearEquationDecimal(params: {
                             />
                         </div>
                     </div>
+
+
+                    {semesterGrades.map((grade,i)=>{
+                        const monicker="desiredGrade"+ordinalSuffix(i+1)
+                        return(
+                                  <div
+                    className="mt-4 w-full mb-1"
+                    >
+                        <label
+                            htmlFor="email"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                            Desired {ordinalSuffix(i+1)} Semester Grade (1-100) 
+                        </label>
+                        <div className="flex gap-2">
+                            <input
+                                type="number"
+                                min={1}
+                                max={100}           
+                                value={optimizeProps?.[monicker]}
+                                onChange={(e) =>
+                                    updateOptimize(e.target.value, monicker)
+                                }
+                                className="hide-spinner bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                placeholder={String(course.settings.letterScale[0][1][0])}
+                            />
+                        </div>
+                    </div>
+                        )
+                    })
+
+
+                    }
 
                 </div>
 

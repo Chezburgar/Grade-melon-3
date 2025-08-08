@@ -384,6 +384,7 @@ export default function Grades({
 				index={index}
 				setShowModal={setOptimizationModal}
 				showModal={optimizationModal}
+				isMediumOrLarger={isMediumOrLarger}
 
 			/>
 			</>
