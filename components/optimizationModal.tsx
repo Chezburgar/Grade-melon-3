@@ -57,7 +57,7 @@ const animationPropsPage=animationPropsHome //for now
 export default function OptimizationModal({showModal,setShowModal,mp,index,cache,createError}:ModalProps){
     const [cacheCopy,setCacheCopy] = useState(structuredClone(cache));
     const course=cacheCopy[mp].courses[index]
-    const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({});
+    const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:course.settings.letterScale[0][1][0]});
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
     const [viewStack,setViewStack] = useState(["default"])
 
@@ -107,7 +107,7 @@ so we're after a system of equations really
 */
 
 
-function solveFinal(target){
+function solveFinal(){
     const categories=course?.settings.finals.categories
     const variables=[]
     var known=0
@@ -115,10 +115,12 @@ function solveFinal(target){
     const unknownCats=[]
     for(let category of categories){
         if(!Number.isNaN(category.courseIndex)){
-        if(!Number.isNaN(cacheCopy[category.mp].courses[category.courseIndex].grade.raw)){
+            //@ts-ignore
+        if(!Number.isNaN(cacheCopy[category.mp].courses[category.courseIndex].grade.raw)&&!cacheCopy[category.mp].courses[category.courseIndex].grade.custom){
             (category as any).raw=category.weight*cacheCopy[category.mp].courses[category.courseIndex].grade.raw
             known+=(category as any).raw
             knownCats.push(category)
+            console.log("mf doom",cacheCopy[category.mp].courses[category.courseIndex].grade)
             continue
         }
         }
@@ -128,9 +130,9 @@ function solveFinal(target){
     }
 
     const parms={known:known,target:optimizeProps.desiredGrade,coefficients:variables,decimalPlaces:Number(course?.settings.rounding.percentPlaces)}
-    console.log("slipping through my fingers",parms)
+
     const solutions=solveMinimalLinearEquationDecimal(parms)
-    console.log("well, that just happened",solutions)
+
     if(solutions==null){
         createError("No Solution Found!")
         return []
@@ -144,7 +146,7 @@ function solveFinal(target){
         //fear is the little death that brings total obliteration. I must not fear.
         const temp=structuredClone(cacheCopy)
         for(let [i,category] of unknownCats.entries()){
-            const newGrade={raw:solutions[i],letter:letterGrade(solutions[i],course?.settings),color:"#FF13F0"}
+            const newGrade={raw:solutions[i],letter:letterGrade(solutions[i],course?.settings),color:"#FF13F0",custom:true}
             if(!Number.isNaN(category.courseIndex)){
             temp[category.mp].courses[category.courseIndex].grade=newGrade
             }else{
@@ -359,7 +361,7 @@ function solveMinimalLinearEquationDecimal(params: {
                                     type="number"
                                     min={1}
                                     max={100}           
-                                    value={optimizeProps?.desiredGrade}
+                                    value={optimizeProps?.desiredGrade || course.settings.letterScale[0][1][0]}
                                     onChange={(e) =>
                                         updateOptimize(e.target.value, "desiredGrade")
                                     }
@@ -440,13 +442,13 @@ function solveMinimalLinearEquationDecimal(params: {
                             </tbody>
                         </table>
                     </div>
-
+{false &&
                     <button
-                        onClick={()=>solveFinal(89.5)}
+                        onClick={optimizeGrades}
                         className="mt-4 ml-2 rounded-lg bg-primary-500 px-2 py-2 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                     >
                         Optimize
-                    </button>
+                    </button>}
                     </motion.div>
         }
 
@@ -593,7 +595,7 @@ function solveMinimalLinearEquationDecimal(params: {
                                 Close
                             </button>
                             <button
-                                onClick={()=>solveFinal(89.5)}
+                                onClick={viewStack.at(-1)=="finals" ? solveFinal : optimizeGrades}
                                 className="rounded-lg bg-primary-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                             >
                                 Optimize
