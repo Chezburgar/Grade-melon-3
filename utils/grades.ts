@@ -351,17 +351,39 @@ function simplifyWeights(categories:Category[]){
 
 }
 
+
+
+function toggleSemester(norm:Settings["default"],settings:CourseSettings,cache:Cache,identifier:string){
+	settings=structuredClone(settings)
+	norm=structuredClone(norm)
+	if(settings.finals.isSemester===false){
+		settings.finals.isSemester=true;
+		var activeSemester=settings.finals.semesters.findIndex(semester=>semester?.categories.some(category=>cache[category.mp].courses.some(course=>course.courseID.substring(0,course.courseID.length-1)==identifier)))
+		let b = new Array(settings.finals.semesters.length)
+		b[activeSemester]=settings.finals.semesters[activeSemester] 
+		settings.finals.semesters=b
+		settings.finals.semesters[activeSemester].show=true;
+		settings.finals.show=false;
+	}else{
+		settings.finals.isSemester=false;
+		settings.finals.show=true;
+		settings.finals.semesters=norm.finals.semesters
+	}
+	return settings
+}
+
+
+
+
+//this fills in an empty finals, like handles the NaN or null courseIndexes and allat.
 function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):CourseSettings{
+	var settings=structuredClone(raw_settings)
 
-
-	const settings=structuredClone(raw_settings)
 	console.log("I want a perfect body",settings)
 
-
-	//@ts-ignore
 	if(settings.mode=="manual"){
 		//we let them control but also we FORCe them to control all my precious
-		const id=Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(identifier))]
+		var id=Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(identifier))]
 		//we handle nothing actually. kys.
 
 
@@ -369,8 +391,34 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):C
 
 	}
 	else{
+		
+
 //it is KNOWN that categories will not be undefined cuz it'll be either set explicitly right here right now
 		if(!settings[identifier]){settings[identifier]=settings.default;}
+
+		
+		//THIS ONLY MAKES SENSE TO KEEP IF it turns out we get ALLLLLL classes data at the start of the year
+		//otherwise, no real way to know if a class is semester-long or not. bollocks. prob via the webapi
+		//tho
+		if(settings[identifier].finals.isSemester==undefined){
+			const realPeriods=getRealMarkingPeriods(cache[0].periods)
+			var count=0;
+			for(let realPeriod of realPeriods){
+				if(cache[realPeriod.index].courses.findIndex(course=>course.courseID.substring(0,course.courseID.length-1)==identifier)!=-1){
+					count++
+				}
+			}
+
+			if(count<3){ //this is effectively a hard-coded, SEPERATE default for if it's a single-semester
+				//class. we will not be allowing modification to this i guess. in manual we won't even try ig.
+				console.log("less than 3")
+				settings[identifier]=toggleSemester(settings.default,settings[identifier],cache,identifier)
+
+			}
+			else{
+				settings[identifier].finals.isSemester=false;
+			}
+		}
 
 		const categories=[]
 		for(let category of settings[identifier].finals.categories){
@@ -388,6 +436,7 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):C
 		//sigh...
 
 		for(let semester of settings[identifier].finals.semesters){
+			if(semester==undefined){continue}
 					const categories=[]
 			for(let category of semester.categories){
 				if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
@@ -457,6 +506,8 @@ function templateFinals(mode,periods):Finals{
 
 
 function getCache(books:Gradebook[]):Cache{
+console.log("what the fuckity fuck is happening. like actuall what the fuck's going on",books[0].gradingScale)
+
 	//pre parsing
 	const settings=books[0].gradingScale
 
@@ -1056,7 +1107,7 @@ function abbreviate(category) {
 				return grade
             }
 
-export type SolveSystemParams = {
+type SolveSystemParams = {
   A: number[][];         // m x n matrix
   targets: number[];     // length m
   knowns?: number[];     // optional per-equation offsets (length m), default 0
@@ -1066,8 +1117,10 @@ export type SolveSystemParams = {
   evennessBias?: number; // small tie-break nudger, default 0.15 (0..0.3 reasonable)
 };
 
-export function solveSystemMinSum(params: SolveSystemParams): number[] | null {
-  const { A, targets, knowns, decimalPlaces } = params;
+function solveSystemMinSum(params: SolveSystemParams): number[] | null {
+  var { A, targets, knowns, decimalPlaces } = params;
+  if(Number.isNaN(decimalPlaces)||decimalPlaces==undefined){decimalPlaces=4}
+  console.log("decimals: ",decimalPlaces)
   const min = params.min ?? 0;
   const max = params.max ?? 100;
   const evennessBias = params.evennessBias ?? 0.15; // lower => less spreading, higher => more
@@ -1172,7 +1225,7 @@ export function solveSystemMinSum(params: SolveSystemParams): number[] | null {
     let bestSum = Infinity;
 
     const cur = new Array(n).fill(0);
-    function dfs(idx: number) {
+    var dfs= function (idx: number) {
       if (idx === n) {
         const y = Ax(cur);
         if (allEq(y, g)) {
@@ -1342,13 +1395,19 @@ export function solveSystemMinSum(params: SolveSystemParams): number[] | null {
   return x;
 }
 
-
+function ordinalSuffix(n: number): string {
+	const s = ["th", "st", "nd", "rd"];
+	const v = n % 100;
+	return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
 
 
 
 export {
 	parseGrades,
 	updateCourse,
+	ordinalSuffix,
+	solveSystemMinSum,
 	addAssignment,
 	delAssignment,
 	updateCategory,
@@ -1356,10 +1415,11 @@ export {
 	templateFinals,
 	genTable,
 	calcFinal,
+	toggleSemester,
 	findCurrentPeriod,
 //	calculateGPA,
 //	updateGPA,
 	abbreviate,
 	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals2
 };
-export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings,Finals };
+export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings,Finals,SolveSystemParams};

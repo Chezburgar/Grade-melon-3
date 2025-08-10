@@ -107,11 +107,10 @@ it would probably be a good idea to show the final grade also on the Home Screen
 				const fetchedClient=res.client;
 				let extraData:any={}
 				for(let resp of res.responses){
-					extraData={...extraData,...resp[1]}
+					extraData={...extraData,...resp[1]} //combines all the extraData objs. lets later ones override
 				}
-				//@ts-ignore
-				
-				//@ts-ignore
+
+			
 				Cookies.set("token",extraData.token,{expires:5/(60*24)})
 				console.log("para me?")
 				console.log(fetchedClient);

@@ -103,7 +103,7 @@ export default function Grades({
 		
 		
 	const finalGrade=course != undefined ? calcFinal(course?.settings.finals.categories,grades) : undefined
-	const semesterIndex=course?.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>category.mp==mp))
+	const semesterIndex=course?.settings.finals.semesters.findIndex(semester=>semester?.categories.some(category=>category.mp==mp))
 	const semesterGrade = (semesterIndex!=-1 && course!=undefined) ? calcFinal(course?.settings.finals.semesters[semesterIndex].categories,grades) : undefined
 	
 	useEffect(() => {
@@ -557,7 +557,7 @@ export default function Grades({
 									let temp=structuredClone(grades?.[mp].courses[index]);	
 									if(temp?.assignments&&ad&&client.username!="10016976"&&width<1280&&false){
 										stopBreakingTheIndexSystems=true; //disabled for [name-redacted]
-										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false,included:false,notes:""})
+										temp.assignments.splice(Math.floor(temp.assignments.length/2),0,{name:"this is where the ad should go",date:{due:new Date(),assigned:new Date()},category:course.categories[0].name,points:{earned:0,possible:0},grade:{letter:"",color:"",raw:NaN},custom:false,included:false,notes:"",GradebookID:crypto.randomUUID()})
 									}
 									else{
 										stopBreakingTheIndexSystems=false

@@ -7,7 +7,8 @@ import { TbRefresh, TbMathSymbols } from "react-icons/tb";
 import {
 	parseGrades,
 	Grades as GradesType,parseDate,findCurrentPeriod,getCache,Cache,calcFinal,
-	initalizeFinals2
+	initalizeFinals2,
+	ordinalSuffix
 	//calculateGPA,
 	//updateGPA,
 } from "../../utils/grades";
@@ -309,13 +310,24 @@ export default function Grades({
 							
 								return (temp?.[mp]?.courses.map(({ name, period, grade, teacher, settings,layoutID}, i) => {
 								if(name=="ad goes here"){return (<div key={i} className="flex shrink justify-center max-h-64"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>)}	
-								const finalGrade=settings?.finals?.show ? calcFinal(settings.finals.categories,grades) : undefined
+								var semesterGrade
+								if(!settings?.finals?.isSemester){
+								var finalGrade=settings?.finals?.show ? calcFinal(settings.finals.categories,grades) : undefined
 								const semesters=settings?.finals?.semesters
 								const semCats=semesters.map(semester=>semester.categories)
-								const indexX=semCats.findIndex(categories=>categories.some(category=>category.mp==mp))
+								var indexX=semCats.findIndex(categories=>categories.some(category=>category.mp==mp))
+								semesterGrade=indexX!=-1 ? (settings?.finals?.semesters[indexX].show ? (calcFinal(settings?.finals?.semesters[indexX].categories,grades)) : undefined):undefined
+						
+							}else{
+								finalGrade=undefined
+								indexX=settings.finals.semesters.findIndex(semester=>semester!=undefined)
+								const semester=settings?.finals?.semesters[indexX]
+								const isNow=semester.categories.some(category=>category.mp==mp)
+								semesterGrade=isNow ? calcFinal(semester.categories,grades) : undefined
+						
+								}
 
-								const semesterGrade=indexX!=-1 ? (settings?.finals?.semesters[indexX].show ? (calcFinal(settings?.finals?.semesters[indexX].categories,grades)) : undefined):undefined
-								console.log("hey is my finals showing?",name,settings.finals)
+							console.log("hey is my finals showing?",name,settings.finals)
 
 								
 							return(
@@ -364,14 +376,14 @@ export default function Grades({
 													{grade.letter}
 													{settings ? (!isNaN(grade.raw) && ` (${grade.raw}%)`) : (!isNaN(grade.raw) ? `${grade.raw}%`:"")}
 												</motion.span>
-												{settings.finals?.show &&
+												{(settings.finals?.show && finalGrade) &&
 												<motion.div
 													layoutId={`final-${layoutID}`}
 													layout="preserve-aspect"
 													style={{color:finalGrade.color.includes("#") && finalGrade.color}}
 													className={`text-md md:text-xl font-bold text-${finalGrade.color}-400`}
 												>
-													Final {finalGrade.letter} {!isNaN(finalGrade.raw) ? (`(${settings.rounding.percent ? (finalGrade.raw).toFixed(settings.rounding.percentPlaces) : finalGrade.raw}%)`) : ""}
+													Final, {finalGrade.letter} {!isNaN(finalGrade.raw) ? (`(${settings.rounding.percent ? (finalGrade.raw).toFixed(settings.rounding.percentPlaces) : finalGrade.raw}%)`) : ""}
 												</motion.div>}
 													{semesterGrade &&
 												<motion.div
@@ -380,7 +392,7 @@ export default function Grades({
 													style={{color:semesterGrade.color.includes("#") && semesterGrade.color}}
 													className={`text-md md:text-xl font-bold text-${semesterGrade.color}-400`}
 												>
-													Semester {semesterGrade.letter} {!isNaN(semesterGrade.raw) ? (`(${settings.rounding.percent ? (semesterGrade.raw).toFixed(settings.rounding.percentPlaces) : semesterGrade.raw}%)`) : ""}
+													{ordinalSuffix(indexX+1)} Semester, {semesterGrade.letter} {!isNaN(semesterGrade.raw) ? (`(${settings.rounding.percent ? (semesterGrade.raw).toFixed(settings.rounding.percentPlaces) : semesterGrade.raw}%)`) : ""}
 												</motion.div>}
 												</div>
 

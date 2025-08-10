@@ -1,5 +1,5 @@
 import React, {useState,useEffect} from "react";
-import {calcFinal, genTable,Course, Finals, Cache,simplifyWeights, letterGrade, letterGradeColor,solveSystemMinSum} from "../utils/grades"
+import {calcFinal, genTable,Course, Finals, Cache,simplifyWeights, letterGrade, letterGradeColor,solveSystemMinSum, ordinalSuffix} from "../utils/grades"
 import {Modal} from "flowbite-react"
 import QuarterField from "./QuarterField";
 import { AnimatePresence,motion } from "framer-motion";
@@ -42,13 +42,38 @@ const animationPropsHome = {
 
 const animationPropsPage=animationPropsHome //for now
 
+
 export default function OptimizationModal({showModal,setShowModal,mp,index,cache,createError,isMediumOrLarger}:ModalProps){
     const [cacheCopy,setCacheCopy] = useState(structuredClone(cache));
     const course=cacheCopy[mp].courses[index]
     const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:course.settings.letterScale[0][1][0]});
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
     const [viewStack,setViewStack] = useState(["default"])
+    course.settings.finals.semesters[Symbol.iterator]=function*(){ //custom iterator so that this still works.
+			for(const item of Array.prototype.values.call(this)){
+				if(item!==undefined){
+					yield item
+				}
+			}
+		}
+    course.settings.finals.semesters.map=function(callback, thisArg) { //custom map so it works
+        console.log("god i'm sorry")
+			const result = [];
+			for (let i = 0; i < this.length; i++) {
+				if (this[i]) {
+				result.push(callback.call(thisArg, this[i], i, this));
+				}
+			}
+			return result;
+		}
+    
 
+
+
+    
+    useEffect(()=>{
+        setCacheCopy(structuredClone(cache))
+    },[cache])
 
 //what should this even do if finals is disabled chat lmoa
 
@@ -75,13 +100,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
 
  
 
-    function ordinalSuffix(n: number): string {
-        const s = ["th", "st", "nd", "rd"];
-        const v = n % 100;
-        return n + (s[(v - 20) % 10] || s[v] || s[0]);
-    }
-
-    	function optimize(){
+    function optimize(){
 		let tempProps = {};
 		tempProps["desiredGrade"] = course.settings.letterScale[0][1][0]
 ;
@@ -114,194 +133,111 @@ TODO:
  -test decimals feature
 
 */
-function solveFinal(){
-    //we gotta build the matrix
-    const rows=[]
-    const targetVector=[]
-    if(optimizeProps.desiredGrade){ // or maybe i'll use NaN or something
-        const row=Array(uniqueCats.length)
-        var target=optimizeProps.desiredGrade
-        var known=0;
-        for(let [i,cat] of uniqueCats.entries()){
-            const catIndex=course?.settings.finals.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
-            if(catIndex==-1){
-                row[i]=0
-            }
-            else{
-                //@ts-ignore
-                if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
-                    (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
-                    known+=(cat as any).raw
+    function solveFinal(){
+        //we gotta build the matrix
+        const rows=[]
+        const targetVector=[]
+        if(optimizeProps.desiredGrade){ // or maybe i'll use NaN or something
+            const row=Array(uniqueCats.length)
+            var target=optimizeProps.desiredGrade
+            var known=0;
+            for(let [i,cat] of uniqueCats.entries()){
+                const catIndex=course?.settings.finals.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
+                if(catIndex==-1){
                     row[i]=0
-                    
-                }else{
-                row[i]=course?.settings.finals.categories[catIndex].weight}
-
-            }
-        }
-        target-=known; //i love floating point math it's awful
-        rows.push(row)
-        targetVector.push(target)
-
-    } 
-    for(let [j,semester] of course?.settings.finals.semesters.entries()){
-        const monicker="desiredGrade"+ordinalSuffix(j+1)
-            if(optimizeProps?.[monicker]){ // or maybe i'll use NaN or something
-        const row=Array(uniqueCats.length)
-        var target=optimizeProps.desiredGrade
-        var known=0;
-        for(let [i,cat] of uniqueCats.entries()){
-            const catIndex=semester.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
-            if(catIndex==-1){
-                row[i]=0
-            }
-            else{
-                //@ts-ignore
-                if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
-                    (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
-                    known+=(cat as any).raw
-                    row[i]=0
-                    
-                }else{
-                row[i]=semester.categories[catIndex].weight}
-
-            }
-        }
-        target-=known; //i love floating point math it's awful
-        rows.push(row)
-        targetVector.push(target)
-
-    } 
-    }
-
-    const parms={A:rows,targets:targetVector,decimalPlaces:Number(course?.settings.rounding.percentPlaces)}
-    const solutionVector=solveSystemMinSum(parms)
-    if(solutionVector!=null){
-    console.log("jesus christ",solutionVector,parms)
-    implementSolutionVirtual(solutionVector)
-    }
-    else{
-        createError("No Solution")
-        return
-    }
-
-}
-
-
-function implementSolutionVirtual(solutionVector){
-    const temp=structuredClone(cacheCopy)
-    for(let [i,cat] of uniqueCats.entries()){
-        if(cat.type=="exam"){
-            continue //god fucking knows how we'll handle exams
-        }
-        const newGrade={raw:solutionVector[i],letter:letterGrade(solutionVector[i],course?.settings),color:"#FF13F0",custom:true}
-        if(!Number.isNaN(cat.courseIndex)){
-            const existing=cacheCopy[cat.mp].courses[cat.courseIndex].grade
-            //@ts-ignore
-            if(Number.isNaN(existing.raw)||existing.custom){
-            temp[cat.mp].courses[cat.courseIndex].grade=newGrade}
-            }else{
-
-                //virtual course
-                temp[cat.mp].courses[99+i]={grade:newGrade,name:"",period:NaN,courseID:course.courseID,layoutID:NaN,room:"",weighted:course.weighted,identifier:course.identifier,settings:course.settings,teacher:{name:"",email:""},categories:course.categories,assignments:[]}
-                
-                //insert virtual course into copy's runtime settings
-                const dex=course.settings.finals.categories.findIndex(cat=>(isNaN(cat.courseIndex)&&cat.mp==cat.mp&&cat.type==cat.type))
-                if(dex!=-1){
-                course.settings.finals.categories[dex].courseIndex=99+i}
-                for(let semester of course.settings.finals.semesters){
-                    const dex=semester.categories.findIndex(cat=>Number.isNaN(cat.courseIndex)&&cat.mp==cat.mp&&cat.type==cat.type)
-                    if(dex==-1){continue}
-                    semester.categories[dex].courseIndex=99+i
                 }
-                temp[mp].courses[index]=course
+                else{
+                    //@ts-ignore
+                    if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
+                        (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
+                        known+=(cat as any).raw
+                        row[i]=0
+                        
+                    }else{
+                    row[i]=course?.settings.finals.categories[catIndex].weight}
+
+                }
             }
-    }
-    setCacheCopy(temp)
-}
+            target-=known; //i love floating point math it's awful
+            rows.push(row)
+            targetVector.push(target)
 
+        } 
+        for(let [j,semester] of course?.settings.finals.semesters.entries()){
+            const monicker="desiredGrade"+ordinalSuffix(j+1)
+                if(optimizeProps?.[monicker]){ // or maybe i'll use NaN or something
+            const row=Array(uniqueCats.length)
+            var target=optimizeProps?.[monicker]
+            var known=0;
+            for(let [i,cat] of uniqueCats.entries()){
+                const catIndex=semester.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
+                if(catIndex==-1){
+                    row[i]=0
+                }
+                else{
+                    //@ts-ignore
+                    if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
+                        (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
+                        known+=(cat as any).raw
+                        row[i]=0
+                        
+                    }else{
+                    row[i]=semester.categories[catIndex].weight}
 
+                }
+            }
+            target-=known; //i love floating point math it's awful
+            rows.push(row)
+            targetVector.push(target)
 
+        }  // no else branch cuz if there's no target val we just don't add that row to the matrix
+        }
 
-function solveMinimalLinearEquationDecimal(params: {
-  known: number;
-  target: number;
-  coefficients: number[];
-  decimalPlaces: number;
-}): number[] | null {
-  var { known, target, coefficients, decimalPlaces } = params;
+        const parms={A:rows,targets:targetVector,decimalPlaces:Number(course?.settings.rounding.percentPlaces)}
+        const solutionVector=solveSystemMinSum(parms)
+        if(solutionVector!=null){
+        console.log("jesus christ",solutionVector,parms)
+        implementSolutionVirtual(solutionVector)
+        }
+        else{
+            createError("No Solution")
+            return
+        }
 
-  const n = coefficients.length;
-  const precision = 10 ** decimalPlaces;
-  const step = 1 / precision;
-  known=Number(known.toFixed(decimalPlaces))
-  var goal = Number((target - known).toFixed(decimalPlaces));
-  console.log("hammer time",goal,Number((goal+known)))
-  if(Number((goal+known))!=target){
-    console.log("wait what?")
-    goal+=step
-  }
-
-
-  console.log("goal weight",goal,known)
-
-  function round(val: number) {
-    return Number(val.toFixed(decimalPlaces));
-  }
-
-  let bestExact: number[] | null = null;
-  let bestExactSum = Infinity;
-
-  let bestOvershoot: {
-    solution: number[];
-    overshootAmount: number;
-    sumOfVars: number;
-  } | null = null;
-
-  // Try a limited number of random/greedy-ish combinations to reduce bundle size and runtime
-  const maxTries = 50000;
-  for (let attempt = 0; attempt < maxTries; attempt++) {
-    const trial: number[] = [];
-    let total = known;
-    let varSum = 0;
-
-    for (let i = 0; i < n; i++) {
-      const value = round(Math.random() * 100); // Random guess within [0,100]
-      trial.push(value);
-      total += round(coefficients[i] * value);
-      varSum += value;
     }
 
-    total = round(total);
 
-    if (total === target) {
-   
-      if (varSum < bestExactSum) {
-        bestExact = trial;
-        bestExactSum = varSum;
-      }
-    } else if (total > target) {
-       
-      const overshootAmount = round(total - target);
-      if (
-        !bestOvershoot ||
-        overshootAmount < bestOvershoot.overshootAmount ||
-        (overshootAmount === bestOvershoot.overshootAmount &&
-          varSum < bestOvershoot.sumOfVars)
-      ) {
-        bestOvershoot = {
-          solution: trial,
-          overshootAmount,
-          sumOfVars: varSum,
-        };
-      }
+    function implementSolutionVirtual(solutionVector){
+        const temp=structuredClone(cacheCopy)
+        for(let [i,cat] of uniqueCats.entries()){
+            if(cat.type=="exam"){
+                continue //god fucking knows how we'll handle exams
+            }
+            const newGrade={raw:solutionVector[i],letter:letterGrade(solutionVector[i],course?.settings),color:"#FF13F0",custom:true}
+            if(!Number.isNaN(cat.courseIndex)){
+                const existing=cacheCopy[cat.mp].courses[cat.courseIndex].grade
+                //@ts-ignore
+                if(Number.isNaN(existing.raw)||existing.custom){
+                temp[cat.mp].courses[cat.courseIndex].grade=newGrade}
+                }else{
+
+                    //virtual course
+                    temp[cat.mp].courses[99+i]={grade:newGrade,name:"",period:NaN,courseID:course.courseID,layoutID:NaN,room:"",weighted:course.weighted,identifier:course.identifier,settings:course.settings,teacher:{name:"",email:""},categories:course.categories,assignments:[]}
+                    
+                    //insert virtual course into copy's runtime settings
+                    const dex=course.settings.finals.categories.findIndex(cat=>(isNaN(cat.courseIndex)&&cat.mp==cat.mp&&cat.type==cat.type))
+                    if(dex!=-1){
+                    course.settings.finals.categories[dex].courseIndex=99+i}
+                    for(let semester of course.settings.finals.semesters){
+                        const dex=semester.categories.findIndex(cat=>Number.isNaN(cat.courseIndex)&&cat.mp==cat.mp&&cat.type==cat.type)
+                        if(dex==-1){continue}
+                        semester.categories[dex].courseIndex=99+i
+                    }
+                    temp[mp].courses[index]=course
+                }
+        }
+        setCacheCopy(temp)
     }
-  }
-
-  return bestExact ?? bestOvershoot?.solution ?? null;
-}
-
-
 
 
 

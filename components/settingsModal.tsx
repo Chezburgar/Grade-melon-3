@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from "react";
 import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight,HiArrowCircleLeft, HiArrowCircleDown } from "react-icons/hi";
-import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse} from "../utils/grades";
+import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse, toggleSemester, ordinalSuffix} from "../utils/grades";
 import {colorShit} from "./colors"
 import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2,Finals} from "../utils/grades"
 import GradeField from "./GradeField";
@@ -44,14 +44,6 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         //new stack based view version
         const [viewStack,setViewStack] = useState(["home"])
         const currentView=viewStack.at(-1)
-
-
-        function ordinalSuffix(n: number): string {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
-}
-
 
 
         const animationPropsHome = {
@@ -473,6 +465,11 @@ className="overflow-y-auto"
    <motion.div
       className="flex flex-col gap-4"
     >
+      {index !=-1 && (
+        <div style={{alignItems:"center"}} className="flex gap-2">
+        <p className="dark:text-white">Is Semester Course?</p>
+          <input type="checkbox" onChange={()=>setFinals(toggleSemester(settings.default,{...course.settings,finals:finals},grades,course.identifier)["finals"])} checked={finals.isSemester}/>
+      </div>)}
       <motion.button 
       {...animationPropsHome}
       key="letter"
@@ -513,6 +510,7 @@ className="overflow-y-auto"
 
     </motion.button>
 
+{/*
     <motion.button
       {...animationPropsHome} 
       key="cats"
@@ -526,7 +524,7 @@ className="overflow-y-auto"
         </div>
 
     </motion.button>
-    
+*/}  
     
   </motion.div>}
 
@@ -818,7 +816,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
   {
-    //Final Grade Page
+    //Final Grade Page finals page
     currentView=="finals" && 
 <motion.div
   {...animationPropsPage}
@@ -850,7 +848,9 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           temp.show=!temp.show
           setFinals(temp)
 
-        }} checked={finals.show}></input>
+        }} checked={finals.show}
+        disabled={finals.isSemester}
+        ></input>
     </div>
 
 
@@ -882,6 +882,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             //temporarily doing this really stupidly
            }
             <select 
+            disabled={finals.isSemester}
            value={f.type}
            onChange={(e)=>{
             let temp=structuredClone(finals)
@@ -903,7 +904,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           <td
             style={{textAlign:"center"}}
           >
-            <select value={f.mp} onChange={(e)=>{
+            <select value={f.mp} disabled={finals.isSemester} onChange={(e)=>{
               let temp=structuredClone(finals)
               temp.categories[i].mp=parseInt(e.target.value)
               const index=grades[parseInt(e.target.value)].courses.findIndex(c=>c.identifier==course.identifier)
@@ -923,7 +924,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             style={{textAlign:"center"}}
           >
          
-            <select value={f.courseIndex}
+            <select value={f.courseIndex} 
        //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
               className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
               onChange={(e)=>{
@@ -953,7 +954,8 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             >
             <input
             type="text"
-            className="bg-transparent w-12 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 rounded-lg border-none p-0 md:ml-5"
+            disabled={finals.isSemester}
+            className={`bg-transparent w-12 ${finals.isSemester ? "text-gray-400" : "dark:text-white"} focus:outline-none focus:ring-1 focus:ring-primary-500 rounded-lg border-none p-0 md:ml-5`}
             onFocus={(e)=>setKill([i,e.target.value.replaceAll("%","")])}
             onChange={(e)=>{
               setKill([i,e.target.value.replaceAll("%","")])
@@ -974,17 +976,18 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
   {isMediumOrLarger && <td>
             <button
+              disabled={finals.isSemester}
               onClick={() => {deleteFinalCategory(i)}}
-              className="
+              className={`
                   flex items-center gap-1
-                  rounded-lg bg-primary-500
+                  rounded-lg
                   px-2 py-2 my-1
-                  text-xs font-medium text-white
+                  text-xs font-medium
                   hover:bg-primary-600
                   focus:outline-none focus:ring-4 focus:ring-primary-300
-                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  ${finals.isSemester ? "bg-primary-700 text-gray-400" : "bg-primary-500 dark:bg-primary-600 text-white"}  dark:hover:bg-primary-700 dark:focus:ring-primary-800
                   sm:text-sm
-                "
+                `}
             >
               <HiOutlineTrash size="1.2rem" />
             </button>
@@ -998,18 +1001,19 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         <td colSpan={settings.mode=="manual" ? 3 : 4}>
            <button
                 onClick={() => {deleteFinalCategory(i)}}
-                className="
+                disabled={finals.isSemester}
+                className={`
                   flex items-center gap-1 ml-2 -mt-1 mb-1
-                  rounded-lg bg-primary-500
+                  rounded-lg 
                   text-xs font-medium text-white
                   hover:bg-primary-600
                   px-1
                   focus:outline-none focus:ring-4 focus:ring-primary-300
-                  dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800
+                  ${finals.isSemester ? "bg-primary-700" : "bg-primary-500 dark:bg-primary-600"} dark:hover:bg-primary-700 dark:focus:ring-primary-800
                   sm:text-sm
-                "
+                `}
               >
-                <p className="dark:text-white">Delete</p>
+                <p className={`${finals.isSemester ? "text-gray-400" : "dark:text-white"}`}>Delete</p>
               </button>
         </td>
 
@@ -1021,10 +1025,10 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
     </table>
     </div>
     <div className="flex justify-between">
-     <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-     onClick={()=>{addFinalCategory()}}>Add+</button>
+     <button className={`-ml-2 mt-2 p-2 px-2 ${finals.isSemester ? "bg-primary-600 text-gray-400" : "bg-primary-500 text-white"} dark:bg-primary-600 rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800`}
+     disabled={finals.isSemester} onClick={()=>{addFinalCategory()}}>Add+</button>
    
-       <button className="-ml-2 mt-2 p-2 px-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+       <button disabled={finals.isSemester} className={`-ml-2 mt-2 p-2 px-2 ${finals.isSemester ? "bg-primary-600 text-gray-400" : "bg-primary-500 text-white"} rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800`}
      onClick={()=>{showDefaults("finals")}}>Show Defaults</button>
    
 
@@ -1314,7 +1318,9 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
       
   
       <tbody>
-       {course.categories.map((f,i)=>(
+       {
+       //@ts-ignore idk why it's going off here, the index!=-1 ensures that it would be fine
+       course.categories.map((f,i)=>(
         <>
         <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
           <td 
