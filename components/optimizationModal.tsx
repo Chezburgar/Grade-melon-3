@@ -46,27 +46,10 @@ const animationPropsPage=animationPropsHome //for now
 export default function OptimizationModal({showModal,setShowModal,mp,index,cache,createError,isMediumOrLarger}:ModalProps){
     const [cacheCopy,setCacheCopy] = useState(structuredClone(cache));
     const course=cacheCopy[mp].courses[index]
-    const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:course.settings.letterScale[0][1][0]});
+    const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined});
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
     const [viewStack,setViewStack] = useState(["default"])
-    course.settings.finals.semesters[Symbol.iterator]=function*(){ //custom iterator so that this still works.
-			for(const item of Array.prototype.values.call(this)){
-				if(item!==undefined){
-					yield item
-				}
-			}
-		}
-    course.settings.finals.semesters.map=function(callback, thisArg) { //custom map so it works
-        console.log("god i'm sorry")
-			const result = [];
-			for (let i = 0; i < this.length; i++) {
-				if (this[i]) {
-				result.push(callback.call(thisArg, this[i], i, this));
-				}
-			}
-			return result;
-		}
-    
+    const [kill,setKill]=useState(undefined)
 
 
 
@@ -78,9 +61,8 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
 //what should this even do if finals is disabled chat lmoa
 
 
-    const finalGrade:Score=course != undefined ? calcFinal(course?.settings.finals.categories,cacheCopy) : undefined
-    console.log("abba",finalGrade)
-
+    const finalGrade:Score=course?.settings?.finals.isSemester ? calcFinal(course?.settings.finals.categories,cacheCopy) : undefined
+    
     //like. you DO NOT want users going into settings if you can avoid it. 
     /*to provide CLARITY | HOW DO I PROVIDE CLARITY ON THIS? how would a user know
     that the exams in the settings tab are to be independent of a quarter, as where the other one is for if it 
@@ -89,11 +71,11 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     i'll leave it enabled. */
 
 
-    const semesterGrades:Score[] = course?.settings.finals.semesters.map(semester=>calcFinal(semester.categories,cacheCopy))
+    const semesterGrades:Score[] = course?.settings.finals.semesters.map(semester=>(semester ? calcFinal(semester.categories,cacheCopy) : undefined))
     
     
     //so this won't ever for mcps users then actually fucking matter or make a difference. whatever.
-    const all=(course?.settings.finals.show ? course?.settings.finals.categories : []).concat(course?.settings.finals.semesters.map((semester)=>semester.show ? semester.categories : []).flat())
+    const all=(course?.settings.finals.show ? course?.settings.finals.categories : []).concat(course?.settings.finals.semesters.map((semester)=>semester?.show ? semester.categories : []).flat())
     
     //not actually using this for the weights, but it will return the unique marking periods. so. swag.
     const uniqueCats=simplifyWeights(all)   
@@ -138,6 +120,7 @@ TODO:
         const rows=[]
         const targetVector=[]
         if(optimizeProps.desiredGrade){ // or maybe i'll use NaN or something
+            console.log("i'm peppa pig",optimizeProps)
             const row=Array(uniqueCats.length)
             var target=optimizeProps.desiredGrade
             var known=0;
@@ -164,6 +147,7 @@ TODO:
 
         } 
         for(let [j,semester] of course?.settings.finals.semesters.entries()){
+            if(semester==undefined){continue}
             const monicker="desiredGrade"+ordinalSuffix(j+1)
                 if(optimizeProps?.[monicker]){ // or maybe i'll use NaN or something
             const row=Array(uniqueCats.length)
@@ -194,6 +178,7 @@ TODO:
         }
 
         const parms={A:rows,targets:targetVector,decimalPlaces:Number(course?.settings.rounding.percentPlaces)}
+        console.log("parms",parms)
         const solutionVector=solveSystemMinSum(parms)
         if(solutionVector!=null){
         console.log("jesus christ",solutionVector,parms)
@@ -252,7 +237,7 @@ TODO:
 		let points = Object.values(optimizeProps);
 		points.splice(0, 1);
 		let results = genTable(course, optimizeProps.desiredGrade, points);
-        console.log("ur mum",results)
+   
 		setSolutions(results);
 	};
 
@@ -378,6 +363,33 @@ TODO:
                                 </div>
                             </div>
                         ))}
+                            <div key={"pharycide"}>
+                                <label
+                                    htmlFor="email"
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                >
+                                    Exam Weight
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        onFocus={(e)=>{
+                                            setKill(e.target.value.replaceAll("%",""))
+                                        }}
+                                        onChange={(e)=>{
+                                        const weight = (e.target.value.replaceAll("%",""))
+                                        setKill(weight);
+                                        }}
+                                        value={(kill!=undefined ? kill : ((optimizeProps["examWeight"])*100 + "%"))}   
+
+                                        onBlur={(e) =>{setKill(undefined);updateOptimize(String((parseFloat(e.target.value.replaceAll("%",""))/100) || 0), "examWeight")}}
+                                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                        placeholder="50"
+                                    />
+
+                                                
+                                </div>
+                            </div>
                     </div>
                     <div className="overflow-x-auto shadow-md rounded-lg mt-5 border border-gray-300 dark:border-gray-600">
                         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -528,7 +540,7 @@ TODO:
                 </div>
 
                 <div className="mx-4 flex justify-center items-center flex-col">
-               {course?.settings.finals.show && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+               {(course?.settings.finals.show && finalGrade) && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
                         <div
                             className={ `bg-${finalGrade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
                             style={{
@@ -539,9 +551,11 @@ TODO:
                         </div>
                     </div>}
 
-                    {semesterGrades.map((grade,i)=>(
+                    {semesterGrades.map((grade,i)=>{
+                        if(grade==undefined){return <></>}
+                        return(
                     <>
-                      {!course?.settings.finals.semesters[i].show && <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+                      { <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800">
                             <div
                                 className={ `bg-${grade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
                                 style={{
@@ -553,9 +567,9 @@ TODO:
                         </div>
                     }
                     </>
-                    ))}
+                    )})}
 
-                    <div
+                    {!course?.settings.finals.isSemester && <div
                     className="mt-4 w-full mb-1"
                     >
                         <label
@@ -577,11 +591,12 @@ TODO:
                                 placeholder={String(course.settings.letterScale[0][1][0])}
                             />
                         </div>
-                    </div>
+                    </div>}
 
 
                     {semesterGrades.map((grade,i)=>{
                         const monicker="desiredGrade"+ordinalSuffix(i+1)
+                        if(grade==undefined){return <></>}
                         return(
                                   <div
                     className="mt-4 w-full mb-1"

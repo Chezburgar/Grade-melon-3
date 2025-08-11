@@ -412,7 +412,9 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):C
 			if(count<3){ //this is effectively a hard-coded, SEPERATE default for if it's a single-semester
 				//class. we will not be allowing modification to this i guess. in manual we won't even try ig.
 				console.log("less than 3")
+				settings[identifier].finals.isSemester=false;
 				settings[identifier]=toggleSemester(settings.default,settings[identifier],cache,identifier)
+				console.log(settings[identifier])
 
 			}
 			else{
@@ -493,7 +495,7 @@ function templateFinals(mode,periods):Finals{
 			let weight=1/mps.length
 			let categories:Category[]=mps.map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))
 			
-			return {show:true,categories:categories,isSemester:false,semesters:[{show:true,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))},{show:true,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))}]}
+			return {show:true,categories:categories,isSemester:undefined,semesters:[{show:false,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))},{show:false,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))}]}
 		}
 
 	else{
@@ -1099,7 +1101,6 @@ function abbreviate(category) {
                     }}
                 }
 					if(realCat.length==0){return {raw:NaN,letter:"N/A",color:"gray"}}
-                console.log("I'm gunna fucking kill myself", currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)
 					const grade ={raw:cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percent ? parseFloat((currPoints/currWeight).toFixed(cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces)) : currPoints/currWeight,
 					letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),
 					color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
