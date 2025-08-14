@@ -396,7 +396,7 @@ TODO:
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     {course?.categories.map(({ name }, i) => (
-                                        <th scope="col" className="py-3 pl-6" key={i}>
+                                        <th scope="col" className="py-3 pl-6" key={i+"swagy"}>
                                             {name}
                                         </th>
                                     ))}
@@ -413,10 +413,10 @@ TODO:
                                         } border-b dark:bg-gray-${
                                             i % 2 == 0 ? 900 : 800
                                         } dark:border-gray-700`}
-                                        key={i}
+                                        key={i+"swiggy"}
                                     >
                                         {course?.categories.map((cat, i) => (
-                                            <td scope="col" className="py-3 pl-6" key={i}>
+                                            <td scope="col" className="py-3 pl-6" key={i+"swecky"}>
                                                 {sol[0][i]} / {optimizeProps[cat.name]}
                                             </td>
                                         ))}
@@ -499,7 +499,7 @@ TODO:
 
 
                         return(
-                            <div key={i} 
+                            <div key={i+"damn"} 
                             className="flex flex-col items-center justify-top"
                             >
                              <p className="dark:text-white">{cacheCopy[0].periods[category.mp].name}</p>
@@ -555,7 +555,7 @@ TODO:
                         if(grade==undefined){return <></>}
                         return(
                     <>
-                      { <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+                      { <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800" key={i +"thats wild"}>
                             <div
                                 className={ `bg-${grade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
                                 style={{
@@ -599,7 +599,7 @@ TODO:
                         if(grade==undefined){return <></>}
                         return(
                                   <div
-                    className="mt-4 w-full mb-1"
+                    className="mt-4 w-full mb-1" key={i}
                     >
                         <label
                             htmlFor="email"

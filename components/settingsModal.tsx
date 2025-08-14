@@ -579,9 +579,8 @@ className="overflow-y-auto"
       {/* ── body ───────────────────────────────────────────── */}
       <tbody>
         {letterScale.map((letter,i) => (
-          <>
+          <React.Fragment key={`${i}--23`}>
           <tr
-            key={`${i}--23`}
             className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}
           >
             {/* letter cell */}
@@ -742,7 +741,7 @@ className="overflow-y-auto"
 
 
         </tr>}
-          </>
+          </React.Fragment>
         ))}
       </tbody>
     </table>
@@ -872,7 +871,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   
       <tbody>
        {finals.categories.map((f,i)=>(
-        <>
+        <React.Fragment key={i}>
         <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
           <td 
           style={{textAlign:"center"}}
@@ -915,7 +914,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             }}
               className="bg-transparent dark:text-white border-0 text-elipses focus:outline-none focus:ring-0"
             >
-              {grades?.[period]?.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.name}</option>))}
+              {grades?.[period]?.periods.map(p=>(<option className="bg-gray-600" key={p.index} value={p.index}>{p.name}</option>))}
             </select>
           </td>
 
@@ -937,7 +936,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             >
         <option className="bg-gray-600" value={NaN}>Auto/Unknown</option>
         {grades[f.mp].courses.map((c,j)=>(
-          <option className="bg-gray-600" value={j}>{c.name.trim()}</option>
+          <option className="bg-gray-600" key={j} value={j}>{c.name.trim()}</option>
 
         ))}
             
@@ -1018,7 +1017,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         </td>
 
         </tr>}
-        </>
+        </React.Fragment>
 ))}
 
       </tbody>
@@ -1065,7 +1064,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
    {isMediumOrLarger && <p className="dark:text-white text-lg font-semibold mb-2">Semesters</p>}
 
 {finals.semesters.map((semester,j)=>{
-  return(<div className="mb-8">
+  return(<div className="mb-8" key={j}>
   <div className="flex items-center justify-between">
     <div>
         <p className="dark:text-white font-semibold">{ordinalSuffix(j+1) +" Semester"}</p>
@@ -1102,7 +1101,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   
       <tbody>
        {semester.categories.map((f,i)=>(
-        <>
+        <React.Fragment key={i}>
         <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
           <td 
           style={{textAlign:"center"}}
@@ -1240,7 +1239,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         </td>
 
         </tr>}
-        </>
+        </React.Fragment>
 ))}
 
       </tbody>
@@ -1321,7 +1320,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
        {
        //@ts-ignore idk why it's going off here, the index!=-1 ensures that it would be fine
        course.categories.map((f,i)=>(
-        <>
+        <React.Fragment key={i}>
         <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
           <td 
           style={{textAlign:"center",textOverflow:"elipsis"}}
@@ -1401,7 +1400,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         </td>
 
         </tr>}
-        </>
+        </React.Fragment>
 ))}
 
       </tbody>
