@@ -1168,7 +1168,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             >
         <option className="bg-gray-600" value={NaN}>Auto/Unknown</option>
         {grades[f.mp].courses.map((c,k)=>(
-          <option className="bg-gray-600" value={k}>{c.name.trim()}</option>
+          <option className="bg-gray-600" key={k} value={k}>{c.name.trim()}</option>
 
         ))}
             
