@@ -50,6 +50,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
     const [viewStack,setViewStack] = useState(["default"])
     const [kill,setKill]=useState(undefined)
+    const [virtual,setVirtual]=useState(structuredClone(course))
 
 
 
@@ -156,10 +157,11 @@ TODO:
             for(let [i,cat] of uniqueCats.entries()){
                 const catIndex=semester.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
                 if(catIndex==-1){
-                    row[i]=0
+                    row[i]=0 //if it doesn't belong to this semester, it's weight is 0
                 }
                 else{
                     //@ts-ignore
+                    //if it has a real value, and it's not from the custom bs from a sovled one, then and only then, add it
                     if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
                         (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
                         known+=(cat as any).raw
@@ -231,13 +233,22 @@ TODO:
 			return { ...prev, [field]: parseFloat(val) };
 		});
 	};
-	
 
-	function optimizeGrades(){
-		let points = Object.values(optimizeProps);
-		points.splice(0, 1);
-		let results = genTable(course, optimizeProps.desiredGrade, points);
-   
+
+	function optimizeGrades(){ 
+        const temp=structuredClone(course)
+            if(optimizeProps["Quarter Exam"]){
+            //modify real cat weights to reflect what we're shoe-horning in
+            for(let category of temp.categories){
+                category.weight*=1-(optimizeProps["Quarter Exam"]/100)
+            }
+            temp.categories.push({name:"Quarter Exam",weight:optimizeProps["Quarter Exam"]/100,grade:{letter:"N/A",color:"gray",raw:0},points:{earned:0,possible:100}})
+            }
+		
+        const points=temp.categories.map(category=>category.name!="Quarter Exam" ? optimizeProps[category.name] : 100)
+        console.log(temp.categories,points,"i miss luke")
+		let results = genTable(temp, optimizeProps?.desiredGradeQ ?? course.settings.letterScale[0][1][0], points);
+        setVirtual(temp)
 		setSolutions(results);
 	};
 
@@ -257,6 +268,7 @@ TODO:
 
         <AnimatePresence
         mode="wait"
+        key="killMePlease"
         initial={false}
         >
 
@@ -265,6 +277,7 @@ TODO:
             (viewStack.at(-1)=="default" || viewStack.at(-1)=="home") && 
                <motion.div
                   className="flex flex-col gap-4"
+                  key="home"
                 >
                   <motion.button 
                   {...animationPropsHome}
@@ -301,8 +314,9 @@ TODO:
             viewStack.at(-1)=="quarter" &&  
                 <motion.div 
                 {...animationPropsPage}
-                key="quarter"
+                key="quarterPage"
                 className="">
+                <React.Fragment key="quarterPageDeep">
                       <div className="flex justify-between items-center mb-3">
                       <button
                         style={{borderWidth:1,padding:5,borderRadius:12}}
@@ -333,9 +347,9 @@ TODO:
                                     type="number"
                                     min={1}
                                     max={100}           
-                                    value={optimizeProps?.desiredGrade || course.settings.letterScale[0][1][0]}
+                                    value={optimizeProps?.desiredGradeQ ?? course.settings.letterScale[0][1][0]}
                                     onChange={(e) =>
-                                        updateOptimize(e.target.value, "desiredGrade")
+                                        updateOptimize(e.target.value, "desiredGradeQ")
                                     }
                                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                     placeholder={String(course.settings.letterScale[0][1][0])}
@@ -363,7 +377,7 @@ TODO:
                                 </div>
                             </div>
                         ))}
-                            <div key={"pharycide"}>
+                            <div>
                                 <label
                                     htmlFor="email"
                                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -380,9 +394,9 @@ TODO:
                                         const weight = (e.target.value.replaceAll("%",""))
                                         setKill(weight);
                                         }}
-                                        value={(kill!=undefined ? kill : ((optimizeProps["examWeight"])*100 + "%"))}   
+                                        value={(kill!=undefined ? kill : ((optimizeProps["Quarter Exam"])||0 + "%"))}   
 
-                                        onBlur={(e) =>{setKill(undefined);updateOptimize(String((parseFloat(e.target.value.replaceAll("%",""))/100) || 0), "examWeight")}}
+                                        onBlur={(e) =>{setKill(undefined);updateOptimize(String((parseFloat(e.target.value.replaceAll("%",""))) || 0), "Quarter Exam")}}
                                         className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                         placeholder="50"
                                     />
@@ -395,7 +409,7 @@ TODO:
                         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
-                                    {course?.categories.map(({ name }, i) => (
+                                    {(virtual || course)?.categories.map(({ name }, i) => (
                                         <th scope="col" className="py-3 pl-6" key={i+"swagy"}>
                                             {name}
                                         </th>
@@ -415,9 +429,9 @@ TODO:
                                         } dark:border-gray-700`}
                                         key={i+"swiggy"}
                                     >
-                                        {course?.categories.map((cat, i) => (
-                                            <td scope="col" className="py-3 pl-6" key={i+"swecky"}>
-                                                {sol[0][i]} / {optimizeProps[cat.name]}
+                                        {(virtual || course)?.categories.map((cat, k) => (
+                                            <td scope="col" className="py-3 pl-6" key={k+"swecky"+i}>
+                                                {sol[0][k]} / {optimizeProps[cat.name]}
                                             </td>
                                         ))}
                                         <td
@@ -448,6 +462,7 @@ TODO:
                     >
                         Optimize
                     </button>}
+                    </React.Fragment>
                     </motion.div>
         }
 
@@ -463,8 +478,9 @@ TODO:
                 viewStack.at(-1)=="finals" &&
                 <motion.div 
                 {...animationPropsPage}
-                key="finals"
+                key="finalsPage"
                 className="">
+                <React.Fragment key="finalsPageDeep">
                     <div className="flex justify-between items-center mb-3">
                       <button
                         style={{borderWidth:1,padding:5,borderRadius:12}}
@@ -552,10 +568,10 @@ TODO:
                     </div>}
 
                     {semesterGrades.map((grade,i)=>{
-                        if(grade==undefined){return <></>}
+                        if(grade==undefined){return null}
                         return(
-                    <>
-                      { <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800" key={i +"thats wild"}>
+                    <React.Fragment key={i}>
+                      { <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800">
                             <div
                                 className={ `bg-${grade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
                                 style={{
@@ -566,7 +582,7 @@ TODO:
                             </div>
                         </div>
                     }
-                    </>
+                    </React.Fragment>
                     )})}
 
                     {!course?.settings.finals.isSemester && <div
@@ -583,7 +599,7 @@ TODO:
                                 type="number"
                                 min={1}
                                 max={100}           
-                                value={optimizeProps?.desiredGrade}
+                                value={optimizeProps?.desiredGrade ?? ""}
                                 onChange={(e) =>
                                     updateOptimize(e.target.value, "desiredGrade")
                                 }
@@ -596,7 +612,7 @@ TODO:
 
                     {semesterGrades.map((grade,i)=>{
                         const monicker="desiredGrade"+ordinalSuffix(i+1)
-                        if(grade==undefined){return <></>}
+                        if(grade==undefined){return null}
                         return(
                                   <div
                     className="mt-4 w-full mb-1" key={i}
@@ -612,7 +628,7 @@ TODO:
                                 type="number"
                                 min={1}
                                 max={100}           
-                                value={optimizeProps?.[monicker]}
+                                value={optimizeProps?.[monicker] ?? ""}
                                 onChange={(e) =>
                                     updateOptimize(e.target.value, monicker)
                                 }
@@ -628,7 +644,7 @@ TODO:
                     }
 
                 </div>
-
+                </React.Fragment>
                 </motion.div> }
             </AnimatePresence>
                 </Modal.Body>

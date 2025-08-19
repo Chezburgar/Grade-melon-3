@@ -327,9 +327,7 @@ export default function Grades({
 						
 								}
 
-							console.log("hey is my finals showing?",name,settings.finals)
-
-								
+				
 							return(
 								<div className="mx-2 flex justify-center w-full md:w-96" key={i}>
 									<motion.div

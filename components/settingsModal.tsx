@@ -56,7 +56,6 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const animationPropsPage=animationPropsHome //for now
 
 
-      console.log("quick output",finals)
 
 
 useEffect(()=>{console.log("where's your head at?")
@@ -266,10 +265,8 @@ async function saveNew(){
       //finals
       let flag=true
 
-      for(let key in tempSettings.default.finals){
-        if(JSON.stringify(tempSettings.default.finals[key])!=JSON.stringify(finals[key])){
-          flag=false;
-        }
+      if(JSON.stringify(courseSettings.finals)!=JSON.stringify(newScale.finals)){
+        flag=false;
       }
 
       if(flag){
@@ -443,7 +440,7 @@ className="dark:bg-gray-700"
 
 >
 
-<h1 className="text-2xl">Grade Calculation Settings <span style={{textOverflow:"ellipsis"}}  className="text-sm">{course.name}</span></h1>
+<p className="text-2xl">Grade Calculation Settings <span style={{textOverflow:"ellipsis"}}  className="text-sm">{course.name}</span></p>
 {index==-1 && <p className="text-sm">Changes here will be the default for all your classes!</p>}
 </Modal.Header>
 
@@ -460,11 +457,14 @@ className="overflow-y-auto"
   <AnimatePresence
     mode="wait"
     initial={false}
+    key="urMom"
   >
    {currentView=="home" && 
    <motion.div
+      key="home"
       className="flex flex-col gap-4"
     >
+    <React.Fragment key="dont fw me twin">
       {index !=-1 && (
         <div style={{alignItems:"center"}} className="flex gap-2">
         <p className="dark:text-white">Is Semester Course?</p>
@@ -525,7 +525,7 @@ className="overflow-y-auto"
 
     </motion.button>
 */}  
-    
+  </React.Fragment>
   </motion.div>}
 
   
@@ -536,7 +536,7 @@ className="overflow-y-auto"
   {...animationPropsPage}
   key="letterPage"
 >
-
+<React.Fragment key="splat">
 
   <div className="flex justify-between items-center mb-3">
   <button
@@ -807,6 +807,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   </div>
 
   </details>
+</React.Fragment>
 </motion.div>
 
   }
@@ -821,6 +822,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   {...animationPropsPage}
   key="finalsPage"
 >
+<React.Fragment key="finals say what?">
    <div className="flex justify-between items-center mb-3">
   <button
     style={{borderWidth:1,padding:5,borderRadius:12}}
@@ -1033,6 +1035,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
    </div>
+   </React.Fragment>
     </motion.div>
 
   }
@@ -1045,6 +1048,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
   {...animationPropsPage}
   key="semesterPage"
 >
+<React.Fragment key="semester says what?">
   <div className="flex justify-between items-center mb-3">
   <button
     style={{borderWidth:1,padding:5,borderRadius:12}}
@@ -1064,6 +1068,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
    {isMediumOrLarger && <p className="dark:text-white text-lg font-semibold mb-2">Semesters</p>}
 
 {finals.semesters.map((semester,j)=>{
+  if(semester==null){return null}
   return(<div className="mb-8" key={j}>
   <div className="flex items-center justify-between">
     <div>
@@ -1142,7 +1147,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             }}
               className="bg-transparent dark:text-white border-0 text-elipses focus:outline-none focus:ring-0"
             >
-              {grades?.[period]?.periods.map(p=>(<option className="bg-gray-600" value={p.index}>{p.name}</option>))}
+              {grades?.[period]?.periods.map(p=>(<option className="bg-gray-600" key={p.index} value={p.index}>{p.name}</option>))}
             </select>
           </td>
 
@@ -1257,6 +1262,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
    </div></div>
   )})}
   
+    </React.Fragment>
     </motion.div>
   }
 
@@ -1296,7 +1302,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           {grades[0].periods.map((mp,k)=>{
 
             return(
-              <option className="bg-gray-600" value={mp.index}>{mp.name}</option>
+              <option className="bg-gray-600" key={k} value={mp.index}>{mp.name}</option>
             )
           })}
         </select>
@@ -1486,61 +1492,3 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 )
 
 }
-
-
-
-/*
-  
-    <table 
-    className="w-full">
-      <thead>
-        <tr className="dark:bg-slate-700">
-          <th className="py-2 dark:text-white">Type</th>
-          <th className="py-2 dark:text-white">Marking Period</th>
-          <th className="py-2 dark:text-white">Name</th>
-          <th className="py-2 dark:text-white">Weight</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr className="bg-gray-900">
-          <td>
-           <select 
-           value="course"
-           className="bg-transparent dark:text-white"
-           >
-              <option value={"course"}>Course</option>
-              <option value="exam">Exam</option>
-           </select>
-          </td>
-
-          <td>
-             <select value={grades.period.index}
-              className="bg-transparent dark:text-white"
-             >
-              {grades.periods.map(p=>(<option value={p.index}>{p.rawName}</option>))}
-            </select>
-          </td>
-
-          <td>
-            <input
-              className="bg-transparent text-elipses w-12 dark:text-white"
-              value={"my course"}
-            />
-            
-          </td>
-
-          <td>
-            <input
-            className="bg-transparent text-elipses w-5 border-0 dark:text-white"
-            type="number"
-            value={25}
-
-            />
-
-          </td>
-
-
-        </tr>
-      </tbody>
-    </table>
-    */

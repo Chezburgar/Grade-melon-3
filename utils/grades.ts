@@ -379,7 +379,7 @@ function toggleSemester(norm:Settings["default"],settings:CourseSettings,cache:C
 function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):CourseSettings{
 	var settings=structuredClone(raw_settings)
 
-	console.log("I want a perfect body",settings)
+	//console.log("I want a perfect body",settings)
 
 	if(settings.mode=="manual"){
 		//we let them control but also we FORCe them to control all my precious
@@ -411,10 +411,10 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):C
 
 			if(count<3){ //this is effectively a hard-coded, SEPERATE default for if it's a single-semester
 				//class. we will not be allowing modification to this i guess. in manual we won't even try ig.
-				console.log("less than 3")
+			//	console.log("less than 3")
 				settings[identifier].finals.isSemester=false;
 				settings[identifier]=toggleSemester(settings.default,settings[identifier],cache,identifier)
-				console.log(settings[identifier])
+			//	console.log(settings[identifier])
 
 			}
 			else{
@@ -508,7 +508,7 @@ function templateFinals(mode,periods):Finals{
 
 
 function getCache(books:Gradebook[]):Cache{
-console.log("what the fuckity fuck is happening. like actuall what the fuck's going on",books[0].gradingScale)
+//console.log("what the fuckity fuck is happening. like actuall what the fuck's going on",books[0].gradingScale)
 
 	//pre parsing
 	const settings=books[0].gradingScale
@@ -567,7 +567,10 @@ console.log("what the fuckity fuck is happening. like actuall what the fuck's go
 				if(course.settings.categories){
 			//		course.categories=course.settings.categories //maybe. eventually. for now. FUCK NO.
 				}
-				console.log(course.settings,"electric avenue")
+			//	console.log(course.settings,"electric avenue")
+			}
+			else{
+				course.settings=settings[id]
 			}
 		
 		}
@@ -575,8 +578,8 @@ console.log("what the fuckity fuck is happening. like actuall what the fuck's go
 
 
 
-	console.log("he's officially lost it chat",settings)
-	console.log("genuinely lost his marbles",gradesCache)
+//	console.log("he's officially lost it chat",settings)
+//	console.log("genuinely lost his marbles",gradesCache)
 
 
 return gradesCache as Cache
