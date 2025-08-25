@@ -267,12 +267,14 @@ export default function Grades({
 							value={mp}
 							className="block w-full p-2 text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 						>
-							{grades[mp]?.periods.map((period) => (
+							{grades[mp]?.periods.map((period) => {
+								console.log("wtf",period)
+								return(
 								<option value={period.index} key={period.index}//
 								>
 									{`${period.name} (${parseDate(period.date)})`}
 								</option>
-							))}
+							)})}
 						</select>
 
 						<button

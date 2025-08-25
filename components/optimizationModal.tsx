@@ -62,7 +62,9 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
 //what should this even do if finals is disabled chat lmoa
 
 
-    const finalGrade:Score=course?.settings?.finals.isSemester ? calcFinal(course?.settings.finals.categories,cacheCopy) : undefined
+//need to come up with a proper way of handling interim grades...
+
+    const finalGrade:Score=!course?.settings?.finals.isSemester ? calcFinal(course?.settings.finals.categories,cacheCopy) : undefined
     
     //like. you DO NOT want users going into settings if you can avoid it. 
     /*to provide CLARITY | HOW DO I PROVIDE CLARITY ON THIS? how would a user know
@@ -556,7 +558,7 @@ TODO:
                 </div>
 
                 <div className="mx-4 flex justify-center items-center flex-col">
-               {(course?.settings.finals.show && finalGrade) && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+               {((course?.settings.finals.show||true) && finalGrade && !course?.settings.finals.isSemester) && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
                         <div
                             className={ `bg-${finalGrade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
                             style={{

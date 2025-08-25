@@ -304,7 +304,7 @@ const parseDate = ({ start, end }: { start: Date; end: Date }): string => {
 		(new Date().getTime() - endDate.getTime()) / 86400000
 	);
 
-	if (daysLeft > 0 && daysToStart < 0) {
+	if (daysLeft > 0 && daysToStart <= 0) {
 		return `ends in ${daysLeft} day${daysLeft > 1 ? "s" : ""}`;
 	} else if (daysToStart > 0) {
 		return `starts in ${daysToStart} day${daysToStart > 1 ? "s" : ""}`;
@@ -402,6 +402,7 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):C
 		//tho
 		if(settings[identifier].finals.isSemester==undefined){
 			const realPeriods=getRealMarkingPeriods(cache[0].periods)
+			console.log(realPeriods,"real periods")
 			var count=0;
 			for(let realPeriod of realPeriods){
 				if(cache[realPeriod.index].courses.findIndex(course=>course.courseID.substring(0,course.courseID.length-1)==identifier)!=-1){
@@ -471,8 +472,15 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):C
 
 
 
-function getRealMarkingPeriods(periods:Grades["periods"]){
+function getRealMarkingPeriods(periods:Grades["periods"],isMCPS:boolean=true){
 	let reals=[]
+	if(isMCPS){
+		for(let i=0;i<periods.length;i++){
+			if(!periods[i].name.includes("Interim")){reals.push(periods[i])}
+		}
+	}
+		
+	else{
 	for(let i=0;i<periods.length;i++){
 		let flag=true
 		for(let j=0;j<periods.length;j++){
@@ -482,7 +490,8 @@ function getRealMarkingPeriods(periods:Grades["periods"]){
 			}
 		}
 		if(flag){reals.push(periods[i])}
-	}
+	}}
+
 	return reals
 }
 
@@ -508,8 +517,7 @@ function templateFinals(mode,periods):Finals{
 
 
 function getCache(books:Gradebook[]):Cache{
-//console.log("what the fuckity fuck is happening. like actuall what the fuck's going on",books[0].gradingScale)
-
+	console.log("whats the data",books)
 	//pre parsing
 	const settings=books[0].gradingScale
 
