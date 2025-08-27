@@ -373,12 +373,34 @@ function toggleSemester(norm:Settings["default"],settings:CourseSettings,cache:C
 }
 
 
-
+function util(cache:Cache){
+		const periods=cache[0].periods;
+	for(let period of periods){
+		if(Number(period.date.start)<=Date.now()&&Date.now()<=Number(period.date.end)){
+			return period.index
+		}
+	}
+	return -1
+}
 
 //this fills in an empty finals, like handles the NaN or null courseIndexes and allat.
-function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):CourseSettings{
-	var settings=structuredClone(raw_settings)
+function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cmp=false):CourseSettings{
+	//I high key do not remember how often this runs lmao
+	console.log("re-evaluation of fianls")
 
+	var settings=structuredClone(raw_settings)
+	
+	const nowMP=cache[0].periods.at(util(cache))
+	var interim;
+	if(nowMP.name.toLocaleLowerCase().includes("interim")){
+		interim=true
+		var realMP=nowMP.index+1;
+	}else{
+		interim=false
+	}
+
+
+	console.log(nowMP,interim,"interim")
 	//console.log("I want a perfect body",settings)
 
 	if(settings.mode=="manual"){
@@ -425,6 +447,8 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):C
 
 		const categories=[]
 		for(let category of settings[identifier].finals.categories){
+			if(interim&&realMP==category.mp){category.mp=nowMP.index}
+
 			if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
 				const index=cache[category.mp].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==identifier) //the many to one idea would require a custom data structure that would store poorly in json so how about, no.
 				category.courseIndex=index!=-1 ? index : NaN //gunna kms fr fr
@@ -442,6 +466,7 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string):C
 			if(semester==undefined){continue}
 					const categories=[]
 			for(let category of semester.categories){
+				if(interim&&realMP==category.mp){category.mp=nowMP.index}
 				if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
 					const index=cache[category.mp].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==identifier) //the many to one idea would require a custom data structure that would store poorly in json so how about, no.
 					category.courseIndex=index!=-1 ? index : NaN //gunna kms fr fr
