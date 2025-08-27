@@ -37,7 +37,7 @@ const animationPropsHome = {
     initial: { x: "100%", opacity: 0 },
     animate: { x: 0, opacity: 1 },
     exit: { x: "-100%", opacity: 0 },
-    transition: { duration: 0.15 },
+    transition: { duration: 0.1 },
 };
 
 const animationPropsPage=animationPropsHome //for now
@@ -48,7 +48,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     const course=cacheCopy[mp].courses[index]
     const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined});
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
-    const [viewStack,setViewStack] = useState(["default"])
+    const [viewStack,setViewStack] = useState(["quarter"])
     const [kill,setKill]=useState(undefined)
     const [virtual,setVirtual]=useState(structuredClone(course))
 
@@ -268,59 +268,52 @@ TODO:
                 className="overflow-y-auto"
                 >
 
+                <div className="flex gap-6 justify-center mb-2 w-[80%] mx-auto">
+        <button
+            style={{ borderWidth: 1, padding: 5, borderRadius: 12 }}
+            className={`-ml-3 font-semibold border-neutral-200 dark:border-gray-500 text-lg  flex-1
+            ${viewStack.at(-1) === "quarter"
+                ? "bg-neutral-300 dark:bg-gray-800 dark:text-white text-gray-500 cursor-not-allowed"
+                : "bg-neutral-50 hover:bg-neutral-100 dark:bg-gray-700 dark:hover:bg-gray-800 dark:text-white"
+            }`}
+            onClick={() => setViewStack(["quarter"])}
+            disabled={viewStack.at(-1) === "quarter"}
+        >
+            <div className="flex items-center">
+            <p>Quarter</p>
+            </div>
+        </button>
+
+        <button
+            style={{ borderWidth: 1, padding: 5, borderRadius: 12 }}
+            className={`-ml-3 font-semibold border-neutral-200 dark:border-gray-500 text-lg flex-1
+            ${viewStack.at(-1) === "finals"
+                ? "bg-neutral-300 dark:bg-gray-800 dark:text-white text-gray-500 cursor-not-allowed"
+                : "bg-neutral-50 hover:bg-neutral-100 dark:bg-gray-700 dark:hover:bg-gray-800 dark:text-white"
+            }`}
+            onClick={() => setViewStack(["finals"])}
+            disabled={viewStack.at(-1) === "finals"}
+        >
+            <div className="flex items-center">
+            <p>Finals</p>
+            </div>
+        </button>
+        </div>
+
         <AnimatePresence
         mode="wait"
         key="killMePlease"
         initial={false}
         >
 
-        {
-            //select page
-            (viewStack.at(-1)=="default" || viewStack.at(-1)=="home") && 
-               <motion.div
-                  className="flex flex-col gap-4"
-                  key="home"
-                >
-                  <motion.button 
-                  {...animationPropsHome}
-                  key="quarter"
-                  style={{borderWidth:1}}
-                  onClick={()=>{setViewStack(["quarter"])}} 
-                  className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg  border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold"> 
-                    <div className="flex justify-between items-center">
-                        This Quarter
-                      <HiArrowCircleRight/>
-                    </div>
-            
-                  </motion.button>
-            
-                 <motion.button
-                  {...animationPropsHome} 
-                  key="finals"
-                  onClick={()=>{setViewStack(["finals"])}}
-                  style={{borderWidth:1}}
-                  className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold">
-                  
-                    <div className="flex justify-between items-center">
-                      Final/Semester Grade
-                      <HiArrowCircleRight/>
-                    </div>
-            
-                  </motion.button>
-              </motion.div>
-        }
+
+
 
         {
             //quarter page
-        
-            viewStack.at(-1)=="quarter" &&  
-                <motion.div 
-                {...animationPropsPage}
-                key="quarterPage"
-                className="">
-                <React.Fragment key="quarterPageDeep">
-                      <div className="flex justify-between items-center mb-3">
-                      <button
+
+            /*
+                                  <button
                         style={{borderWidth:1,padding:5,borderRadius:12}}
                         className="-ml-3 dark:text-white font-semibold border-neutral-200 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100 dark:hover:bg-gray-800 dark:bg-[#2d3847]"
                         onClick={()=>{setViewStack(["default"])}}
@@ -332,10 +325,17 @@ TODO:
                           <p>Back</p>
                         </div>
                       </button>
-                      {true && <p className="dark:text-white text-xl font-bold">Quarter Grade</p>}
-                      </div>
+            */
+        
 
-
+            viewStack.at(-1)=="quarter" &&  
+                <div 
+                {...animationPropsPage}
+                key="quarterPage"
+                className="">
+                <React.Fragment key="quarterPageDeep">
+        
+                     
                     <div className="flex flex-col gap-3">
                         <div>
                             <label
@@ -465,7 +465,7 @@ TODO:
                         Optimize
                     </button>}
                     </React.Fragment>
-                    </motion.div>
+                    </div>
         }
 
     
@@ -483,21 +483,8 @@ TODO:
                 key="finalsPage"
                 className="">
                 <React.Fragment key="finalsPageDeep">
-                    <div className="flex justify-between items-center mb-3">
-                      <button
-                        style={{borderWidth:1,padding:5,borderRadius:12}}
-                        className="-ml-3 dark:text-white font-semibold border-neutral-200 dark:border-gray-500 text-lg bg-neutral-50 hover:bg-neutral-100 dark:hover:bg-gray-800 dark:bg-[#2d3847]"
-                        onClick={()=>{setViewStack(["default"])}}
-                      >
-                        <div
-                          className="flex items-center"
-                        >
-                          <HiArrowCircleLeft/>
-                          <p>Back</p>
-                        </div>
-                      </button>
-                      {true && <p className="dark:text-white text-xl font-bold">Final/Semester Grade</p>}
-                    </div>
+                    <p className="dark:text-white text-xl font-bold">Final/Semester Grade</p>
+       
                 <div
                // className="mt-8 flex justify-evenly mx-4"
                   className="mt-6 mx-4"
