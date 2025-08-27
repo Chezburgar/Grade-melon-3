@@ -614,7 +614,7 @@ function getCache(books:Gradebook[]):Cache{
 //	console.log("he's officially lost it chat",settings)
 //	console.log("genuinely lost his marbles",gradesCache)
 
-
+console.log("soup soup",gradesCache)
 return gradesCache as Cache
 }
 

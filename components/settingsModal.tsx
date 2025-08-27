@@ -30,6 +30,7 @@ interface props{
 
 
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,mp:period,isMediumOrLarger}:props){
+        console.log(grades,"it was a dark and stormy night")
           const settings= grades?.[0]?.settings
   const course = index==-1 ? {courseID:"default",settings:settings.default,name:"",identifier:"default"} : grades?.[period]?.courses[index];
         const courseSettings=course.settings
@@ -218,7 +219,7 @@ async function saveAndApply(tempSettings){
 		}
 		tempSettings[key]=initalizeFinals2(grades,tempSettings,key)
 	}
-       console.log(tempSettings,"sigh a million sighs")
+       console.log(tempSettings,"sigh a million sighs",grades)
         for(let grade of tempGrades){
             grade.settings=tempSettings
             for(let ncourse of grade.courses){

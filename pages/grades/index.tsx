@@ -404,7 +404,7 @@ export default function Grades({
 													style={{color:semesterGrade.color.includes("#") && semesterGrade.color}}
 													className={`text-md md:text-xl font-bold text-${semesterGrade.color}-400`}
 												>
-													{ordinalSuffix(indexX+1)} Semester, {semesterGrade.letter} {!isNaN(semesterGrade.raw) ? (`(${settings.rounding.percent ? (semesterGrade.raw).toFixed(settings.rounding.percentPlaces) : semesterGrade.raw}%)`) : ""}
+													{!settings?.finals?.isSemester && ordinalSuffix(indexX+1)} Semester, {semesterGrade.letter} {!isNaN(semesterGrade.raw) ? (`(${settings.rounding.percent ? (semesterGrade.raw).toFixed(settings.rounding.percentPlaces) : semesterGrade.raw}%)`) : ""}
 												</motion.div>}
 												</div>
 
