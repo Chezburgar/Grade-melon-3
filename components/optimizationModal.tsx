@@ -248,7 +248,6 @@ TODO:
             }
 		
         const points=temp.categories.map(category=>category.name!="Quarter Exam" ? optimizeProps[category.name] : 100)
-        console.log(temp.categories,points,"i miss luke")
 		let results = genTable(temp, optimizeProps?.desiredGradeQ ?? course.settings.letterScale[0][1][0], points);
         setVirtual(temp)
 		setSolutions(results);
@@ -483,8 +482,7 @@ TODO:
                 key="finalsPage"
                 className="">
                 <React.Fragment key="finalsPageDeep">
-                    <p className="dark:text-white text-xl font-bold">Final/Semester Grade</p>
-       
+ 
                 <div
                // className="mt-8 flex justify-evenly mx-4"
                   className="mt-6 mx-4"
