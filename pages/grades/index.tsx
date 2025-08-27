@@ -83,6 +83,7 @@ export default function Grades({
 				//setLoading(true);
 				try {
 					getGradebooks(client,null,null).then(raws=>{
+						
 						setGrades(getCache(raws))
 						setMP(findCurrentPeriod(getCache(raws)))
 						setLoading(false)
@@ -323,8 +324,19 @@ export default function Grades({
 							}else{
 								finalGrade=undefined
 								indexX=settings.finals.semesters.findIndex(semester=>semester!=undefined)
-								const semester=settings?.finals?.semesters[indexX]
-								const isNow=semester.categories.some(category=>category.mp==mp)
+								const semester=settings?.finals?.semesters[indexX]     
+								const interimWiseComparison = (cat1,cat2) => {
+									cat1=structuredClone(cat1)
+									cat2=structuredClone(cat2)
+									if(grades[0].periods[cat1.mp].name.toLowerCase().includes("interim")){
+										cat1.mp+=1
+									}
+									if(grades[0].periods[cat2.mp].name.toLowerCase().includes("interim")){
+										cat2.mp+=1
+									}
+									return cat1.mp==cat2.mp
+								}
+								const isNow=semester.categories.some(category=>interimWiseComparison(category,{mp:mp}))
 								semesterGrade=isNow ? calcFinal(semester.categories,grades) : undefined
 						
 								}

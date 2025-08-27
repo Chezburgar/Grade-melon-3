@@ -103,7 +103,18 @@ export default function Grades({
 		
 		
 	const finalGrade=course != undefined ? calcFinal(course?.settings.finals.categories,grades) : undefined
-	const semesterIndex=course?.settings.finals.semesters.findIndex(semester=>semester?.categories.some(category=>category.mp==mp))
+									const interimWiseComparison = (cat1,cat2) => {
+									cat1=structuredClone(cat1)
+									cat2=structuredClone(cat2)
+									if(grades[0].periods[cat1.mp].name.toLowerCase().includes("interim")){
+										cat1.mp+=1
+									}
+									if(grades[0].periods[cat2.mp].name.toLowerCase().includes("interim")){
+										cat2.mp+=1
+									}
+									return cat1.mp==cat2.mp
+								}
+	const semesterIndex=course?.settings.finals.semesters.findIndex(semester=>semester?.categories.some(category=>interimWiseComparison(category,{mp:mp})))
 	const semesterGrade = (semesterIndex!=-1 && course!=undefined) ? calcFinal(course?.settings.finals.semesters[semesterIndex].categories,grades) : undefined
 	
 	useEffect(() => {
