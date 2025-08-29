@@ -389,7 +389,8 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
 	console.log("re-evaluation of fianls")
 
 	var settings=structuredClone(raw_settings)
-	
+ 
+	/*
 	const nowMP=cache[0].periods.at(util(cache))
 	var interim;
 	if(nowMP.name.toLocaleLowerCase().includes("interim")){
@@ -398,9 +399,9 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
 	}else{
 		interim=false
 	}
+	*/
 
-
-	console.log(nowMP,interim,"interim")
+ 
 	//console.log("I want a perfect body",settings)
 
 	if(settings.mode=="manual"){
@@ -447,7 +448,7 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
 
 		const categories=[]
 		for(let category of settings[identifier].finals.categories){
-			if(interim&&realMP==category.mp){category.mp=nowMP.index}
+		//	if(interim&&realMP==category.mp){category.mp=nowMP.index}
 
 			if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
 				const index=cache[category.mp].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==identifier) //the many to one idea would require a custom data structure that would store poorly in json so how about, no.
@@ -466,7 +467,7 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
 			if(semester==undefined){continue}
 					const categories=[]
 			for(let category of semester.categories){
-				if(interim&&realMP==category.mp){category.mp=nowMP.index}
+		//		if(interim&&realMP==category.mp){category.mp=nowMP.index}
 				if(Number.isNaN(category.courseIndex)||category.courseIndex==null){
 					const index=cache[category.mp].courses.findIndex(c=>c.courseID.substring(0,c.courseID.length-1)==identifier) //the many to one idea would require a custom data structure that would store poorly in json so how about, no.
 					category.courseIndex=index!=-1 ? index : NaN //gunna kms fr fr

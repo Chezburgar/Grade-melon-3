@@ -59,7 +59,8 @@ export default function Grades({
 	const [gpaModal, setGpaModal] = useState(false);
 	const view = (router.query.view as string) || defaultView;
 	const [settingsModal,setSettingsModal]=useState<boolean>(false);
-
+	//@ts-ignore
+	const mcps=client?.district=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"
 	const isMediumOrLarger = width >= 768;
 
 	useEffect(() => {
@@ -133,6 +134,27 @@ export default function Grades({
 		setLoading(true);
 
 		if(getFresh){
+			if(grades[0].periods[p].name.toLowerCase().includes("interim")&&mcps){
+				var second;
+				var secondIndex;
+				client.gradebook(p+1).then(([res,extra])=>{
+					res.gradingScale=extra?.gradingScale
+					const parsed=parseGrades(res,grades[0].settings)
+					second=parsed;
+					secondIndex=p+1;
+				})
+				
+			}else{
+				client.gradebook(p-1).then(([res,extra])=>{
+					res.gradingScale=extra?.gradingScale
+					const parsed=parseGrades(res,grades[0].settings)
+					second=parsed;
+					secondIndex=p-1;
+				})
+	
+			}
+
+
 		client
 			.gradebook(p)
 			.then(([res,extra]) => {
@@ -146,6 +168,12 @@ export default function Grades({
 					temp[p].courses[i].settings=grades[p].courses[i].settings
 				}
 
+				if(second){
+					temp[secondIndex]=second
+						for(let i=0;i<temp[secondIndex].courses.length;i++){
+					temp[secondIndex].courses[i].settings=grades[secondIndex].courses[i].settings
+				}
+				}
 				setGrades(temp)
 				setMP(p);
 				setLoading(false);

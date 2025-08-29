@@ -95,7 +95,7 @@ export default function Grades({
 	const [title,setTitle]=useState(undefined);
 	const [showSettingsModal,setShowSettingsModal]=useState(false);
 	const assignmentTitle = useRef(null);
-
+	const mcps=client?.district=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"
 
 	useEffect(()=>{
 		console.log("FUCK CHRIST",optimizationModal)
@@ -186,6 +186,29 @@ export default function Grades({
 			parseFloat(val)
 		);
 
+		const assignment = temp.courses[index].assignments[assignmentId]
+//this was once simple, but now because of the way we operate accross MP's, we're maintaing parity between interims and standard MP's. or at least we're giving it a shot.
+		var adjustedId 
+	
+		
+		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
+				if(assignment.custom){
+			adjustedId=tempCache[mp+1].courses[index].assignments.length-(temp.courses[index].assignments.length-assignmentId);
+		}else{
+			adjustedId=tempCache[mp+1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
+		}
+			if(adjustedId==-1){return}
+			tempCache[mp+1].courses[index]=updateCourse(tempCache[mp+1].courses[index],adjustedId,update,parseFloat(val))
+
+		}else if(mcps){
+		if(assignment.custom){
+			adjustedId=tempCache[mp-1].courses[index].assignments.length-(temp.courses[index].assignments.length-assignmentId);
+		}else{
+			adjustedId=tempCache[mp-1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
+		}
+		if(adjustedId==-1){return}
+			tempCache[mp-1].courses[index]=addAssignment(tempCache[mp-1].courses[index])
+		}
 		setGrades(tempCache);
 		
 	};
@@ -208,6 +231,11 @@ export default function Grades({
 		temp.courses[index] = addAssignment(
 			temp.courses[index]
 		);
+		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
+			tempCache[mp+1].courses[index]=addAssignment(tempCache[mp+1].courses[index])
+		}else if(mcps){
+			tempCache[mp-1].courses[index]=addAssignment(tempCache[mp-1].courses[index])
+		}
 		setGrades({ ...tempCache }); //yeah that works too I guess. I like structuredClone better though. that way no mutations.
 		
 	};
@@ -215,10 +243,31 @@ export default function Grades({
 	const del = (id: number) => {
 		let tempCache = structuredClone(grades);
 		let temp = tempCache?.[mp]
+		const assignment=temp.courses[index].assignments[id]
 		temp.courses[index] = delAssignment(
 			temp.courses[index],
 			id
 		);
+		//this was once simple, but now because of the way we operate accross MP's, we're maintaing parity between interims and standard MP's. or at least we're giving it a shot.
+		var adjustedId;
+		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
+				if(assignment.custom){
+			adjustedId=tempCache[mp+1].courses[index].assignments.length-(temp.courses[index].assignments.length-id);
+		}else{
+			adjustedId=tempCache[mp+1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
+		}
+			if(adjustedId==-1){return}
+			tempCache[mp+1].courses[index]=delAssignment(tempCache[mp+1].courses[index],adjustedId)
+
+		}else if(mcps){
+		if(assignment.custom){
+			adjustedId=tempCache[mp-1].courses[index].assignments.length-(temp.courses[index].assignments.length-id);
+		}else{
+			adjustedId=tempCache[mp-1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
+		}
+		if(adjustedId==-1){return}
+			tempCache[mp-1].courses[index]=delAssignment(tempCache[mp-1].courses[index],adjustedId)
+		}
 		setGrades(tempCache);
 		
 	};
@@ -226,11 +275,36 @@ export default function Grades({
 	const updateCat = (val: string, assignmentId: number) => {
 		let tempCache = structuredClone(grades)
 		let temp = tempCache?.[mp]
+		const assignment=temp.courses[index].assignments[assignmentId]
 		temp.courses[index] = updateCategory(
 			temp.courses[index],
 			assignmentId,
 			val
 		);
+//sigh
+		var adjustedId;
+		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
+				if(assignment.custom){
+			adjustedId=tempCache[mp+1].courses[index].assignments.length-(temp.courses[index].assignments.length-assignmentId);
+		}else{
+			adjustedId=tempCache[mp+1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
+		}
+			if(adjustedId==-1){return}
+			tempCache[mp+1].courses[index]=updateCategory(tempCache[mp+1].courses[index],adjustedId,val)
+
+		}else if(mcps){
+		if(assignment.custom){
+			adjustedId=tempCache[mp-1].courses[index].assignments.length-(temp.courses[index].assignments.length-assignmentId);
+		}else{
+			adjustedId=tempCache[mp-1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
+		}
+		if(adjustedId==-1){return}
+			tempCache[mp-1].courses[index]=updateCategory(tempCache[mp-1].courses[index],adjustedId,val)
+		}
+
+
+
+
 		setGrades(tempCache);
 		
 	};
@@ -247,6 +321,27 @@ export default function Grades({
 		console.log(p);
 		setLoading(true);
 		if(getFresh){
+		if(grades[0].periods[p].name.toLowerCase().includes("interim")&&mcps){
+			var second;
+			var secondIndex;
+			client.gradebook(p+1).then(([res,extra])=>{
+				res.gradingScale=extra?.gradingScale
+				const parsed=parseGrades(res,grades[0].settings)
+				second=parsed;
+				secondIndex=p+1;
+			})
+			
+		}else{
+			client.gradebook(p-1).then(([res,extra])=>{
+				res.gradingScale=extra?.gradingScale
+				const parsed=parseGrades(res,grades[0].settings)
+				second=parsed;
+				secondIndex=p-1;
+			})
+
+		}
+
+
 		client
 			.gradebook(p)
 						.then(([res,extra]) => {
@@ -255,11 +350,19 @@ export default function Grades({
 							const parsed=parseGrades(res,grades[0].settings)
 							const temp=structuredClone(grades)
 							temp[p]=parsed;
+							
 							//not rlly done, are we...
 							for(let i=0;i<temp[p].courses.length;i++){
 								temp[p].courses[i].settings=grades[p].courses[i].settings
 							}
-			
+							console.log("luke william roddy")
+							if(second){
+								console.log("ayy shawty")
+								temp[secondIndex]=second
+								for(let i=0;i<temp[secondIndex].courses.length;i++){
+								temp[secondIndex].courses[i].settings=grades[secondIndex].courses[i].settings
+							}
+							}
 							setGrades(temp)
 							setMP(p);
 							setLoading(false);
