@@ -410,7 +410,98 @@ export default function Grades({
 					{course ? `${course?.name} - Grade Melon` : "Grade Melon"}
 				</title>
 			</Head>
+			{!loading && <>
+			<Modal show={assignmentsModal} onClose={() => setAssignmentsModal(false)}>
+				<Modal.Header className="text-xl font-medium text-gray-900 dark:text-white">
+					{ (isEditing ? (<input onFocus={handleFocus} className="border-none bg-transparent focus:outline-none focus:ring-0 p-0 text-xl font-medium" type="text" onChange={handleChange} ref={assignmentTitle} autoFocus onBlur={handleTitleChange} value={title}></input>) : (<p onClick={course?.assignments[modalDetails]?.custom ? editTitle : ()=>{}}>{title}</p>))
+					}
+				</Modal.Header>
+				<Modal.Body>
+						<div id="assignment-details">
+							<p className="font-bold text-black dark:text-white">Grade</p>
+							<p
+							style={{color:course?.assignments[modalDetails]?.grade.color.includes('#') && course?.assignments[modalDetails]?.grade.color}}
+								className={`text-base leading-relaxed` +  ` text-${course?.assignments[modalDetails]?.grade.color}-400`}
+							>
+								{course?.assignments[modalDetails]?.grade.letter}
+								{!isNaN(course?.assignments[modalDetails]?.grade.raw) &&
+									` (${course?.assignments[modalDetails]?.grade.raw}%)`}
+							</p>
+							<p className="font-bold text-black dark:text-white">Points</p>
+							<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+								{!isNaN(course?.assignments[modalDetails]?.points.earned)
+									? course?.assignments[modalDetails]?.points.earned
+									: "NG"}
+								/{course?.assignments[modalDetails]?.points.possible}
+							</p>
+							<p className="font-bold text-black dark:text-white">Date Due</p>
+							<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+								{course?.assignments[
+									modalDetails
+								]?.date.due.toLocaleDateString()}							</p>
+								{Boolean(course?.assignments[
+									modalDetails
+								]?.notes) && <>
+								<p className="font-bold text-black dark:text-white">Notes</p>
+							<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+								{course?.assignments[
+									modalDetails
+								]?.notes}							</p></>}
+							<p className="font-bold text-black dark:text-white">Category</p>
+							<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+								{course?.assignments[modalDetails]?.category}
+							</p>
+						</div>
+				</Modal.Body>
+				<Modal.Footer>
+						<div className="flex gap-2">
+							<button
+								onClick={() => setAssignmentsModal(false)}
+								className="rounded-lg bg-gray-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
+							>
+								Close
+							</button>
+							<button
+								onClick={() => {
+									del(modalDetails);
+									setAssignmentsModal(false);
+								}}
+								className="rounded-lg bg-primary-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+							>
+								<div className="flex gap-1 items-center">
+									<HiOutlineTrash size={"1.2rem"} />
+									Delete
+								</div>
+							</button>
+						</div>
 
+				</Modal.Footer>
+			</Modal>
+
+			<SettingsModal
+				client={client}
+				grades={grades}
+				mp={mp}
+				setGrades={setGrades}
+				index={index}
+				createError={createError}
+				showModal={showSettingsModal}
+				setShowModal={setShowSettingsModal}
+				isMediumOrLarger={isMediumOrLarger}	
+			/>
+
+			<OptimizationModal
+				createError={createError}
+				cache={grades}
+				mp={mp}
+				index={index}
+				setShowModal={setOptimizationModal}
+				showModal={optimizationModal}
+				isMediumOrLarger={isMediumOrLarger}
+
+			/>
+			</>
+}
 			{loading ? (
 				<div className="flex justify-center">
 					<Spinner size="xl" color="pink" />
