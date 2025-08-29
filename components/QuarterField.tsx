@@ -22,7 +22,8 @@ export default function QuarterField({onChange,cache,mp,courseIndex,onBlur=()=>{
     };
 
     const onUpdate = async (e) => {
-        setValasString(e.target.value);
+        setValasString(e.target.value.replace("-","")
+);
         await onChange(e);
     };
 

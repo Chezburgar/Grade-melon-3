@@ -383,7 +383,7 @@ TODO:
                                     htmlFor="email"
                                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                 >
-                                    Exam Weight
+                                    Quarter-Exam Weight (only use if not already included)
                                 </label>
                                 <div className="flex gap-2">
                                     <input
@@ -508,7 +508,7 @@ TODO:
                              <p className="dark:text-white">{cacheCopy[0].periods[category.mp].name}</p>
                              
                             <QuarterField onChange={(e)=>{
-                                const val=parseFloat(e.target.value)
+                                const val=Math.abs(parseFloat(e.target.value))
 
                                 const newGrade={raw:val,letter:letterGrade(val,course?.settings),color:letterGradeColor(letterGrade(val,course?.settings))}
                                 const temp=structuredClone(cacheCopy)
@@ -550,7 +550,7 @@ TODO:
                                 width: `${finalGrade.raw < 100 ? finalGrade.raw : 100}%`,backgroundColor:(finalGrade.color.includes("#") && `${finalGrade.color}`)
                             }}
                         >
-                            <p className="text-sm">Final {!Number.isNaN(finalGrade.raw) && ` (${finalGrade.raw})%`}</p>
+                            <p className="text-sm absolute">Final {!Number.isNaN(finalGrade.raw) && ` (${finalGrade.raw})%`}</p>
                         </div>
                     </div>}
 
@@ -565,7 +565,7 @@ TODO:
                                     width: `${grade.raw < 100 ? grade.raw : 100}%`,backgroundColor:(grade.color.includes("#") && `${grade.color}`)
                                 }}
                             >
-                            <p className="text-sm">{ordinalSuffix(i+1)} Semester {!Number.isNaN(grade.raw) && ` (${grade.raw})%`}</p>
+                            <p className="text-sm absolute">{ordinalSuffix(i+1)} Semester {!Number.isNaN(grade.raw) && ` (${grade.raw})%`}</p>
                             </div>
                         </div>
                     }
