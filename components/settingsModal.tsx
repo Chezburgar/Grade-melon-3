@@ -30,7 +30,6 @@ interface props{
 
 
 export default function SettingsModal({client,index,showModal,setShowModal,grades,setGrades,createError,mp:period,isMediumOrLarger}:props){
-        console.log(grades,"it was a dark and stormy night")
           const settings= grades?.[0]?.settings
   const course = index==-1 ? {courseID:"default",settings:settings.default,name:"",identifier:"default"} : grades?.[period]?.courses[index];
         const courseSettings=course.settings

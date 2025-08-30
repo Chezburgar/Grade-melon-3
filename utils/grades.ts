@@ -1156,9 +1156,9 @@ type SolveSystemParams = {
 };
 
 function solveSystemMinSum(params: SolveSystemParams): number[] | null {
-  var { A, targets, knowns, decimalPlaces } = params;
-  if(Number.isNaN(decimalPlaces)||decimalPlaces==undefined){decimalPlaces=4}
-  console.log("decimals: ",decimalPlaces)
+  let { A, targets, knowns, decimalPlaces } = params;
+  if (Number.isNaN(decimalPlaces as any) || decimalPlaces == null) decimalPlaces = 4;
+
   const min = params.min ?? 0;
   const max = params.max ?? 100;
   const evennessBias = params.evennessBias ?? 0.15; // lower => less spreading, higher => more
@@ -1167,7 +1167,7 @@ function solveSystemMinSum(params: SolveSystemParams): number[] | null {
   if (m === 0) return null;
   const n = A[0].length;
 
-  const precision = 10 ** decimalPlaces;
+  const precision = 10 ** decimalPlaces!;
   const step = 1 / precision;
   const halfUlp = 0.5 / precision;
   const range = Math.max(step, max - min);
@@ -1177,6 +1177,7 @@ function solveSystemMinSum(params: SolveSystemParams): number[] | null {
   const clamp = (v: number) => Math.max(min, Math.min(max, v));
   const eqDec = (a: number, b: number) => Math.abs(a - b) <= halfUlp;
 
+  // effective RHS after subtracting knowns (if any), snapped to grid
   const g = targets.map((t, i) => roundGrid(t - (knowns?.[i] ?? 0)));
 
   function Ax(x: number[]): number[] {
@@ -1192,7 +1193,7 @@ function solveSystemMinSum(params: SolveSystemParams): number[] | null {
   const allEq = (y: number[], rhs: number[]) => y.every((v, i) => eqDec(v, rhs[i]));
   const allGe = (y: number[], rhs: number[]) => y.every((v, i) => v + halfUlp >= rhs[i]);
 
-  // ---------- tiny linear algebra (n <= ~8) ----------
+  // ---------- tiny linear algebra (n ≤ ~8) ----------
   function matT(M: number[][]): number[][] {
     const r = M.length, c = M[0].length;
     const T = Array.from({ length: c }, () => Array(r).fill(0));
@@ -1223,26 +1224,26 @@ function solveSystemMinSum(params: SolveSystemParams): number[] | null {
   }
   // Solve small dense linear system M x = b (Gaussian elimination with partial pivoting)
   function solveLinear(Min: number[][], bIn: number[]): number[] | null {
-    const n = Min.length;
+    const n2 = Min.length;
     const M = Min.map(r => r.slice());
     const b = bIn.slice();
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < n2; i++) {
       let p = i;
-      for (let r = i + 1; r < n; r++) if (Math.abs(M[r][i]) > Math.abs(M[p][i])) p = r;
+      for (let r = i + 1; r < n2; r++) if (Math.abs(M[r][i]) > Math.abs(M[p][i])) p = r;
       if (Math.abs(M[p][i]) < 1e-12) return null; // singular / ill-conditioned
       if (p !== i) { [M[i], M[p]] = [M[p], M[i]]; const tb = b[i]; b[i] = b[p]; b[p] = tb; }
       const piv = M[i][i];
-      for (let r = i + 1; r < n; r++) {
+      for (let r = i + 1; r < n2; r++) {
         const f = M[r][i] / piv;
         if (!isFinite(f) || Math.abs(f) < 1e-18) continue;
-        for (let c = i; c < n; c++) M[r][c] -= f * M[i][c];
+        for (let c = i; c < n2; c++) M[r][c] -= f * M[i][c];
         b[r] -= f * b[i];
       }
     }
-    const x = new Array(n).fill(0);
-    for (let i = n - 1; i >= 0; i--) {
+    const x = new Array(n2).fill(0);
+    for (let i = n2 - 1; i >= 0; i--) {
       let s = b[i];
-      for (let c = i + 1; c < n; c++) s -= M[i][c] * x[c];
+      for (let c = i + 1; c < n2; c++) s -= M[i][c] * x[c];
       x[i] = s / M[i][i];
     }
     return x;
@@ -1263,7 +1264,7 @@ function solveSystemMinSum(params: SolveSystemParams): number[] | null {
     let bestSum = Infinity;
 
     const cur = new Array(n).fill(0);
-    var dfs= function (idx: number) {
+    const dfs = (idx: number) => {
       if (idx === n) {
         const y = Ax(cur);
         if (allEq(y, g)) {
@@ -1277,7 +1278,7 @@ function solveSystemMinSum(params: SolveSystemParams): number[] | null {
         cur[idx] = v;
         dfs(idx + 1);
       }
-    }
+    };
     dfs(0);
 
     if (bestExact) return bestExact;
@@ -1369,69 +1370,107 @@ function solveSystemMinSum(params: SolveSystemParams): number[] | null {
     }
   }
 
-  // Redistribution pass: keep Σx constant, but flatten (reduce peaks) without breaking Ax >= g
+  // ---------- Multi-receiver, multi-step redistribution (preserve Σx; reduce peak) ----------
   {
-    let leveled = true;
-    let tries = 0, maxTries = 2000;
-
-    while (leveled && tries++ < maxTries) {
-      leveled = false;
-
-      // pick highest variable
+    let tries = 0, maxTries = 4000;
+    while (tries++ < maxTries) {
+      // pick tallest variable
       let jMax = 0;
       for (let j = 1; j < n; j++) if (x[j] > x[jMax]) jMax = j;
       if (x[jMax] <= min) break;
 
-      const decVal = roundGrid(x[jMax] - step);
-      if (decVal < min) break;
+      const donorSteps = Math.floor((x[jMax] - min) * precision + 1e-9);
+      if (donorSteps <= 0) break;
 
-      // try decrease jMax
-      const xTrial = x.slice();
-      xTrial[jMax] = decVal;
-      let yTrial = Ax(xTrial);
+      let lowered = false;
 
-      // if still feasible, accept (Σx drops; usually we've already minimized Σx, but this can still help)
-      if (allGe(yTrial, g)) {
-        x = xTrial; y = yTrial; leveled = true; continue;
-      }
+      // try moving t steps from tallest to others; largest t first is fine,
+      // but 1..donorSteps works and is easier to reason about
+      for (let t = 1; t <= donorSteps; t++) {
+        const xTrial = x.slice();
+        xTrial[jMax] = clamp(roundGrid(xTrial[jMax] - t * step));
+        let yTrial = Ax(xTrial);
 
-      // else compensate by +1 step to some k ≠ jMax (Σx preserved)
-      let bestK = -1;
-      let bestLift = -Infinity;
-      for (let k = 0; k < n; k++) {
-        if (k === jMax) continue;
-        if (xTrial[k] + step > max) continue;
-        // estimate how much k helps the rows that became tight/violated
-        let lift = 0;
+        // quick feasibility check after removing t steps
+        let deficits = new Array(m).fill(0);
+        let totalDef = 0;
         for (let i = 0; i < m; i++) {
-          if (yTrial[i] + halfUlp < g[i]) {
-            const c = A[i][k];
-            if (c > 0) lift += c;
+          const d = g[i] - yTrial[i];
+          const di = d > 0 ? d : 0;
+          deficits[i] = di;
+          totalDef += di;
+        }
+
+        if (totalDef <= halfUlp && allGe(yTrial, g)) {
+          // already feasible; sum is preserved (we'll add 0 steps elsewhere)
+          x = xTrial; y = yTrial; lowered = true; break;
+        }
+
+        // We have exactly t grid-steps to reallocate among receivers (Σx preserved).
+        let budget = t;
+
+        // marginal lift for giving +1 step to k on currently violated rows
+        const liftScore = (k: number, def: number[]) => {
+          let s = 0;
+          for (let i = 0; i < m; i++) {
+            if (def[i] > halfUlp) {
+              const c = A[i][k];
+              if (c > 0) s += c;
+            }
+          }
+          return s;
+        };
+
+        // distribute budget greedily
+        while (budget > 0 && totalDef > halfUlp) {
+          let bestK = -1;
+          let bestScore = -Infinity;
+
+          for (let k = 0; k < n; k++) {
+            if (k === jMax) continue;
+            if (xTrial[k] + step > max + 1e-12) continue;
+            const score = liftScore(k, deficits);
+            // tie-break: prefer smaller current x to flatten
+            if (
+              score > bestScore ||
+              (score === bestScore && xTrial[k] < (bestK === -1 ? Infinity : xTrial[bestK]))
+            ) {
+              bestScore = score; bestK = k;
+            }
+          }
+
+          if (bestK === -1 || bestScore <= 0) break;
+
+          xTrial[bestK] = clamp(roundGrid(xTrial[bestK] + step));
+          yTrial = Ax(xTrial);
+
+          // recompute deficits
+          totalDef = 0;
+          for (let i = 0; i < m; i++) {
+            const di = g[i] - yTrial[i];
+            deficits[i] = di > 0 ? di : 0;
+            totalDef += deficits[i];
+          }
+          budget -= 1;
+        }
+
+        // accept if feasible and Σx preserved
+        if (totalDef <= halfUlp && allGe(yTrial, g)) {
+          const sum0 = x.reduce((a, v) => a + v, 0);
+          const sum1 = xTrial.reduce((a, v) => a + v, 0);
+          if (Math.abs(sum1 - sum0) <= 1e-9) {
+            x = xTrial; y = yTrial; lowered = true; break;
           }
         }
-        // tie-break: prefer smaller current x to spread
-        if (
-          lift > bestLift ||
-          (lift === bestLift && x[k] < (bestK === -1 ? Infinity : x[bestK]))
-        ) {
-          bestLift = lift;
-          bestK = k;
-        }
       }
 
-      if (bestK !== -1) {
-        xTrial[bestK] = roundGrid(xTrial[bestK] + step);
-        yTrial = Ax(xTrial);
-        if (allGe(yTrial, g)) {
-          // Σx unchanged, distribution flatter
-          x = xTrial; y = yTrial; leveled = true;
-        }
-      }
+      if (!lowered) break; // cannot lower peak further without breaking Σx or feasibility
     }
   }
 
   return x;
 }
+
 
 function ordinalSuffix(n: number): string {
 	const s = ["th", "st", "nd", "rd"];
