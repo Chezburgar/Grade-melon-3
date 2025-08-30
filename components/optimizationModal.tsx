@@ -256,9 +256,7 @@ TODO:
 
 
     return(
-        <Modal show={showModal} onClose={()=>{setShowModal(false)
-            
-        }}>
+        <Modal show={showModal} onClose={()=>{setShowModal(false)}} className={`${!isMediumOrLarger && "bg-transparent"}`}>
                 <Modal.Header className="text-xl font-medium text-gray-900 dark:text-white">
                     Optimize Grade
                 </Modal.Header>

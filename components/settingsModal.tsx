@@ -434,6 +434,7 @@ return(
 <Modal 
 show={showModal}
 onClose={()=>setShowModal(false)}
+className={!isMediumOrLarger && `bg-transparent`}
 >
 
 <Modal.Header

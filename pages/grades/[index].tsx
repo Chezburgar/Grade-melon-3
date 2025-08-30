@@ -50,6 +50,8 @@ interface GradesProps {
 	setCourseSettings:any;
 	markingPeriod:number;
 	setMarkingPeriod:(p:number)=>void;
+	modalBg:boolean;
+	setModalBg:(b:boolean)=>void;
 }
 
 
@@ -81,7 +83,7 @@ export default function Grades({
 	setAd,
 	setTime,
 	timestamp,
-	width,markingPeriod,setMarkingPeriod
+	width,markingPeriod,setMarkingPeriod,modalBg,setModalBg
 	
 }: GradesProps) {
 	const router = useRouter();
@@ -313,7 +315,7 @@ export default function Grades({
 		
 		setModalDetails(assignmnetId);
 		setTitle(course?.assignments[assignmnetId]?.name)
-		setAssignmentsModal(true);
+		setAssignmentsModal(true);setModalBg(true)
 	};
 
 	function update(p: number,getFresh=false){
@@ -401,17 +403,19 @@ export default function Grades({
 		if(title=="New Assignment"){setTitle("")}}
 
 
+	function toggleSettings(bool){
+		setShowSettingsModal(bool);
+		setModalBg(bool)
+	}
+
+	function toggleOptimization(bool){
+		setOptimizationModal(bool);
+		setModalBg(bool)
+	}
 
 	return (
-		<motion.div 
-		className="p-5 md:p-10 flex-1 h-screen">
-			<Head>
-				<title>
-					{course ? `${course?.name} - Grade Melon` : "Grade Melon"}
-				</title>
-			</Head>
-			{!loading && <>
-			<Modal show={assignmentsModal} onClose={() => setAssignmentsModal(false)}>
+		<>			{!loading && <>
+			<Modal show={assignmentsModal} onClose={() => {setAssignmentsModal(false);setModalBg(false)}} className={!isMediumOrLarger && `bg-transparent`}>
 				<Modal.Header className="text-xl font-medium text-gray-900 dark:text-white">
 					{ (isEditing ? (<input onFocus={handleFocus} className="border-none bg-transparent focus:outline-none focus:ring-0 p-0 text-xl font-medium" type="text" onChange={handleChange} ref={assignmentTitle} autoFocus onBlur={handleTitleChange} value={title}></input>) : (<p onClick={course?.assignments[modalDetails]?.custom ? editTitle : ()=>{}}>{title}</p>))
 					}
@@ -456,7 +460,7 @@ export default function Grades({
 				<Modal.Footer>
 						<div className="flex gap-2">
 							<button
-								onClick={() => setAssignmentsModal(false)}
+								onClick={() => {setAssignmentsModal(false);setModalBg(false)}}
 								className="rounded-lg bg-gray-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
 							>
 								Close
@@ -465,6 +469,7 @@ export default function Grades({
 								onClick={() => {
 									del(modalDetails);
 									setAssignmentsModal(false);
+									setModalBg(false);
 								}}
 								className="rounded-lg bg-primary-500 px-2.5 py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
 							>
@@ -477,7 +482,7 @@ export default function Grades({
 
 				</Modal.Footer>
 			</Modal>
-
+			
 			<SettingsModal
 				client={client}
 				grades={grades}
@@ -486,7 +491,7 @@ export default function Grades({
 				index={index}
 				createError={createError}
 				showModal={showSettingsModal}
-				setShowModal={setShowSettingsModal}
+				setShowModal={(bool)=>{setShowSettingsModal(bool);setModalBg(bool)}}
 				isMediumOrLarger={isMediumOrLarger}	
 			/>
 
@@ -495,13 +500,23 @@ export default function Grades({
 				cache={grades}
 				mp={mp}
 				index={index}
-				setShowModal={setOptimizationModal}
+				setShowModal={(bool)=>{setOptimizationModal(bool);setModalBg(bool)}}
 				showModal={optimizationModal}
 				isMediumOrLarger={isMediumOrLarger}
 
 			/>
 			</>
 }
+
+
+		<motion.div 
+		className="p-5 md:p-10 flex-1 h-screen">
+			<Head>
+				<title>
+					{course ? `${course?.name} - Grade Melon` : "Grade Melon"}
+				</title>
+			</Head>
+
 			{loading ? (
 				<div className="flex justify-center">
 					<Spinner size="xl" color="pink" />
@@ -521,7 +536,7 @@ export default function Grades({
 							<BsGearWideConnected
 								className="text-2xl md:text-3xl hover:text-gray-600 text-black dark:text-white"
 								style={{alignSelf:"end"}}
-								onClick={()=>setShowSettingsModal(true)}
+								onClick={()=>toggleSettings(true)}
 					
 					/>
 					</motion.h1>
@@ -631,7 +646,7 @@ export default function Grades({
 						</select>
 						<button
 							type="button"
-							onClick={()=>setOptimizationModal(true)}
+							onClick={()=>toggleOptimization(true)}
 							className=" bg-primary-500 border border-primary-500 focus:outline-none hover:bg-primary-600 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm p-2.5 dark:bg-primary-600 text-white dark:hover:bg-primary-700 dark:focus:ring-primary-400"
 						>
 							<BsGraphUp size={"1.3rem"} />
@@ -752,6 +767,6 @@ export default function Grades({
 					</div>
 				</motion.div>
 			)}
-		</motion.div>
+		</motion.div></>
 	);
 }

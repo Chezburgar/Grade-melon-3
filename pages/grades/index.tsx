@@ -36,6 +36,8 @@ interface GradesProps {
 	setGradesCache:(grades:GradesType[])=>void;
 	markingPeriod:number;
 	setMarkingPeriod:(p:number)=>void;
+	modalBg:boolean;
+	setModalBg:(b:boolean)=>void;
 }
 
 export default function Grades({
@@ -50,10 +52,10 @@ export default function Grades({
 	setTime,
 	timestamp,
 	width,
-	gradesCache,setGradesCache,markingPeriod,setMarkingPeriod
+	gradesCache,setGradesCache,markingPeriod,setMarkingPeriod,modalBg,setModalBg
 }: GradesProps) {
 	const router = useRouter();
-	const [loading, setLoading] = useState(grades ? false : true);
+	const [loading, setLoading] = useState(grades ? false : true);	
 	const [defaultView, setDefaultView] = useState("card");
 	//const [period, setMP] = useState<number>();
 	const [gpaModal, setGpaModal] = useState(false);
@@ -274,7 +276,7 @@ export default function Grades({
 				client={client}
 				index={-1}
 				showModal={settingsModal}
-				setShowModal={setSettingsModal}
+				setShowModal={(bool)=>{setSettingsModal(bool);setModalBg(bool)}}
 				grades={grades}
 				setGrades={setGrades}
 				mp={mp}
@@ -316,7 +318,7 @@ export default function Grades({
 
 						
 						<button
-							onClick={()=>setSettingsModal(true)}
+							onClick={()=>{setSettingsModal(true);setModalBg(true)}}
 
 							>
 							<BsGearWideConnected

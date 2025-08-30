@@ -41,6 +41,7 @@ function MyApp({ Component, pageProps }) {
 	const [timestamp,setTime]=useState(0);
     const [ad,setAd]=useState<false | any>(false);
 	const { width } = useWindowSize();
+	const [modalBg,setModalBg] = useState(false)
 	const isMediumOrLarger = width >= 768;
 
 	const apiUrl="https://studentvuelib.up.railway.app"
@@ -413,6 +414,8 @@ const logout = async () => {
 								ad={ad}
 								setAd={setAd}
 								width={width}
+																		modalBg={modalBg}
+										setModalBg={setModalBg}
 						 
 
 							/>
@@ -448,6 +451,8 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
+																				modalBg={modalBg}
+										setModalBg={setModalBg}
 							 
 									/>
 								</AnimateSharedLayout>
@@ -479,12 +484,15 @@ const logout = async () => {
 										ad={ad}
 										setAd={setAd}
 										width={width}
+										modalBg={modalBg}
+										setModalBg={setModalBg}
 	 
 									/>
 								</AnimateSharedLayout>
 								<div className="px-4 fixed bottom-5 w-full">
 									<MobileBar />
 								</div>
+								{modalBg && <div style={{opacity:0.1}} className="fixed inset-0 bg-gray-500 z-0"></div>}
 							</div>
 						</div>
 					)}
