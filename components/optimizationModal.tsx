@@ -53,7 +53,12 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     const [virtual,setVirtual]=useState(structuredClone(course))
 
 
+    function reset(){
+        setOptimizeProps({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined})
+        setVirtual(structuredClone(course))
+        setCacheCopy(structuredClone(cache))
 
+    }
     
     useEffect(()=>{
         setCacheCopy(structuredClone(cache))
@@ -125,8 +130,8 @@ TODO:
         if(optimizeProps.desiredGrade){ // or maybe i'll use NaN or something
             console.log("i'm peppa pig",optimizeProps)
             const row=Array(uniqueCats.length)
-            var target=optimizeProps.desiredGrade
-            var known=0;
+            let target=optimizeProps.desiredGrade
+            let known=0;
             for(let [i,cat] of uniqueCats.entries()){
                 const catIndex=course?.settings.finals.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
                 if(catIndex==-1){
@@ -135,7 +140,7 @@ TODO:
                 else{
                     //@ts-ignore
                     if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
-                        (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
+                        (cat as any).raw=course?.settings.finals.categories[catIndex].weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
                         known+=(cat as any).raw
                         row[i]=0
                         
@@ -144,6 +149,7 @@ TODO:
 
                 }
             }
+            console.log(target,known,"kill me")
             target-=known; //i love floating point math it's awful
             rows.push(row)
             targetVector.push(target)
@@ -154,8 +160,8 @@ TODO:
             const monicker="desiredGrade"+ordinalSuffix(j+1)
                 if(optimizeProps?.[monicker]){ // or maybe i'll use NaN or something
             const row=Array(uniqueCats.length)
-            var target=optimizeProps?.[monicker]
-            var known=0;
+            let target=optimizeProps?.[monicker]
+            let known=0;
             for(let [i,cat] of uniqueCats.entries()){
                 const catIndex=semester.categories.findIndex(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&cat.type==category.type)
                 if(catIndex==-1){
@@ -165,7 +171,7 @@ TODO:
                     //@ts-ignore
                     //if it has a real value, and it's not from the custom bs from a sovled one, then and only then, add it
                     if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
-                        (cat as any).raw=cat.weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
+                        (cat as any).raw=semester.categories[catIndex].weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
                         known+=(cat as any).raw
                         row[i]=0
                         
@@ -627,6 +633,8 @@ TODO:
 
 
                     }
+
+                    <button onClick={reset} className="mr-auto mt-2 rounded-lg bg-primary-600 hover:bg-primary-700 active:bg-primary-700 text-white p-0.5 text-sm">Reset</button>
 
                 </div>
                 </React.Fragment>
