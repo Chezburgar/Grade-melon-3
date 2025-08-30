@@ -563,7 +563,7 @@ TODO:
                                     width: `${grade.raw < 100 ? grade.raw : 100}%`,backgroundColor:(grade.color.includes("#") && `${grade.color}`)
                                 }}
                             >
-                            <p className="text-sm absolute">{ordinalSuffix(i+1)} Semester {!Number.isNaN(grade.raw) && ` (${grade.raw})%`}</p>
+                            <p className="text-sm absolute">{ordinalSuffix(i+1)} Semester {!Number.isNaN(grade.raw) ? ` (${grade.raw})%` : `(N/A)%`}</p>
                             </div>
                         </div>
                     }
