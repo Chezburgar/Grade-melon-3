@@ -534,7 +534,7 @@ export default function Grades({
 					>
 						{course?.name}
 							<BsGearWideConnected
-								className="text-2xl md:text-3xl hover:text-gray-600 text-black dark:text-white"
+								className="text-2xl md:text-3xl hover:text-gray-600 hover:text-gray-400 text-gray-600  dark:text-gray-200"
 								style={{alignSelf:"end"}}
 								onClick={()=>toggleSettings(true)}
 					
