@@ -209,7 +209,7 @@ export default function Grades({
 			adjustedId=tempCache[mp-1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
 		}
 		if(adjustedId==-1){return}
-			tempCache[mp-1].courses[index]=addAssignment(tempCache[mp-1].courses[index])
+			tempCache[mp-1].courses[index]=updateCourse(tempCache[mp-1].courses[index],adjustedId,update,parseFloat(val))
 		}
 		setGrades(tempCache);
 		
