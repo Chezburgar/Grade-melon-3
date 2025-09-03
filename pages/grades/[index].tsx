@@ -219,7 +219,7 @@ export default function Grades({
 	
 	const handleTitleChange = () => {
 		const newTitle =assignmentTitle.current.value=='' ? "New Assignment" : assignmentTitle.current.value
-		let tempCache = structuredClone(grades);
+		let tempCache:Cache = structuredClone(grades);
 		let temp = tempCache?.[mp]
 		temp.courses[index].assignments[modalDetails].name=newTitle;
 		setGrades(tempCache);
@@ -228,7 +228,7 @@ export default function Grades({
 	  };
 
 	const add = () => {
-		let tempCache = grades;
+		let tempCache = structuredClone(grades);
 		let temp=tempCache?.[mp]
 		temp.courses[index] = addAssignment(
 			temp.courses[index]
@@ -238,7 +238,7 @@ export default function Grades({
 		}else if(mcps){
 			tempCache[mp-1].courses[index]=addAssignment(tempCache[mp-1].courses[index])
 		}
-		setGrades({ ...tempCache }); //yeah that works too I guess. I like structuredClone better though. that way no mutations.
+		setGrades(tempCache); //yeah that works too I guess. I like structuredClone better though. that way no mutations.
 		
 	};
 
@@ -323,9 +323,7 @@ export default function Grades({
 		console.log(p);
 		setLoading(true);
 		if(getFresh){
-			console.log("explain urselves",p,mp)
 		if(grades[p].periods[p].name.toLowerCase().includes("interim")&&mcps){
-			console.log("interim spotted, let's get er")
 			var second;
 			var secondIndex;
 			client.gradebook(p+1).then(([res,extra])=>{

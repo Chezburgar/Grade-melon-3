@@ -222,6 +222,17 @@ export default function Grades({
 
 	},[ad])
 
+	const interimWiseComparison = (cat1,cat2) => {
+	cat1=structuredClone(cat1)
+	cat2=structuredClone(cat2)
+	if(grades[0].periods[cat1.mp].name.toLowerCase().includes("interim")){
+		cat1.mp+=1
+	}
+	if(grades[0].periods[cat2.mp].name.toLowerCase().includes("interim")){
+		cat2.mp+=1
+	}
+	return cat1.mp==cat2.mp
+	}
 
 
 	return (
@@ -357,24 +368,13 @@ export default function Grades({
 								var finalGrade=settings?.finals?.show ? calcFinal(settings.finals.categories,grades) : undefined
 								const semesters=settings?.finals?.semesters
 								const semCats=semesters.map(semester=>semester.categories)
-								var indexX=semCats.findIndex(categories=>categories.some(category=>category.mp==mp))
+								var indexX=semCats.findIndex(categories=>categories.some(category=>interimWiseComparison(category,{mp:mp})))
 								semesterGrade=indexX!=-1 ? (settings?.finals?.semesters[indexX].show ? (calcFinal(settings?.finals?.semesters[indexX].categories,grades)) : undefined):undefined
-						
+								
 							}else{
 								finalGrade=undefined
 								indexX=settings.finals.semesters.findIndex(semester=>semester!=undefined)
 								const semester=settings?.finals?.semesters[indexX]     
-								const interimWiseComparison = (cat1,cat2) => {
-									cat1=structuredClone(cat1)
-									cat2=structuredClone(cat2)
-									if(grades[0].periods[cat1.mp].name.toLowerCase().includes("interim")){
-										cat1.mp+=1
-									}
-									if(grades[0].periods[cat2.mp].name.toLowerCase().includes("interim")){
-										cat2.mp+=1
-									}
-									return cat1.mp==cat2.mp
-								}
 								const isNow=semester.categories.some(category=>interimWiseComparison(category,{mp:mp}))
 								semesterGrade=isNow ? calcFinal(semester.categories,grades) : undefined
 						
