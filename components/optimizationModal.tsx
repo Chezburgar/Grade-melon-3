@@ -46,9 +46,9 @@ const animationPropsPage=animationPropsHome //for now
 export default function OptimizationModal({showModal,setShowModal,mp,index,cache,createError,isMediumOrLarger}:ModalProps){
     const [cacheCopy,setCacheCopy] = useState(structuredClone(cache));
     const course=cacheCopy[mp].courses[index]
-    const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined});
+    const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:!course?.settings.finals.isSemester && false ? course.settings.letterScale[0][1][0] : undefined});
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
-    const [viewStack,setViewStack] = useState(["quarter"])
+    const [viewStack,setViewStack] = useState(["finals"])
     const [kill,setKill]=useState(undefined)
     const [virtual,setVirtual]=useState(structuredClone(course))
 

@@ -461,7 +461,7 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
 
 		//mk so there's still the semester shit righhhhhhhht
 
-		//sigh...
+		//sigh
 
 		for(let semester of settings[identifier].finals.semesters){
 			if(semester==undefined){continue}
@@ -693,7 +693,7 @@ const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
         weight: parseFloat(weight.standard) / 100,
         grade: {
           letter: letterGrade((points.current / points.possible) * 100,courseSettings),
-          raw:    places!=false ? parseFloat(
+          raw:    places!==false ? parseFloat(
          ((points.current / points.possible) * 100).toFixed(places)
           ) :  ((points.current / points.possible) * 100),
           color: letterGradeColor(
@@ -729,7 +729,7 @@ const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
 				name: parseAssignmentName(name),
 				grade: {
 					letter:  letterGrade(parsePoints(points).grade,courseSettings), 
-					raw: places!=false ? parseFloat(parsePoints(points).grade.toFixed(places)) : parsePoints(points).grade,
+					raw: places!==false ? parseFloat(parsePoints(points).grade.toFixed(places)) : parsePoints(points).grade,
 					color: notes!="(Not For Grading)" ? letterGradeColor(letterGrade(parsePoints(points).grade,courseSettings),courseSettings) : "mud" ,
 				},
 				points: {
@@ -890,7 +890,7 @@ const calculateCategory = (course: Course, categoryId: number): Course => {
 				assignment.included
 		)
 		.reduce((a, b) => a + b.points.possible, 0);
-	course.categories[categoryId].grade.raw = places!=false ? parseFloat(
+	course.categories[categoryId].grade.raw = places!==false ? parseFloat(
 		(
 			(course.categories[categoryId].points.earned /
 				course.categories[categoryId].points.possible) *
@@ -933,7 +933,7 @@ function calculateGrade(course: Course): Course{
 		}
 		return false;
 	});
-	course.grade.raw = places!=false ? parseFloat(
+	course.grade.raw = places!==false ? parseFloat(
 		trueCategories
 			.reduce((a, b) => {
 				return a + b.grade.raw * (b.weight / currWeight);
@@ -1045,7 +1045,7 @@ const updateCourse = (
 		const gradingScale=course.settings;
 	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
 	//update assignment grade
-	course.assignments[assignmentId].grade.raw = places!=false ? parseFloat(
+	course.assignments[assignmentId].grade.raw = places!==false ? parseFloat(
 		(
 			(course.assignments[assignmentId].points.earned /
 				course.assignments[assignmentId].points.possible) *
@@ -1138,10 +1138,11 @@ function abbreviate(category) {
                     }}
                 }
 					if(realCat.length==0){return {raw:NaN,letter:"N/A",color:"gray"}}
-					const grade ={raw:cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percent ? parseFloat((currPoints/currWeight).toFixed(cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces)) : currPoints/currWeight,
+					const grade ={raw:cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces ? parseFloat((currPoints/currWeight).toFixed(cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces)) : currPoints/currWeight,
 					letter:letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),
 					color:letterGradeColor(letterGrade(currPoints/currWeight,cache[realCat[0].mp].courses[realCat[0].courseIndex].settings),cache[realCat[0].mp].courses[realCat[0].courseIndex].settings)}
-			//	console.log(grade)
+			//		console.log("why we rounding?",cache[realCat[0].mp].courses[realCat[0].courseIndex].settings.rounding.percentPlaces,currPoints/currWeight)
+					//	console.log(grade)
 				return grade
             }
 
