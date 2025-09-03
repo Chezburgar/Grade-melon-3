@@ -559,7 +559,7 @@ function getCache(books:Gradebook[]):Cache{
 
 	if(!settings.default.finals){
 	settings.default.finals=templateFinals(settings.mode,periods)}
-	let gradesCache:any=books.map(book=>parseGrades(book,settings))
+	let gradesCache:Grades[]=books.map(book=>parseGrades(book,settings))
 
 		
 
@@ -616,7 +616,7 @@ function getCache(books:Gradebook[]):Cache{
 //	console.log("genuinely lost his marbles",gradesCache)
 
 console.log("soup soup",gradesCache)
-return gradesCache as Cache
+return gradesCache
 }
 
 

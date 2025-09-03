@@ -218,7 +218,7 @@ async function saveAndApply(tempSettings){
 		}
 		tempSettings[key]=initalizeFinals2(grades,tempSettings,key)
 	}
-       console.log(tempSettings,"sigh a million sighs",grades)
+       console.log(tempSettings,"sigh a million sighs",tempGrades,grades)
         for(let grade of tempGrades){
             grade.settings=tempSettings
             for(let ncourse of grade.courses){

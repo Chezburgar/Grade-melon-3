@@ -144,7 +144,12 @@ export default function Grades({
 					const parsed=parseGrades(res,grades[0].settings)
 					second=parsed;
 					secondIndex=p+1;
-				})
+					part2()
+				}).catch((err) => {
+				console.log(err);
+				createError(err.message);
+				setLoading(false);
+			});
 				
 			}else{
 				client.gradebook(p-1).then(([res,extra])=>{
@@ -152,12 +157,16 @@ export default function Grades({
 					const parsed=parseGrades(res,grades[0].settings)
 					second=parsed;
 					secondIndex=p-1;
-				})
+					part2()
+				}).catch((err) => {
+				console.log(err);
+				createError(err.message);
+				setLoading(false);
+			});
 	
 			}
 
-
-		client
+		const part2= ()=>client
 			.gradebook(p)
 			.then(([res,extra]) => {
 				res.gradingScale=extra?.gradingScale

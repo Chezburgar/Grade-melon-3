@@ -323,7 +323,9 @@ export default function Grades({
 		console.log(p);
 		setLoading(true);
 		if(getFresh){
-		if(grades[0].periods[p].name.toLowerCase().includes("interim")&&mcps){
+			console.log("explain urselves",p,mp)
+		if(grades[p].periods[p].name.toLowerCase().includes("interim")&&mcps){
+			console.log("interim spotted, let's get er")
 			var second;
 			var secondIndex;
 			client.gradebook(p+1).then(([res,extra])=>{
@@ -331,7 +333,11 @@ export default function Grades({
 				const parsed=parseGrades(res,grades[0].settings)
 				second=parsed;
 				secondIndex=p+1;
-			})
+				part2()
+			}).catch((err) => {
+				createError(err.message);
+				setLoading(false);
+			});
 			
 		}else{
 			client.gradebook(p-1).then(([res,extra])=>{
@@ -339,12 +345,15 @@ export default function Grades({
 				const parsed=parseGrades(res,grades[0].settings)
 				second=parsed;
 				secondIndex=p-1;
-			})
+				part2()
+			}).catch((err) => {
+				createError(err.message);
+				setLoading(false);
+			});
 
 		}
 
-
-		client
+		const part2=()=>client
 			.gradebook(p)
 						.then(([res,extra]) => {
 							res.gradingScale=extra?.gradingScale
@@ -357,7 +366,6 @@ export default function Grades({
 							for(let i=0;i<temp[p].courses.length;i++){
 								temp[p].courses[i].settings=grades[p].courses[i].settings
 							}
-							console.log("luke william roddy")
 							if(second){
 								console.log("ayy shawty")
 								temp[secondIndex]=second
@@ -590,7 +598,7 @@ export default function Grades({
 						</div>
 					</div>}
 
-						{semesterIndex!=-1 && course?.settings.finals.semesters[semesterIndex].show
+						{semesterIndex!=-1
 						 &&
 						<div className="mt-2.5 mb-4 w-full bg-gray-200 rounded-full dark:bg-gray-700 relative">
 						<div
