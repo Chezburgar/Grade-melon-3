@@ -1023,3 +1023,5 @@ const courseHistory:CourseHistory[] = [
     ]
   }
 ];
+
+export{};
