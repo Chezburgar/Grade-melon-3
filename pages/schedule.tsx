@@ -46,6 +46,14 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 		}
 	}, [client, term]);
 
+
+	function matchName(todayClass){ //wont work for concurrent schools
+		const name=todayClass.name
+		const period=parseInt(todayClass.period)
+		const matchedIndex=schedule.mainClasses.findIndex(course=>parseInt(course.period)==period)
+		return matchedIndex != -1 ? schedule.mainClasses[matchedIndex].name : todayClass.name
+	}	
+
 	return (
 		<div className="p-5 md:p-10 h-full flex-1">
 			<Head>
@@ -232,7 +240,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 											{start+" - "+end}
 										</th>
 										<td className='py-4 px-6'>{period ? period : i}</td>
-										<td className="py-4 px-6">{name}</td>
+										<td className="py-4 px-6">{matchName(schedule.today.main[i])}</td>
 										<td className="py-4 px-6">{room}</td>
 										<td className="py-4 px-6">
 											{teacher}

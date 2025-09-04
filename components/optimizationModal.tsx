@@ -306,7 +306,7 @@ TODO:
         <AnimatePresence
         mode="wait"
         key="killMePlease"
-        initial={false}
+        initial={true}
         >
 
 
