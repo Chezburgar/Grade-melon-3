@@ -324,7 +324,7 @@ fetch(apiUrl + "/logLogin", {
 
 const logout = async () => {
 	await Cookies.remove("password");
-	localStorage.remove("mps")
+	localStorage.removeItem("mps")
 	await router.push("/login");
 	 setClient(undefined);
 	 setGrades(undefined);
