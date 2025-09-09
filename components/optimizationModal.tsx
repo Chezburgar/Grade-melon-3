@@ -2,6 +2,7 @@ import React, {useState,useEffect} from "react";
 import {calcFinal, genTable,Course, Finals, Cache,simplifyWeights, letterGrade, letterGradeColor,solveSystemMinSum, ordinalSuffix} from "../utils/grades"
 import {Modal} from "flowbite-react"
 import QuarterField from "./QuarterField";
+import ExamField from "./ExamField";
 import { AnimatePresence,motion } from "framer-motion";
 import { HiArrowCircleLeft, HiArrowCircleRight } from "react-icons/hi";
 
@@ -51,7 +52,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     const [viewStack,setViewStack] = useState(["finals"])
     const [kill,setKill]=useState(undefined)
     const [virtual,setVirtual]=useState(structuredClone(course))
-
+    
 
     function reset(){
         setOptimizeProps({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined})
@@ -88,7 +89,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     //not actually using this for the weights, but it will return the unique marking periods. so. swag.
     const uniqueCats=simplifyWeights(all)   
 
- 
+    
 
     function optimize(){
 		let tempProps = {};
@@ -509,6 +510,7 @@ TODO:
                             <div key={i+"damn"} 
                             className="flex flex-col items-center justify-top"
                             >
+                        {category.type=="course" &&<>
                              <p className="dark:text-white">{cacheCopy[0].periods[category.mp].name}</p>
                              
                             <QuarterField onChange={(e)=>{
@@ -539,7 +541,28 @@ TODO:
                             }} cache={cacheCopy}
                                 mp={category.mp}    
                                 courseIndex={category.courseIndex}                        
-                            />
+                            /></>        
+                            }
+
+                            {category.type=="exam" &&<>
+                             <p className="dark:text-white">{cacheCopy[0].periods[category.mp].name + " Exam"}</p>
+                             
+                            <ExamField onChange={(e)=>{
+                                const val=Math.abs(parseFloat(e.target.value))
+
+                                const newGrade={raw:val,letter:letterGrade(val,course?.settings),color:letterGradeColor(letterGrade(val,course?.settings))}
+                                const clone = structuredClone(cacheCopy)
+                                const catIndex = cacheCopy[mp].courses[index].settings.finals.categories.findIndex(cat =>(cat.courseIndex == category.courseIndex || (Number.isNaN(cat.courseIndex) && Number.isNaN(category.courseIndex))) && cat.mp == category.mp && cat.type == category.type && cat.weight == category.weight);
+                                if(catIndex==-1){createError("i didn't even like coding this feature.");return}
+                                //@ts-ignore
+                                clone[mp].courses[index].settings.finals.categories[catIndex].grade=newGrade
+                                setCacheCopy(clone)
+
+                            }} 
+                                val={(category as any).grade || {raw:NaN,letter:"N/A",color:"gray"}}
+                                                        
+                            /></>        
+                            }
 
                             </div>
                         )
@@ -661,107 +684,3 @@ TODO:
 
     )
 }
-
-
-
-
-/*
-  <Modal.Body>
-                        <div>
-                            <div className="flex flex-col gap-3">
-                                <div>
-                                    <label
-                                        htmlFor="email"
-                                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                    >
-                                        Desired Grade (1-100)
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            max={100}           
-                                            value={optimizeProps?.desiredGrade}
-                                            onChange={(e) =>
-                                                updateOptimize(e.target.value, "desiredGrade")
-                                            }
-                                            className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                            placeholder={String(course.settings.letterScale[0][1][0])}
-                                        />
-                                    </div>
-                                </div>
-                                {course?.categories.map(({ name }, i) => (
-                                    <div key={i}>
-                                        <label
-                                            htmlFor="email"
-                                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                        >
-                                            Points Left ({name})
-                                        </label>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                max={100}
-                                                value={optimizeProps[name]}
-                                                onChange={(e) => updateOptimize(e.target.value, name)}
-                                                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                                placeholder="50"
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="overflow-x-auto shadow-md rounded-lg mt-5 border border-gray-300 dark:border-gray-600">
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                        <tr>
-                                            {course?.categories.map(({ name }, i) => (
-                                                <th scope="col" className="py-3 pl-6" key={i}>
-                                                    {name}
-                                                </th>
-                                            ))}
-                                            <th scope="col" className="py-3 px-6">
-                                                Grade
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {solutions.map((sol, i) => (
-                                            <tr
-                                                className={`bg-${
-                                                    i % 2 == 0 ? "white" : "gray-50"
-                                                } border-b dark:bg-gray-${
-                                                    i % 2 == 0 ? 900 : 800
-                                                } dark:border-gray-700`}
-                                                key={i}
-                                            >
-                                                {course?.categories.map((cat, i) => (
-                                                    <td scope="col" className="py-3 pl-6" key={i}>
-                                                        {sol[0][i]} / {optimizeProps[cat.name]}
-                                                    </td>
-                                                ))}
-                                                <td
-                                                    scope="row"
-                                                    className="py-4 pl-6 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                                                >
-                                                    {sol[1].toFixed(2)}%
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {!solutions.length && (
-                                            <tr className="text-red-600 font-bold">
-                                                <td
-                                                    className="text-center align-center py-3"
-                                                    colSpan={course?.categories.length + 1}
-                                                >
-                                                    No Solutions Found!
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                </Modal.Body>
-*/

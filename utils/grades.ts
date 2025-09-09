@@ -1118,9 +1118,11 @@ function abbreviate(category) {
 				//console.log(categories,"calc final type shit")
                 for(let category of categories){
 					if(category.type=="exam"){
-						//idk yet chat. synergy might actually have this tracked/trackable so
-						//yeah...
-
+						//@ts-ignore
+						if(category.grade){ //lazily implementing cuz the fcps ppl haven't complained
+							currPoints+=(category as any).grade.raw*category.weight
+							currWeight+=category.weight
+						}
 					}
 					else{
 						//@ts-ignore
