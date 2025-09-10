@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../styles/globals.css";
 import StudentVue, { Client } from "studentvue";
 import { useRouter } from "next/router";
@@ -42,6 +42,7 @@ function MyApp({ Component, pageProps }) {
     const [ad,setAd]=useState<false | any>(false);
 	const { width } = useWindowSize();
 	const [modalBg,setModalBg] = useState(false)
+	const scrollPos=useRef(0)
 	const isMediumOrLarger = width >= 768;
 
 	const apiUrl="https://studentvuelib.up.railway.app"
@@ -97,6 +98,8 @@ it would probably be a good idea to show the final grade also on the Home Screen
 
 
 */
+
+
 
 
 		await StudentVue.login(url || districtURL, {
@@ -236,6 +239,34 @@ it would probably be a good idea to show the final grade also on the Home Screen
  */
 	  }, []);
  
+
+  useEffect(() => {
+	console.log("am I crazxy")
+    const handleRouteChange = (url: string) => {
+		console.log("sometimes u gotta pop out and show n")
+      console.log("Navigating to:", url);
+      if(url.includes("grades/")&&!isMediumOrLarger){
+		scrollPos.current=window.scrollY;
+
+	  }
+    };
+
+	const handleRouteNavigate = (url:string) => {
+		console.log("what da fuck is goin on here")
+		if(url.includes("grades")&&!url.includes("grades/")&&!isMediumOrLarger){
+			window.scrollTo(0,scrollPos.current)
+		}
+	}
+
+    router.events.on("routeChangeStart", handleRouteChange);
+	router.events.on("routeChangeComplete", handleRouteNavigate);
+    return () => {
+      router.events.off("routeChangeStart", handleRouteChange);
+      router.events.off("routeChangeComplete", handleRouteNavigate);
+    };
+
+
+  }, [router]);
 
  
 
@@ -415,9 +446,9 @@ const logout = async () => {
 								ad={ad}
 								setAd={setAd}
 								width={width}
-																		modalBg={modalBg}
-										setModalBg={setModalBg}
-						 
+								modalBg={modalBg}
+								setModalBg={setModalBg}
+						 		scrollPos={scrollPos}
 
 							/>
 						</AnimateSharedLayout>
@@ -458,7 +489,8 @@ const logout = async () => {
 										setSettingsModal={setSettingsModal}
 										setAd={setAd}
 										width={width}
-																				modalBg={modalBg}
+										scrollPos={scrollPos}
+										modalBg={modalBg}
 										setModalBg={setModalBg}
 							 
 									/>
@@ -495,6 +527,7 @@ const logout = async () => {
 										width={width}
 										modalBg={modalBg}
 										setModalBg={setModalBg}
+										scrollPos={scrollPos}
 	 
 									/>
 								</AnimateSharedLayout>
