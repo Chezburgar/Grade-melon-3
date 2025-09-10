@@ -8,9 +8,9 @@ import {
 	parseGrades,
 	Grades as GradesType,parseDate,findCurrentPeriod,getCache,Cache,calcFinal,
 	initalizeFinals2,
-	ordinalSuffix
-	//calculateGPA,
-	//updateGPA,
+	ordinalSuffix,
+	calculateGPA,
+	updateGPA,
 } from "../../utils/grades";
 import { Modal } from "flowbite-react";
 import { motion } from "framer-motion";
@@ -38,6 +38,8 @@ interface GradesProps {
 	setMarkingPeriod:(p:number)=>void;
 	modalBg:boolean;
 	setModalBg:(b:boolean)=>void;
+	settingsModal:boolean;
+	setSettingsModal:(b:boolean)=>void;
 }
 
 export default function Grades({
@@ -52,7 +54,7 @@ export default function Grades({
 	setTime,
 	timestamp,
 	width,
-	gradesCache,setGradesCache,markingPeriod,setMarkingPeriod,modalBg,setModalBg
+	gradesCache,setGradesCache,markingPeriod,setMarkingPeriod,modalBg,setModalBg,setSettingsModal,settingsModal
 }: GradesProps) {
 	const router = useRouter();
 	const [loading, setLoading] = useState(grades ? false : true);	
@@ -60,7 +62,7 @@ export default function Grades({
 	//const [period, setMP] = useState<number>();
 	const [gpaModal, setGpaModal] = useState(false);
 	const view = (router.query.view as string) || defaultView;
-	const [settingsModal,setSettingsModal]=useState<boolean>(false);
+
 	//@ts-ignore
 	const mcps=client?.district=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"
 	const isMediumOrLarger = width >= 768;
@@ -204,17 +206,23 @@ export default function Grades({
 
 	};
 
-	/*
+	
 	useEffect(() => {
 		if (gpaModal) {
-			setGrades(calculateGPA(grades));
+			//@ts-ignore
+			const clone = structuredClone(grades)
+			clone[mp]=calculateGPA(grades?.[mp])
+			setGrades(clone)
 		}
 	}, [gpaModal]);
 
 	const changeWeights = (e, i: number) => {
-		setGrades(updateGPA(grades, i, e.target.checked));
+		//@ts-ignore
+		const clone = structuredClone(grades)
+		grades[mp]=updateGPA(grades[mp], i, e.target.checked);
+		setGrades(clone)
 	};
-	*/
+	
 
 
 	useEffect(()=>{
@@ -242,19 +250,19 @@ export default function Grades({
 			<Head>
 				<title>Gradebook - Grade Melon</title>
 			</Head>
-			{/*
+			{
 			<Modal show={gpaModal} onClose={() => setGpaModal(false)}>
 				<Modal.Header>GPA Calculator</Modal.Header>
 				<Modal.Body>
 					<p className="dark:text-white font-bold text-xl">
-						GPA: {grades?.gpa.toFixed(2)}
+						GPA: {grades?.[mp]?.gpa.toFixed(2)}
 					</p>
 					<p className="dark:text-white font-bold text-xl pb-5">
-						WGPA: {grades?.wgpa.toFixed(2)}
+						WGPA: {grades?.[mp]?.wgpa.toFixed(2)}
 					</p>
 
 					<p className="dark:text-white font-bold text-xl">Weighted?</p>
-					{grades?.courses.map((course, i) => (
+					{grades?.[mp]?.courses.map((course, i) => (
 						<div className="flex gap-2 items-center pt-2" key={i}>
 							<label className="relative inline-flex items-center cursor-pointer">
 								<input
@@ -282,7 +290,7 @@ export default function Grades({
 					</div>
 				</Modal.Footer>
 			</Modal>
-			*/}
+			}
 
 			
 
@@ -304,7 +312,7 @@ export default function Grades({
 				isMediumOrLarger={isMediumOrLarger}
 			
 			/>
-					<div className="flex gap-2 mb-5">
+					<div style={{}} className="flex gap-2 mb-5">
 						<button
 							type="button"
 							onClick={() => update(mp,true)}
@@ -331,21 +339,22 @@ export default function Grades({
 						<button
 							type="button"
 							onClick={() => setGpaModal(true)}
-							className="hidden bg-primary-500 border border-primary-500 focus:outline-none hover:bg-primary-600 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm p-2.5 dark:bg-primary-600 text-white dark:hover:bg-primary-700 dark:focus:ring-primary-400"
+							style={{alignSelf:"center"}}
+							className="bg-primary-500 border border-primary-500 focus:outline-none max-h-min px-2.5 py-2 hover:bg-primary-600 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg dark:bg-primary-600 text-white dark:hover:bg-primary-700 dark:focus:ring-primary-400"
 						>
 							<TbMathSymbols size={"1.3rem"} />
 						</button>
 
 						
-						<button
+	{!isMediumOrLarger	&& <button
 							onClick={()=>{setSettingsModal(true);setModalBg(true)}}
 
 							>
 							<BsGearWideConnected
-							className="text-2xl md:text-3xl hover:text-gray-400 dark:hover:text-gray-400 dark:text-gray-200 text-gray-600"
-							
+							className="md:text-3xl hover:text-gray-400 dark:hover:text-gray-400 dark:text-gray-200 text-gray-600"
+							size={30}
 							/>
-						</button>
+						</button>}
 					</div>
 					{view === "card" && (
 						<div

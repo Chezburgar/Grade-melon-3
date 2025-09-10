@@ -52,6 +52,8 @@ interface GradesProps {
 	setMarkingPeriod:(p:number)=>void;
 	modalBg:boolean;
 	setModalBg:(b:boolean)=>void;
+	setSettingsModal:(b:boolean)=>void;
+	settingsModal:boolean;
 }
 
 
@@ -83,7 +85,7 @@ export default function Grades({
 	setAd,
 	setTime,
 	timestamp,
-	width,markingPeriod,setMarkingPeriod,modalBg,setModalBg
+	width,markingPeriod,setMarkingPeriod,modalBg,setModalBg,settingsModal,setSettingsModal
 	
 }: GradesProps) {
 	const router = useRouter();
@@ -95,7 +97,6 @@ export default function Grades({
 	const [modalDetails, setModalDetails] = useState(0);
 	const [isEditing, setIsEditing]=useState(false);
 	const [title,setTitle]=useState(undefined);
-	const [showSettingsModal,setShowSettingsModal]=useState(false);
 	const assignmentTitle = useRef(null);
 	const mcps=client?.district=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"
 
@@ -130,23 +131,7 @@ export default function Grades({
 										setLoading(false)
 									})				
 				
-				
-				
-
-
-/*
-				client.gradebook().then(([res,extras]) => {
-					res.gradingScale=extras?.gradingScale
-					console.log(typeof index);
-					let parsedGrades = parseGrades(res);
-
-					//@ts-ignore
-					let realShi=getCache(killMe) //this sucks so much. it would almost be easier to just actually finish the backend. so many fucking tmep layers.
-					setGrades(realShi);
-					setMP(findCurrentPeriod(realShi));
-					setLoading(false);
-				});
-				*/
+		
 			}
 		} catch {
 			if (localStorage.getItem("remember") === "false") {
@@ -410,7 +395,7 @@ export default function Grades({
 
 
 	function toggleSettings(bool){
-		setShowSettingsModal(bool);
+		setSettingsModal(bool);
 		setModalBg(bool)
 	}
 
@@ -496,8 +481,8 @@ export default function Grades({
 				setGrades={setGrades}
 				index={index}
 				createError={createError}
-				showModal={showSettingsModal}
-				setShowModal={(bool)=>{setShowSettingsModal(bool);setModalBg(bool)}}
+				showModal={settingsModal}
+				setShowModal={(bool)=>{setSettingsModal(bool);setModalBg(bool)}}
 				isMediumOrLarger={isMediumOrLarger}	
 			/>
 
@@ -539,12 +524,13 @@ export default function Grades({
 						className="flex flex-wrap justify-between text-xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1"
 					>
 						{course?.name}
-							<BsGearWideConnected
-								className="text-2xl md:text-3xl hover:text-gray-400 dark:hover:text-gray-400 text-gray-600  dark:text-gray-200"
+							{!isMediumOrLarger && <BsGearWideConnected
+								className="hover:text-gray-400 dark:hover:text-gray-400 text-gray-600  dark:text-gray-200"
 								style={{alignSelf:"end"}}
+								size={30}
 								onClick={()=>toggleSettings(true)}
 					
-					/>
+					/>}
 					</motion.h1>
 					<div
 					className=""

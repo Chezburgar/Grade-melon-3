@@ -8,7 +8,7 @@ import {
 } from "react-icons/ai";
 import { FiLogOut } from "react-icons/fi";
 import { IoDocumentTextOutline } from "react-icons/io5";
-import { BsTable } from "react-icons/bs";
+import { BsGear, BsTable } from "react-icons/bs";
 import { TbLayoutGrid } from "react-icons/tb";
 import { BsQuestionLg } from "react-icons/bs";
 import Link from "next/link";
@@ -21,15 +21,16 @@ interface NavProps {
 	setAd:(ad:any)=>void;
 	setTime:(time:number)=>void;
 	timestamp:number;
-
-	
+	settingsModal:boolean;
+	setSettingsModal:(b:boolean)=>void
+	setModalBg:(b:boolean)=>void
 
 }
 
 export default function SideBar({ studentInfo, logout,	ad,
 	setAd,
 	setTime,
-	timestamp
+	timestamp,settingsModal,setSettingsModal,setModalBg
 	 }: NavProps) {
 	const router = useRouter();
 
@@ -98,8 +99,19 @@ export default function SideBar({ studentInfo, logout,	ad,
 							</a>
 						</li>
 					</ul>
-					{router.pathname === "/grades" && (
+					{(router.pathname === "/grades" || router.pathname.includes("/grades") ) && (
 						<ul className="pt-4 mt-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
+							<li>
+								<div
+									onClick={()=>{setSettingsModal(true);setModalBg(true)}}
+									className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+								>
+									<BsGear className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+									<span className="flex-1 ml-3 whitespace-nowrap">Settings</span>
+								</div>
+							</li>
+							{router.pathname==="/grades" && 
+							<React.Fragment>
 							<li>
 								<Link
 									href="?view=card"
@@ -119,6 +131,8 @@ export default function SideBar({ studentInfo, logout,	ad,
 									<span className="ml-3">Table View</span>
 								</Link>
 							</li>
+							</React.Fragment>
+	 						}
 						</ul>
 					)}
 				</div>

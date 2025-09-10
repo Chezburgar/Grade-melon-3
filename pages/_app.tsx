@@ -29,7 +29,7 @@ function MyApp({ Component, pageProps }) {
 		undefined
 	);
 	const [client, setClient] = useState<Awaited<ReturnType<typeof StudentVue.login>>["client"]>(undefined);
-	 
+	const [settingsModal,setSettingsModal]=useState<boolean>(false);
 	const [studentInfo, setStudentInfo] = useState(undefined);
 	const [toasts, setToasts] = useState<Toast[]>([]);
 	const [cacheLoading,setCacheLoading]=useState(true)
@@ -426,9 +426,13 @@ const logout = async () => {
 					{client && isMediumOrLarger && (
 						<div className="pb-16 md:pb-0">
 							<div className="flex overflow-x-auto">
-								<SideBar 										timestamp={timestamp}
+								<SideBar 						
+										timestamp={timestamp}
 										setTime={setTime}
 										ad={ad}
+										settingsModal={settingsModal}
+										setSettingsModal={setSettingsModal}
+										setModalBg={setModalBg}
 										setAd={setAd} studentInfo={studentInfo} logout={logout}/>
 								<AnimateSharedLayout>
 									<Component
@@ -450,6 +454,8 @@ const logout = async () => {
 										timestamp={timestamp}
 										setTime={setTime}
 										ad={ad}
+										settingsModal={settingsModal}
+										setSettingsModal={setSettingsModal}
 										setAd={setAd}
 										width={width}
 																				modalBg={modalBg}
@@ -480,6 +486,8 @@ const logout = async () => {
 										districts={districts}
 										setDistricts={setDistricts}
 										isMediumOrLarger={isMediumOrLarger}
+										settingsModal={settingsModal}
+										setSettingsModal={setSettingsModal}
 										timestamp={timestamp}
 										setTime={setTime}
 										ad={ad}

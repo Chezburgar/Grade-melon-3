@@ -122,8 +122,8 @@ type Cache = Grades[]
 interface Grades {
 	courses: Course[];
 	settings:Settings;
-	//gpa: number;
-	//wgpa: number;
+	gpa: number;
+	wgpa: number;
 	period: {
 		name: string;
 		index: number;
@@ -195,7 +195,7 @@ if(rounding.percent){
 
 }
 	
-
+console.log(gradingScale)
 
 if(!gradingScale){
 	if (grade >= 89.5) {
@@ -242,8 +242,6 @@ const letterGPA = (letterGrade: string, weighted: boolean,double=false): number 
 	else if(letterGrade.includes("C")){gpa+=2;}
 	else if(letterGrade.includes("D")){gpa+=1;}
 	else if(letterGrade.includes("E")||letterGrade.includes("F")){gpa+=0;}
-
-	if(double){gpa*=2;}
 	return(gpa);
 };
 
@@ -620,6 +618,16 @@ return gradesCache
 }
 
 
+
+function specialSettingsThing(settings,course:Gradebook["courses"][number]){
+	const identifier=settings.mode=="manual" ? (ReplaceUnderscores(stripParens(course.title))+course.period+course.staff.name) : course.courseID.substring(0,course.courseID.length-1)
+	const courseSettings=settings[identifier] ? settings[identifier] : structuredClone(settings.default)
+	//this is a dumb hotfix but we ARE not refactoring again. why i let some settings be global and finals not be global and now the default and reset system is fucked to hell. 
+	if(!courseSettings.letterScale||!courseSettings.rounding){courseSettings.rounding=settings.default.rounding;courseSettings.letterScale=settings.default.letterScale}
+	const places=courseSettings.rounding.percent===true ? courseSettings.rounding.percentPlaces : (courseSettings.rounding.percent===false ? false : 2)
+	return courseSettings;		
+}
+
 const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
 	//@ts-ignore
 	const settings:Settings=override ? override : grades.gradingScale;
@@ -638,11 +646,11 @@ const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
 	}
 	let parsedGrades:Grades = {
 		settings:settings,
-	/*	gpa:
+		gpa:
 			grades.courses.reduce(
 				(a, b) =>
 					a +
-					letterGPA(letterGrade(b.marks[0].calculatedScore.raw,gradingScale[b.title+b.period] ? gradingScale[b.title + b.period] : gradingScale.default), false),
+					letterGPA(letterGrade(b.marks[0].calculatedScore.raw,specialSettingsThing(settings,b)), false),
 				0
 			) / grades.courses.length,
 		wgpa:
@@ -650,14 +658,12 @@ const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
 				(a, b) =>
 					a +
 					letterGPA(
-						letterGrade(b.marks[0].calculatedScore.raw,gradingScale[b.title+b.period] ? gradingScale[b.title + b.period] : gradingScale.default),
+						letterGrade(b.marks[0].calculatedScore.raw, specialSettingsThing(settings,b)),
 						isWeighted(b.title)
 					),
 				0
 			) / grades.courses.length,
-	Deprecating until I remake it this is so useless and calculated so naively 
-	
-			*/
+
 
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
 				const identifier=settings.mode=="manual" ? (ReplaceUnderscores(stripParens(title))+period+staff.name) : courseID.substring(0,courseID.length-1)
@@ -977,16 +983,16 @@ const addAssignment = (course: Course): Course => {
 	return course;
 };
 
-/*
+
 const calculateGPA = (grades: Grades): Grades => {
 	grades.gpa =
 		grades.courses.reduce(
-			(a, b) => a + letterGPA(letterGrade(b.grade.raw,b.gradingScale), false),
+			(a, b) => a + letterGPA(letterGrade(b.grade.raw,b.settings), false),
 			0
 		) / grades.courses.length;
 	grades.wgpa =
 		grades.courses.reduce(
-			(a, b) => a + letterGPA(letterGrade(b.grade.raw,b.gradingScale), b.weighted),
+			(a, b) => a + letterGPA(letterGrade(b.grade.raw,b.settings), b.weighted),
 			0
 		) / grades.courses.length;
 
@@ -1000,7 +1006,7 @@ const updateGPA = (grades: Grades, i: number, val: boolean): Grades => {
 	return { ...grades };
 };
 
-*/
+
 
 const delAssignment = (course: Course, assignmentId: number): Course => {
 	course.assignments.splice(assignmentId, 1);
@@ -1497,8 +1503,8 @@ export {
 	calcFinal,
 	toggleSemester,
 	findCurrentPeriod,
-//	calculateGPA,
-//	updateGPA,
+	calculateGPA,
+	updateGPA,
 	abbreviate,
 	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals2
 };
