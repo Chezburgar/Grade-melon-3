@@ -243,8 +243,6 @@ it would probably be a good idea to show the final grade also on the Home Screen
   useEffect(() => {
 	console.log("am I crazxy")
     const handleRouteChange = (url: string) => {
-		console.log("sometimes u gotta pop out and show n")
-      console.log("Navigating to:", url);
       if(url.includes("grades/")&&!isMediumOrLarger){
 		scrollPos.current=window.scrollY;
 
@@ -252,7 +250,6 @@ it would probably be a good idea to show the final grade also on the Home Screen
     };
 
 	const handleRouteNavigate = (url:string) => {
-		console.log("what da fuck is goin on here")
 		if(url.includes("grades")&&!url.includes("grades/")&&!isMediumOrLarger){
 			window.scrollTo(0,scrollPos.current)
 		}
