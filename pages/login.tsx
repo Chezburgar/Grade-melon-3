@@ -51,7 +51,7 @@ export default function Login({
 									}
 
         if(districts[districts.findIndex((d) => d.parentVueUrl === districtURL)
-									].parentVueUrl=="https://sisstudent.fcps.edu/SVUE/Service/PXPCommunication.asmx"){
+									]?.parentVueUrl=="https://sisstudent.fcps.edu/SVUE/Service/PXPCommunication.asmx"){
 								window.location.replace("https://old.grademelon.org");
 
 									}
