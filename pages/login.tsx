@@ -50,8 +50,7 @@ export default function Login({
 								createError("Grademelon is unavailable in Georgia")
 									}
 
-        if(districts[districts.findIndex((d) => d.parentVueUrl === districtURL)
-									]?.parentVueUrl=="https://sisstudent.fcps.edu/SVUE/Service/PXPCommunication.asmx"){
+        if(districtURL=="https://sisstudent.fcps.edu/SVUE"){
 								window.location.replace("https://old.grademelon.org");
 
 									}
