@@ -366,7 +366,7 @@ export default function Grades({
 								if(temp?.[mp]?.courses&&ad&&client.username!="10016976"&&!isMediumOrLarger){ //disalbe for [name redacted] cuz i aint buildin a subscription service rn gang
 									console.log("is my life real?")
 									//@ts-ignore
-									temp.courses.splice(Math.floor(temp.courses.length/2),0,{ name:"ad goes here"})
+									temp?.[mp].courses.splice(Math.floor(temp?.[mp].courses.length/2),0,{ name:"ad goes here"})
 
 								}
 							
@@ -526,8 +526,7 @@ export default function Grades({
 							</table>
 						</div>
 					)}
-					{isMediumOrLarger && <div className="mt-6"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>}
-				</div>
+			</div>
 			)}
 		</motion.div>
 	);

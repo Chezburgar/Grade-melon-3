@@ -39,7 +39,7 @@ function MyApp({ Component, pageProps }) {
 	const [referal,setReferal]=useState(false);
 	const [districts, setDistricts] = useState(allDistricts);
 	const [timestamp,setTime]=useState(0);
-    const [ad,setAd]=useState<false | any>(false);
+    const [ad,setAd]=useState<false | any>(undefined);
 	const { width } = useWindowSize();
 	const [modalBg,setModalBg] = useState(false)
 	const scrollPos=useRef(0)
@@ -227,16 +227,17 @@ it would probably be a good idea to show the final grade also on the Home Screen
 }
 
 	useEffect(() => { //ad fetch
-		/*
+		
 		if(ad==undefined){
 			getAd().then(res=>{
+				console.log("ads fetch")
 				setAd(res.ad);
 			}).catch(error=>console.log(error))
 	
 		}
 
 
- */
+ 
 	  }, []);
  
 

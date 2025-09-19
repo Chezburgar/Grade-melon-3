@@ -137,7 +137,7 @@ export default function SideBar({ studentInfo, logout,	ad,
 					)}
 				</div>
 			</aside>
-			{router.pathname.includes("grades/") &&
+			{router.pathname.includes("grades") &&
 		<div className="mt-4 flex shrink max-w-70 hidden md:block"><CustomAd timestamp={timestamp} setTime={setTime} ad={ad} setAd={setAd}/></div>
 	 }
 		</div>
