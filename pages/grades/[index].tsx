@@ -229,6 +229,7 @@ export default function Grades({
 
 	const del = (id: number) => {
 		let tempCache = structuredClone(grades);
+		const original=structuredClone(tempCache?.[mp].courses[index])
 		let temp = tempCache?.[mp]
 		const assignment=temp.courses[index].assignments[id]
 		temp.courses[index] = delAssignment(
@@ -236,19 +237,21 @@ export default function Grades({
 			id
 		);
 		//this was once simple, but now because of the way we operate accross MP's, we're maintaing parity between interims and standard MP's. or at least we're giving it a shot.
-		var adjustedId;
+		let adjustedId;
+		console.log("is the flag blue",mcps,tempCache[mp+1].courses[index].assignments.length,original.assignments.length,id)
 		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
 				if(assignment.custom){
-			adjustedId=tempCache[mp+1].courses[index].assignments.length-(temp.courses[index].assignments.length-id);
+			adjustedId=tempCache[mp+1].courses[index].assignments.length-(original.assignments.length-id);
 		}else{
 			adjustedId=tempCache[mp+1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
 		}
+		console.log(adjustedId,"anora russia")
 			if(adjustedId==-1){return}
 			tempCache[mp+1].courses[index]=delAssignment(tempCache[mp+1].courses[index],adjustedId)
-
+		console.log("what the fuck is going on",tempCache)
 		}else if(mcps){
 		if(assignment.custom){
-			adjustedId=tempCache[mp-1].courses[index].assignments.length-(temp.courses[index].assignments.length-id);
+			adjustedId=tempCache[mp-1].courses[index].assignments.length-(original.assignments.length-id);
 		}else{
 			adjustedId=tempCache[mp-1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
 		}
@@ -340,7 +343,7 @@ export default function Grades({
 			.gradebook(p)
 						.then(([res,extra]) => {
 							res.gradingScale=extra?.gradingScale
-							console.log(res);
+				
 							const parsed=parseGrades(res,grades[0].settings)
 							const temp=structuredClone(grades)
 							temp[p]=parsed;
@@ -365,7 +368,7 @@ export default function Grades({
 				setLoading(false);
 			});
 		}else{
-			console.log(grades[p],"what about 	astroworld")
+		
 			setMP(p)
 			setLoading(false)
 		}
