@@ -51,7 +51,7 @@ export default function Login({
 									}
 
         if(districtURL=="https://sisstudent.fcps.edu/SVUE"){
-								window.location.replace("https://old.grademelon.org");
+								window.location.assign("https://old.grademelon.org");
 
 									}
 
