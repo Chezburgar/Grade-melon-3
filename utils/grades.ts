@@ -431,6 +431,11 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
 				}
 			}
 
+			if(count==0){
+				//this means it's either old-style settings, or they dropped the class, either way, just return
+				return settings[identifier]
+			}
+
 			if(count<3){ //this is effectively a hard-coded, SEPERATE default for if it's a single-semester
 				//class. we will not be allowing modification to this i guess. in manual we won't even try ig.
 			//	console.log("less than 3")
