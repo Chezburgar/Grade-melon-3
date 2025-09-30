@@ -39,6 +39,7 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [advancedOpen,setAdvancedOpen]=useState(false)
         const [decimalPlaces,setDecimalPlaces]=useState(undefined)
         const [finals,setFinals]=useState<Finals>(course.settings.finals)
+        const [modify,setModify]=useState(false)
         const [kill,setKill]=useState([undefined,undefined])
 
         //new stack based view version
@@ -469,7 +470,7 @@ className="overflow-y-auto"
       {index !=-1 && (
         <div style={{alignItems:"center"}} className="flex gap-2">
         <p className="dark:text-white">Is Semester Course?</p>
-          <input type="checkbox" onChange={()=>setFinals(toggleSemester(settings.default,{...course.settings,finals:finals},grades,course.identifier)["finals"])} checked={finals.isSemester}/>
+          <input type="checkbox" onChange={()=>{setFinals(toggleSemester(settings.default,{...course.settings,finals:finals},grades,course.identifier)["finals"]);setModify(!modify)}} checked={finals.isSemester}/>
       </div>)}
       <motion.button 
       {...animationPropsHome}
@@ -865,7 +866,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         <tr className="dark:bg-slate-700">
           <th style={{textAlign:"center"}} className="py-2 dark:text-white">Type</th>
           <th style={{textAlign:"center"}} className="py-2 dark:text-white">Marking Period</th>
-          {settings.mode=="manual" && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
+          {settings.mode=="manual" ||modify && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
           <th style={{textAlign:"center"}} className="py-2 pr-4 md:pr-0 dark:text-white">Weight</th>
           {isMediumOrLarger && <th style={{textAlign:"center"}} className="py-2 dark:text-white"></th>}
         </tr>
@@ -922,13 +923,13 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           </td>
 
 
-{settings.mode=="manual"  && <td
+{settings.mode=="manual"||modify  && <td
             style={{textAlign:"center"}}
           >
          
             <select value={f.courseIndex} 
        //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
-              className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
+              className={`bg-transparent ${true ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
               onChange={(e)=>{
                 let temp=structuredClone(finals)
                 temp.categories[i].courseIndex=parseInt(e.target.value)
@@ -1000,7 +1001,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
    {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
-        <td colSpan={settings.mode=="manual" ? 3 : 4}>
+        <td colSpan={settings.mode=="manual"||modify ? 3 : 4}>
            <button
                 onClick={() => {deleteFinalCategory(i)}}
                 disabled={finals.isSemester}
@@ -1098,7 +1099,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         <tr className="dark:bg-slate-700">
           <th style={{textAlign:"center"}} className="py-2 dark:text-white">Type</th>
           <th style={{textAlign:"center"}} className="py-2 dark:text-white">Marking Period</th>
-          {settings.mode=="manual" && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
+          {settings.mode=="manual"||modify && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
           <th style={{textAlign:"center"}} className="py-2 pr-4 md:pr-0 dark:text-white">Weight</th>
           {isMediumOrLarger && <th style={{textAlign:"center"}} className="py-2 dark:text-white"></th>}
         </tr>
@@ -1153,13 +1154,13 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           </td>
 
 
-{settings.mode=="manual"  && <td
+{settings.mode=="manual"||modify  && <td
             style={{textAlign:"center"}}
           >
          
             <select value={f.courseIndex}
        //     disabled={settings.mode=="automatic"} why have it at all if we disabling it tbh
-              className={`bg-transparent ${settings.mode!="manual" ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
+              className={`bg-transparent ${true ? "text-gray-500" : "dark:text-white"} border-0 focus:outline-none focus:ring-0`}
               onChange={(e)=>{
                 let temp=structuredClone(finals)
                 temp.semesters[j].categories[i].courseIndex=parseInt(e.target.value)

@@ -671,8 +671,8 @@ const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
 
 
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
+				if(courseID.at(-1)=="X"){courseID=courseID.substring(0,courseID.length-1);console.log("through the wire,",courseID)}
 				let identifier=settings.mode=="manual" ? (ReplaceUnderscores(stripParens(title))+period+staff.name) : courseID.substring(0,courseID.length-1)
-				if(identifier=="SCI2001B"){identifier="SCI2001"}
 				const courseSettings=settings[identifier] ? settings[identifier] : structuredClone(settings.default)
 		//this is a dumb hotfix but we ARE not refactoring again. why i let some settings be global and finals not be global and now the default and reset system is fucked to hell. 
 			if(!courseSettings.letterScale||!courseSettings.rounding){courseSettings.rounding=settings.default.rounding;courseSettings.letterScale=settings.default.letterScale}
