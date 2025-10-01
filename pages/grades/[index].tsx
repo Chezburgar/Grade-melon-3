@@ -179,22 +179,17 @@ export default function Grades({
 	
 		
 		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
-				if(assignment.custom){
-			adjustedId=tempCache[mp+1].courses[index].assignments.length-(temp.courses[index].assignments.length-assignmentId);
-		}else{
 			adjustedId=tempCache[mp+1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
-		}
-			if(adjustedId==-1){return}
+			if(adjustedId!=-1){
 			tempCache[mp+1].courses[index]=updateCourse(tempCache[mp+1].courses[index],adjustedId,update,parseFloat(val))
+			}
 
-		}else if(mcps){
-		if(assignment.custom){
-			adjustedId=tempCache[mp-1].courses[index].assignments.length-(temp.courses[index].assignments.length-assignmentId);
-		}else{
+		}else if(mcps&&Number(tempCache[0].periods[mp-1].date.end)>Date.now()){
 			adjustedId=tempCache[mp-1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
-		}
-		if(adjustedId==-1){return}
+		
+		if(adjustedId!=-1){
 			tempCache[mp-1].courses[index]=updateCourse(tempCache[mp-1].courses[index],adjustedId,update,parseFloat(val))
+		}
 		}
 		setGrades(tempCache);
 		
@@ -218,10 +213,14 @@ export default function Grades({
 		temp.courses[index] = addAssignment(
 			temp.courses[index]
 		);
+
+		const uuid=temp.courses[index].assignments.at(0).GradebookID
+
 		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
-			tempCache[mp+1].courses[index]=addAssignment(tempCache[mp+1].courses[index])
+			tempCache[mp+1].courses[index]=addAssignment(tempCache[mp+1].courses[index],uuid)
 		}else if(mcps){
-			tempCache[mp-1].courses[index]=addAssignment(tempCache[mp-1].courses[index])
+			if(Number(tempCache[0].periods[mp-1].date.end)>Date.now()){
+			tempCache[mp-1].courses[index]=addAssignment(tempCache[mp-1].courses[index],uuid)}
 		}
 		setGrades(tempCache); //yeah that works too I guess. I like structuredClone better though. that way no mutations.
 		
@@ -274,20 +273,16 @@ export default function Grades({
 //sigh
 		var adjustedId;
 		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
-				if(assignment.custom){
-			adjustedId=tempCache[mp+1].courses[index].assignments.length-(temp.courses[index].assignments.length-assignmentId);
-		}else{
+
 			adjustedId=tempCache[mp+1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
-		}
+		
 			if(adjustedId==-1){return}
 			tempCache[mp+1].courses[index]=updateCategory(tempCache[mp+1].courses[index],adjustedId,val)
 
-		}else if(mcps){
-		if(assignment.custom){
-			adjustedId=tempCache[mp-1].courses[index].assignments.length-(temp.courses[index].assignments.length-assignmentId);
-		}else{
+		}else if(mcps&&Number(tempCache[0].periods[mp-1].date.end)>Date.now()){
+
 			adjustedId=tempCache[mp-1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
-		}
+		
 		if(adjustedId==-1){return}
 			tempCache[mp-1].courses[index]=updateCategory(tempCache[mp-1].courses[index],adjustedId,val)
 		}
