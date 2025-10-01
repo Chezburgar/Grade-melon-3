@@ -964,13 +964,13 @@ function calculateGrade(course: Course): Course{
 	return course;
 };
 
-const addAssignment = (course: Course): Course => {
+const addAssignment = (course: Course,uuid=crypto.randomUUID()): Course => {
 	course.assignments.unshift({
 		name: "New Assignment",
 		included:true,
 		notes:"",
 		custom:true,
-		GradebookID:crypto.randomUUID(),
+		GradebookID:uuid,
 		grade: {
 			letter: "N/A",
 			raw: NaN,
