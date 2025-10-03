@@ -219,7 +219,7 @@ export default function Grades({
 	const changeWeights = (e, i: number) => {
 		//@ts-ignore
 		const clone = structuredClone(grades)
-		grades[mp]=updateGPA(grades[mp], i, e.target.checked);
+		clone[mp]=updateGPA(clone[mp], i, e.target.checked);
 		setGrades(clone)
 	};
 	
