@@ -11,12 +11,34 @@ async function inital(params:ConstructorParameters<typeof Client>){
 }
 
 
+interface LongTerm{
+    identifier /*district URL + marking period index*/ : {data:Grades,age:number}
+    district /*district URL*/ : Grades[]
+}
+
+function stupid(client:Client,mp:any,fetchCache:any):Promise<[Gradebook,any]>{
+  const clientIdentifier=client.district+client.username;
+  if(fetchCache[clientIdentifier+mp.index.toString()]){
+    if(Math.abs(fetchCache[clientIdentifier+mp.index.toString()].age-Date.now())<1000*60*60*24*3){
+    return new Promise((res,rej)=>res(fetchCache[clientIdentifier+mp.index.toString()].data))
+    }
+  }
+
+    try{
+      return new Promise((res,rej)=>client.gradebook(mp.index).then(grades=>{fetchCache[clientIdentifier+mp.index]={data:grades,age:Date.now()};res(grades)}).catch(error=>rej(error)))
+    }catch(error){console.log(error,"dexter morgan");
+      return new Promise((res,rej)=>client.gradebook(mp.index).then(grades=>{fetchCache[clientIdentifier+mp.index]={data:grades,age:Date.now()};res(grades)}).catch(error=>rej(error)))
+    }
+  
+}
+
+
 
 
 export async function getGradebooks(client:Awaited<ReturnType<typeof StudentVue.login>>["client"],lock,setLock):Promise<Gradebook[]>{
 
-    const periods=localStorage.getItem("mps");
-    if(!periods){
+    const fetchCache=JSON.parse(localStorage.getItem("fetchCache") ?? "{}");
+  
         //cacheLoading
         const result=await client.gradebook();
         //setLock(true); if we did a lazy loading implementation
@@ -26,23 +48,20 @@ export async function getGradebooks(client:Awaited<ReturnType<typeof StudentVue.
 			index: index,
 		}))
 
-        localStorage.setItem("mps",JSON.stringify(periods))
-        const remainder=await Promise.all(periods.map(mp=>client.gradebook(mp.index)))
+        
+            const remainder:typeof result[]=await Promise.all(periods.map(mp=>{if(result[0].reportingPeriod.current.index==mp.index){return new Promise<typeof result>((res,rej)=>{res(result)})}else{return stupid(client,mp,fetchCache)}}))
         for(let extra of remainder.map(res=>res[1])){
             result[1]={...result[1],...extra}
         }
         const final=[result[0],...remainder.map(resp=>resp[0])]
         final[0].gradingScale=result[1].gradingScale //this is all dumb shi but I don't wanna do a refactor rn
         const extraData=result[1];
+        localStorage.setItem("fetchCache",JSON.stringify(fetchCache))
         return final
     }
-    else{
-        const mps=JSON.parse(periods);
-        const result=await Promise.all(mps.map(mp=>client.gradebook(mp.index)))
-        return result
-    }
 
-}
+
+
 
 
 
