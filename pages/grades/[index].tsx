@@ -239,23 +239,18 @@ export default function Grades({
 		let adjustedId;
 		console.log("is the flag blue",mcps,tempCache[mp+1].courses[index].assignments.length,original.assignments.length,id)
 		if(tempCache[mp].period.name.toLowerCase().includes("interim")&&mcps){
-				if(assignment.custom){
-			adjustedId=tempCache[mp+1].courses[index].assignments.length-(original.assignments.length-id);
-		}else{
 			adjustedId=tempCache[mp+1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
-		}
 		console.log(adjustedId,"anora russia")
-			if(adjustedId==-1){return}
+			if(adjustedId!=-1){ //so if it's an assignment that ain't there in the future, ignore?
 			tempCache[mp+1].courses[index]=delAssignment(tempCache[mp+1].courses[index],adjustedId)
+			}
 		console.log("what the fuck is going on",tempCache)
 		}else if(mcps){
-		if(assignment.custom){
-			adjustedId=tempCache[mp-1].courses[index].assignments.length-(original.assignments.length-id);
-		}else{
 			adjustedId=tempCache[mp-1].courses[index].assignments.findIndex(ass=>ass.GradebookID==assignment.GradebookID)
-		}
-		if(adjustedId==-1){return}
+
+		if(adjustedId=!-1){
 			tempCache[mp-1].courses[index]=delAssignment(tempCache[mp-1].courses[index],adjustedId)
+		}
 		}
 		setGrades(tempCache);
 		

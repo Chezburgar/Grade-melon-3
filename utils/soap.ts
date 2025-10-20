@@ -13,10 +13,23 @@ async function inital(params:ConstructorParameters<typeof Client>){
 
 
 
-export async function getGradebooks(client:Awaited<ReturnType<typeof StudentVue.login>>["client"],lock,setLock):Promise<Gradebook[]>{
 
-    const periods=localStorage.getItem("mps");
-    if(!periods){
+
+function stupid(client:Client,mp:any):Promise<[Gradebook,any]>{
+  const clientIdentifier=client.district+client.username;
+    try{
+      return new Promise((res,rej)=>client.gradebook(mp.index,null,false).then(grades=>{res(grades)}).catch(error=>rej(error)))
+    }catch(error){console.log(error,"dexter morgan");
+      return new Promise((res,rej)=>client.gradebook(mp.index,null,false).then(grades=>{res(grades)}).catch(error=>rej(error)))
+    }
+  
+}
+
+
+
+
+export async function getGradebooks(client:Awaited<ReturnType<typeof StudentVue.login>>["client"],lock,setLock):Promise<Gradebook[]>{
+  
         //cacheLoading
         const result=await client.gradebook();
         //setLock(true); if we did a lazy loading implementation
@@ -26,8 +39,8 @@ export async function getGradebooks(client:Awaited<ReturnType<typeof StudentVue.
 			index: index,
 		}))
 
-        localStorage.setItem("mps",JSON.stringify(periods))
-        const remainder=await Promise.all(periods.map(mp=>client.gradebook(mp.index)))
+        
+            const remainder:typeof result[]=await Promise.all(periods.map(mp=>{if(result[0].reportingPeriod.current.index==mp.index){return new Promise<typeof result>((res,rej)=>{res(result)})}else{return stupid(client,mp)}}))
         for(let extra of remainder.map(res=>res[1])){
             result[1]={...result[1],...extra}
         }
@@ -36,13 +49,9 @@ export async function getGradebooks(client:Awaited<ReturnType<typeof StudentVue.
         const extraData=result[1];
         return final
     }
-    else{
-        const mps=JSON.parse(periods);
-        const result=await Promise.all(mps.map(mp=>client.gradebook(mp.index)))
-        return result
-    }
 
-}
+
+
 
 
 

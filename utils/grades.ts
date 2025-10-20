@@ -1,5 +1,5 @@
 import { Gradebook } from "studentvue";
-import Grades from "../pages/grades";
+
 
 interface Assignment {
 	name: string;
@@ -46,7 +46,7 @@ interface Category{
 
 interface CourseSettings{
 	rounding:{percent:boolean,percentPlaces:number,mark:boolean,markPlaces:number},letterScale:
-	[string,[number,number],string?][],finals?:Finals,categories?:Course["categories"],assignments:MetaAssignments[] // categories is to be implemented
+	[string,[number,number],string?][],finals?:Finals,categories?:Course["categories"]
 }
 
 
