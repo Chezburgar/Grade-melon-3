@@ -242,9 +242,9 @@ export default function Grades({
 	return cat1.mp==cat2.mp
 	}
 
-	const hasFinals = grades[mp]?.courses.some((course)=>course.settings.finals.show)
+	const hasFinals = grades?.[mp]?.courses.some((course)=>course.settings.finals.show)
 
-	const hasSemester = grades[mp]?.courses.some(({settings})=>{
+	const hasSemester = grades?.[mp]?.courses.some(({settings})=>{
 	if(!settings?.finals?.isSemester){
 	const semesters=settings?.finals?.semesters
 	const semCats=semesters.map(semester=>semester.categories)
