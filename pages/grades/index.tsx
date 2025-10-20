@@ -242,7 +242,16 @@ export default function Grades({
 	return cat1.mp==cat2.mp
 	}
 
+	const hasFinals = grades[mp].courses.some((course)=>course.settings.finals.show)
 
+	const hasSemester = grades[mp].courses.some(({settings})=>{
+	if(!settings?.finals?.isSemester){
+	const semesters=settings?.finals?.semesters
+	const semCats=semesters.map(semester=>semester.categories)
+	var indexX=semCats.findIndex(categories=>categories.some(category=>interimWiseComparison(category,{mp:mp})))
+	return indexX!=-1}
+											
+	})
 	return (
 		<motion.div 
 		style={settingsModal ? {overflowY:"hidden",maxHeight:500} : {}}
@@ -486,11 +495,42 @@ export default function Grades({
 										<th scope="col" className="py-3 px-6">
 											Grade
 										</th>
+										{
+										hasFinals && <th scope="col" className="py-3 px-6">
+												Final		
+											</th>
+										}
+										{ 
+										hasSemester &&	<th scope="col" className="py-3 px-6">
+												Semester		
+											</th>
+										}
 									</tr>
 								</thead>
 								<tbody>
 									{grades?.[mp]?.courses.map(
-										({ name, period, grade, teacher }, i) => (
+										({ name, period, grade, teacher,settings }, i) => {
+											var semesterGrade
+											if(!settings?.finals?.isSemester){
+											var finalGrade=settings?.finals?.show ? calcFinal(settings.finals.categories,grades) : undefined
+											const semesters=settings?.finals?.semesters
+											const semCats=semesters.map(semester=>semester.categories)
+											var indexX=semCats.findIndex(categories=>categories.some(category=>interimWiseComparison(category,{mp:mp})))
+											semesterGrade=indexX!=-1 ? (settings?.finals?.semesters[indexX].show||true ? (calcFinal(settings?.finals?.semesters[indexX].categories,grades)) : undefined):undefined
+											
+										}else{
+											finalGrade=undefined
+											indexX=settings.finals.semesters.findIndex(semester=>semester!=undefined)
+											const semester=settings?.finals?.semesters[indexX]     
+											const isNow=semester.categories.some(category=>interimWiseComparison(category,{mp:mp}))
+											semesterGrade=isNow ? calcFinal(semester.categories,grades) : undefined
+									
+											}
+
+
+											
+											
+											return (
 											<tr
 												className={`bg-${
 													i % 2 == 0 ? "white" : "gray-50"
@@ -519,8 +559,28 @@ export default function Grades({
 														{!isNaN(grade.raw) && ` (${grade.raw}%)`}
 													</span>
 												</td>
+												{hasFinals &&
+													<td className="py-4 px-6">
+														{finalGrade ? <span 
+														style={{color:finalGrade.color.includes("#") && finalGrade.color}}
+														className={`font-bold text-${finalGrade.color}-400`}>
+															{finalGrade.letter}
+															{!isNaN(finalGrade.raw) && ` (${finalGrade.raw}%)`}
+														</span> : <p>N/A</p>}
+													</td>
+												}
+												{hasSemester &&
+													<td className="py-4 px-6">
+														{semesterGrade ? <span 
+														style={{color:semesterGrade.color.includes("#") && semesterGrade.color}}
+														className={`font-bold text-${semesterGrade.color}-400`}>
+															{semesterGrade.letter}
+															{!isNaN(semesterGrade.raw) && ` (${semesterGrade.raw}%)`}
+														</span> : <p>N/A</p>}
+													</td>
+												}
 											</tr>
-										)
+										)}
 									)}
 								</tbody>
 							</table>
