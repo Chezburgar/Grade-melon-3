@@ -485,7 +485,7 @@ className="overflow-y-auto"
 
       </motion.button>
 
-     <motion.button
+{false &&     <motion.button
       {...animationPropsHome} 
       key="finals"
       onClick={()=>{setViewStack(["finals"])}}
@@ -497,7 +497,7 @@ className="overflow-y-auto"
           <HiArrowCircleRight/>
         </div>
 
-      </motion.button>
+      </motion.button>}
 
    <motion.button
       {...animationPropsHome} 

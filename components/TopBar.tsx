@@ -38,7 +38,9 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 	const fadeTime=20000
 
 	useEffect(() => {
-		if (!window.matchMedia("(display-mode: standalone)").matches) {
+	const ua = window.navigator.userAgent || "";
+	const isChromebook = /\bCrOS\b/i.test(ua);
+		if (!window.matchMedia("(display-mode: standalone)").matches&&!isChromebook) {
 			if (localStorage.getItem("advertisePWA") === null&&(Number(localStorage.getItem('pwaCount'))<10||localStorage.getItem('pwaCount')==null)) {
 				setAdvertisePWA(true);
 				if(localStorage.getItem('pwaCount')==null){localStorage.setItem('pwaCount','0')}
@@ -52,9 +54,11 @@ export default function TopBar({ studentInfo, logout, client }: TopBarProps) {
 	}, []);
 
 	useEffect(() => {
+	const ua = window.navigator.userAgent || "";
+	const isChromebook = /\bCrOS\b/i.test(ua);
 		let m=localStorage.getItem("advertiseDiscord")
 		let n=localStorage.getItem("disCount");
-			if (m=== null&&(Number(n)<10||n==null)) {
+			if ((m=== null&&(Number(n)<10||n==null))&&!isChromebook) {
 				setAdvertiseDiscord(true);
 				if(n==null){localStorage.setItem('disCount','0')}
 				else{

@@ -10,11 +10,12 @@ import CustomAd from "../components/customAd";
 import { Grades,parseGrades,findCurrentPeriod,getCache} from "../utils/grades";
 import Head from "next/head";
 import { HiX } from "react-icons/hi";
-import { AnimateSharedLayout } from "framer-motion";
+import { AnimateSharedLayout,MotionConfig } from "framer-motion";
 import Cookies from "js-cookie";
 import useWindowSize from '../hooks/useWindowSize';
 import { Analytics } from "@vercel/analytics/react";
 import allDistricts from "../lib/districts";
+import { springConfig,reducedMotionConfig } from "../utils/motionConfig";
 
 interface Toast {
 	title: string;
@@ -422,6 +423,7 @@ const logout = async () => {
 				<Topbar studentInfo={studentInfo} logout={logout} client={client} />
 				<div>
 					{!client && (
+					<MotionConfig transition={springConfig}>
 						<AnimateSharedLayout>
 							<Component
 								{...pageProps}
@@ -450,6 +452,7 @@ const logout = async () => {
 
 							/>
 						</AnimateSharedLayout>
+					</MotionConfig>
 					)}
 
 					{client && isMediumOrLarger && (
@@ -463,6 +466,7 @@ const logout = async () => {
 										setSettingsModal={setSettingsModal}
 										setModalBg={setModalBg}
 										setAd={setAd} studentInfo={studentInfo} logout={logout}/>
+								<MotionConfig transition={springConfig}>
 								<AnimateSharedLayout>
 									<Component
 										{...pageProps}
@@ -493,12 +497,14 @@ const logout = async () => {
 							 
 									/>
 								</AnimateSharedLayout>
+								</MotionConfig>
 							</div>
 						</div>
 					)}
 					{client && !isMediumOrLarger && (
 						<div className="pb-16 md:pb-0">
 							<div className="md:hidden">
+								<MotionConfig transition={reducedMotionConfig}>
 								<AnimateSharedLayout>
 									<Component
 										{...pageProps}
@@ -529,6 +535,7 @@ const logout = async () => {
 	 
 									/>
 								</AnimateSharedLayout>
+								</MotionConfig>
 								<div className="px-4 fixed bottom-5 w-full">
 									<MobileBar />
 								</div>
