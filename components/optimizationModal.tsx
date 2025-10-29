@@ -53,6 +53,9 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     const [kill,setKill]=useState(undefined)
     const [virtual,setVirtual]=useState(structuredClone(course))
     console.log("GOD I AM SO FUCKING TIRED OF THIS FUCKING SHIT",cacheCopy[mp].courses[index].settings.finals.semesters[0].categories[0].weight,cache[mp].courses[index].settings.finals.semesters[0].categories[0].weight)
+    const currentSemesterIndex=course.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>category.courseIndex==index&&category.mp==mp))
+     
+
 
     function reset(){
         setOptimizeProps({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined})
@@ -88,10 +91,19 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     //so this won't ever for mcps users then actually fucking matter or make a difference. whatever.
     const all=(course?.settings.finals.show ? course?.settings.finals.categories : []).concat(course?.settings.finals.semesters.map((semester)=>semester?.show ? semester.categories : []).flat())
     
-    //not actually using this for the weights, but it will return the unique marking periods. so. swag.
-    const uniqueCats=simplifyWeights(all)   
+    
+            //this is so so so so dumb
+    function wasIncluded(cat){
+   return course.settings.finals.semesters[currentSemesterIndex].categories.some(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&category.type==cat.type)
+    }
+
 
     
+    
+    //not actually using this for the weights, but it will return the unique marking periods. so. swag.
+    const uniqueCats=simplifyWeights(all).filter(cat=>wasIncluded(cat))
+
+
 
     function optimize(){
 		let tempProps = {};
@@ -206,6 +218,9 @@ TODO:
     }
 
 
+
+
+
     function implementSolutionVirtual(solutionVector){
         const temp=structuredClone(cacheCopy)
         for(let [i,cat] of uniqueCats.entries()){
@@ -216,9 +231,10 @@ TODO:
             if(!Number.isNaN(cat.courseIndex)){
                 const existing=cacheCopy[cat.mp].courses[cat.courseIndex].grade
                 //@ts-ignore
-                if(Number.isNaN(existing.raw)||existing.custom){
-                temp[cat.mp].courses[cat.courseIndex].grade=newGrade}
-                }else{
+                if((Number.isNaN(existing.raw)||existing.custom)){
+                temp[cat.mp].courses[cat.courseIndex].grade=newGrade
+                }
+            }else{
 
                     //virtual course
                     temp[cat.mp].courses[99+i]={grade:newGrade,name:"",period:NaN,courseID:course.courseID,layoutID:NaN,room:"",weighted:course.weighted,identifier:course.identifier,settings:course.settings,teacher:{name:"",email:""},categories:course.categories,assignments:[]}
@@ -302,7 +318,7 @@ TODO:
             disabled={viewStack.at(-1) === "finals"}
         >
             <div className="flex items-center">
-            <p>Finals</p>
+            <p>Semester</p>
             </div>
         </button>
         </div>
@@ -585,7 +601,7 @@ TODO:
                     </div>}
 
                     {semesterGrades.map((grade,i)=>{
-                        if(grade==undefined){return null}
+                        if(grade==undefined||i!=currentSemesterIndex){return null}
                         return(
                     <React.Fragment key={i}>
                       { <div className="mt-5 w-full bg-gray-300 rounded-full dark:bg-gray-800">
@@ -629,7 +645,7 @@ TODO:
 
                     {semesterGrades.map((grade,i)=>{
                         const monicker="desiredGrade"+ordinalSuffix(i+1)
-                        if(grade==undefined){return null}
+                        if(grade==undefined||i!=currentSemesterIndex){return null}
                         return(
                                   <div
                     className="mt-4 w-full mb-1" key={i}
