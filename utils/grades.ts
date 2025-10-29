@@ -328,6 +328,7 @@ const parseAssignmentName = (name: string): string => {
 
 
 function simplifyWeights(categories:Category[]){
+	categories=structuredClone(categories)
 	const seen=[]
 	const real=[]
 	for(let category of categories){
@@ -533,7 +534,7 @@ function templateFinals(mode,periods):Finals{
 			let weight=1/mps.length
 			let categories:Category[]=mps.map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))
 			
-			return {show:true,categories:categories,isSemester:undefined,semesters:[{show:false,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))},{show:false,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))}]}
+			return {show:false,categories:categories,isSemester:undefined,semesters:[{show:true,categories:mps.slice(0,mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))},{show:true,categories:mps.slice(mps.length/2).map(mp=>({mp:mp,courseIndex:NaN,weight:weight*2,type:"course"}))}]}
 		}
 
 	else{

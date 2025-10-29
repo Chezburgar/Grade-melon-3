@@ -47,12 +47,12 @@ const animationPropsPage=animationPropsHome //for now
 export default function OptimizationModal({showModal,setShowModal,mp,index,cache,createError,isMediumOrLarger}:ModalProps){
     const [cacheCopy,setCacheCopy] = useState(structuredClone(cache));
     const course=cacheCopy[mp].courses[index]
-    const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:!course?.settings.finals.isSemester && false ? course.settings.letterScale[0][1][0] : undefined});
+    const [optimizeProps, setOptimizeProps] = useState<OptimizeProps>({desiredGrade:undefined});
     const [solutions, setSolutions] = useState<[number[], number][]>([]);   
     const [viewStack,setViewStack] = useState(["finals"])
     const [kill,setKill]=useState(undefined)
     const [virtual,setVirtual]=useState(structuredClone(course))
-    
+    console.log("GOD I AM SO FUCKING TIRED OF THIS FUCKING SHIT",cacheCopy[mp].courses[index].settings.finals.semesters[0].categories[0].weight,cache[mp].courses[index].settings.finals.semesters[0].categories[0].weight)
 
     function reset(){
         setOptimizeProps({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined})
@@ -63,6 +63,8 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     
     useEffect(()=>{
         setCacheCopy(structuredClone(cache))
+        console.log("luke roddy",cacheCopy[mp].courses[index].settings.finals.semesters[0].categories[0].weight,cache[mp].courses[index].settings.finals.semesters[0].categories[0].weight)
+
     },[cache])
 
 //what should this even do if finals is disabled chat lmoa
@@ -177,6 +179,7 @@ TODO:
                         row[i]=0
                         
                     }else{
+                        console.log("dash poe rock",semester.categories[catIndex].weight,semester)
                     row[i]=semester.categories[catIndex].weight}
 
                 }
@@ -570,7 +573,7 @@ TODO:
                 </div>
 
                 <div className="mx-4 flex justify-center items-center flex-col">
-               {((course?.settings.finals.show||true) && finalGrade && !course?.settings.finals.isSemester) && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+               {((course?.settings.finals.show&&false) && finalGrade && !course?.settings.finals.isSemester) && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
                         <div
                             className={ `bg-${finalGrade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
                             style={{
@@ -599,7 +602,7 @@ TODO:
                     </React.Fragment>
                     )})}
 
-                    {!course?.settings.finals.isSemester && <div
+                    {!course?.settings.finals.isSemester && false && <div
                     className="mt-4 w-full mb-1"
                     >
                         <label

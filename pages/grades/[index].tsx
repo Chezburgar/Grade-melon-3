@@ -100,6 +100,8 @@ export default function Grades({
 	const assignmentTitle = useRef(null);
 	const mcps=client?.district=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"
 
+	console.log(course,"joshua")
+
 	useEffect(()=>{
 		console.log("FUCK CHRIST",optimizationModal)
 	},[optimizationModal])
