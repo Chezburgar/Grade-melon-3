@@ -50,7 +50,8 @@ export default function Login({
 								createError("Grademelon is unavailable in Georgia")
 									}
 
-        if(districtURL!="https://md-mcps-psv.edupoint.com"){
+        if(districtURL!="https://md-mcps-psv.edupoint.com"&&districtURL!=undefined){
+								console.log("kill me bro",districtURL)
 								window.location.assign("https://old.grademelon.org");
 
 									}

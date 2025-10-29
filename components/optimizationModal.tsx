@@ -66,7 +66,6 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     
     useEffect(()=>{
         setCacheCopy(structuredClone(cache))
-        console.log("luke roddy",cacheCopy[mp].courses[index].settings.finals.semesters[0].categories[0].weight,cache[mp].courses[index].settings.finals.semesters[0].categories[0].weight)
 
     },[cache])
 
@@ -191,8 +190,7 @@ TODO:
                         row[i]=0
                         
                     }else{
-                        console.log("dash poe rock",semester.categories[catIndex].weight,semester)
-                    row[i]=semester.categories[catIndex].weight}
+                      row[i]=semester.categories[catIndex].weight}
 
                 }
             }
