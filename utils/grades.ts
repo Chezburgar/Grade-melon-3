@@ -1517,4 +1517,4 @@ export {
 	abbreviate,
 	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals2
 };
-export type { SchoolsListType,Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings,Finals,SolveSystemParams};
+export type { Category, SchoolsListType,Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings,Finals,SolveSystemParams};
