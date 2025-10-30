@@ -329,7 +329,7 @@ fetch(apiUrl + "/logLogin", {
 			}
 
 
-
+//vercel test
 			client.ChildList().then(([info])=>{
 				console.log("im so so so tired")
 				setStudentInfo(info)
