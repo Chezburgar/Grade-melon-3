@@ -265,6 +265,7 @@ export default function Grades({
 		const school=schoolsList[index]
 		const listCopy=structuredClone(schoolsList)
 		listCopy[schoolIndex].cache=structuredClone(grades)
+		listCopy[schoolIndex].mp=mp
 		setSchoolsList(listCopy)
 		setGrades(school.cache)
 		setMP(school.mp)

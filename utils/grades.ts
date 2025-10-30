@@ -23,6 +23,12 @@ interface Assignment {
 	GradebookID:string;
 }
 
+interface SchoolsListType{
+		mp:number,
+		cache:Grades[],
+		name?:string
+		gu:string|null
+	}
 
 
 interface Finals{
@@ -1511,4 +1517,4 @@ export {
 	abbreviate,
 	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals2
 };
-export type { Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings,Finals,SolveSystemParams};
+export type { SchoolsListType,Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings,Finals,SolveSystemParams};
