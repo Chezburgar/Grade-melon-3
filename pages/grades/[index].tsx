@@ -13,7 +13,8 @@ import {
 	genTable,
 	abbreviate,
 	letterGradeColor,letterGrade,Cache,
-	findCurrentPeriod
+	findCurrentPeriod,
+	SchoolsListType
 } from "../../utils/grades";
 import GradeField from "../../components/GradeField";
 import CategoryField from "../../components/CategoryField";
@@ -54,6 +55,8 @@ interface GradesProps {
 	setModalBg:(b:boolean)=>void;
 	setSettingsModal:(b:boolean)=>void;
 	settingsModal:boolean;
+	schoolsList:SchoolsListType[]
+	schoolIndex:number
 }
 
 
@@ -85,7 +88,7 @@ export default function Grades({
 	setAd,
 	setTime,
 	timestamp,
-	width,markingPeriod,setMarkingPeriod,modalBg,setModalBg,settingsModal,setSettingsModal
+	width,markingPeriod,setMarkingPeriod,modalBg,setModalBg,settingsModal,setSettingsModal,schoolsList,schoolIndex
 	
 }: GradesProps) {
 	const router = useRouter();
@@ -306,7 +309,7 @@ export default function Grades({
 		if(grades[p].periods[p].name.toLowerCase().includes("interim")&&mcps){
 			var second;
 			var secondIndex;
-			client.gradebook(p+1).then(([res,extra])=>{
+			client.gradebook(p+1,schoolsList ? schoolsList[schoolIndex].gu : null).then(([res,extra])=>{
 				res.gradingScale=extra?.gradingScale
 				const parsed=parseGrades(res,grades[0].settings)
 				second=parsed;
@@ -318,7 +321,7 @@ export default function Grades({
 			});
 			
 		}else{
-			client.gradebook(p-1).then(([res,extra])=>{
+			client.gradebook(p-1,schoolsList ? schoolsList[schoolIndex].gu : null).then(([res,extra])=>{
 				res.gradingScale=extra?.gradingScale
 				const parsed=parseGrades(res,grades[0].settings)
 				second=parsed;

@@ -21,7 +21,6 @@ interface props{
   finals?:any;
   setFinals?:any;
   isMediumOrLarger:boolean;
-
 }
 
 

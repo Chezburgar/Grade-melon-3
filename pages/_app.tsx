@@ -16,6 +16,7 @@ import useWindowSize from '../hooks/useWindowSize';
 import { Analytics } from "@vercel/analytics/react";
 import allDistricts from "../lib/districts";
 import { springConfig,reducedMotionConfig } from "../utils/motionConfig";
+import { SchoolsListType } from "../utils/grades";
 
 interface Toast {
 	title: string;
@@ -23,11 +24,6 @@ interface Toast {
 }
 
 
-interface SchoolsListType{
-		mp:number,
-		cache:Grades[],
-		name?:string
-	}
 
 const noShowNav = ["/login", "/", "/privacy", "/letter","/faq"];
 
@@ -265,14 +261,14 @@ async function buildConcurrentCache(gu):Promise<SchoolsListType>{
 	remainder[0][0].gradingScale=gradingScale
 	const builtCache=getCache(remainder.map(remain=>remain[0]))
 	const builtMp=findCurrentPeriod(builtCache)
-	return {mp:builtMp,cache:builtCache}
+	return {mp:builtMp,cache:builtCache,gu:gu}
 }
 
 
 useEffect(()=>{
 	if(studentInfo?.schools?.length>0&&grades&&!schoolsList){
 		const schoolsData=Promise.all(studentInfo.schools.map(async(school)=>({...await buildConcurrentCache(school.GU),name:school.name})))
-		schoolsData.then(data=>setSchoolsList([{name:studentInfo.currentSchool,cache:grades,mp:mp},...data]))
+		schoolsData.then(data=>setSchoolsList([{name:studentInfo.currentSchool,cache:grades,mp:mp,gu:null},...data]))
 	}
 
 },[studentInfo,grades,schoolsList])
@@ -393,11 +389,14 @@ const logout = async () => {
 	await Cookies.remove("password");
 	localStorage.removeItem("mps")
 	await router.push("/login");
-	 setClient(undefined);
-	 setGrades(undefined);
+	
+	setSchoolsList(undefined)
+	setSchoolIndex(0)
+	setClient(undefined);
+	setGrades(undefined);
 	
 	
-	setStudentInfo(undefined);
+	 setStudentInfo(undefined);
 	
 	if(localStorage.getItem("remember")=="false"){Cookies.remove("username")}
 	//Cookies.remove("districtURL");
