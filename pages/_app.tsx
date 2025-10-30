@@ -306,7 +306,7 @@ useEffect(()=>{
 
 	useEffect(()=>{ //Hook responsible for fetching studentInfo
 		if(client!==undefined&&studentInfo==undefined){
-			if(localStorage.getItem("infoCache")!=undefined&&false){ //temporarily disabling infoCache
+			if(localStorage.getItem("infoCache")!=undefined){ //temporarily re-enabling infoCache
 				const cache=JSON.parse(localStorage.getItem("infoCache"));
 				if(cache.user==client.username){
 					setStudentInfo(cache.info);
