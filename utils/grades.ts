@@ -555,7 +555,7 @@ function getCache(books:Gradebook[]):Cache{
 
 	//this is for setting the default entry for finals obj. eventually, this should be moved to the 
 	//backend. but for now, since it changes so often in dev, we process it here.
-	if(settings.mode==undefined){settings.mode="automatic"}
+	if(settings.mode==undefined){settings.mode="other"}
 
 	const periods=books[0].reportingPeriod.available.map(({ name, index, date }) => ({
 			name:name,
@@ -598,7 +598,7 @@ function getCache(books:Gradebook[]):Cache{
 	for(let grades of gradesCache){
 		grades.settings=settings
 		for(let course of grades.courses as Course[]){
-			const id = settings.mode=="automatic" ? course.identifier : Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(course.identifier))]
+			const id = settings.mode=="mcps" ? course.identifier : Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(course.identifier))]
 			if(settings[id]==undefined){
 				course.settings=initalizeFinals2(gradesCache,settings,course.identifier)
 				//this one is finna be special cause categories is unique in that it won't have a global

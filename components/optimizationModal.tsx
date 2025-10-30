@@ -316,7 +316,7 @@ TODO:
             disabled={viewStack.at(-1) === "finals"}
         >
             <div className="flex items-center">
-            <p>Semester</p>
+            <p>{course?.settings.finals?.show ? "Finals" : "Semester"}</p>
             </div>
         </button>
         </div>
@@ -587,7 +587,7 @@ TODO:
                 </div>
 
                 <div className="mx-4 flex justify-center items-center flex-col">
-               {((course?.settings.finals.show&&false) && finalGrade && !course?.settings.finals.isSemester) && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
+               {((course?.settings.finals.show) && finalGrade && !course?.settings.finals.isSemester) && <div className="mt-7 w-full bg-gray-300 rounded-full dark:bg-gray-800">
                         <div
                             className={ `bg-${finalGrade.color}-400 text-xs md:text-sm font-semibold text-left pl-2 p-0.5 leading-none rounded-full h-6`}
                             style={{
@@ -616,7 +616,7 @@ TODO:
                     </React.Fragment>
                     )})}
 
-                    {!course?.settings.finals.isSemester && false && <div
+                    {course?.settings.finals.show  && <div
                     className="mt-4 w-full mb-1"
                     >
                         <label

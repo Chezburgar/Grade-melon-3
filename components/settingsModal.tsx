@@ -40,7 +40,7 @@ export default function SettingsModal({client,index,showModal,setShowModal,grade
         const [finals,setFinals]=useState<Finals>(course.settings.finals)
         const [modify,setModify]=useState(false)
         const [kill,setKill]=useState([undefined,undefined])
-
+        const mcps=client?.district=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"
         //new stack based view version
         const [viewStack,setViewStack] = useState(["home"])
         const currentView=viewStack.at(-1)
@@ -484,7 +484,7 @@ className="overflow-y-auto"
 
       </motion.button>
 
-{false &&     <motion.button
+{!mcps &&     <motion.button
       {...animationPropsHome} 
       key="finals"
       onClick={()=>{setViewStack(["finals"])}}
@@ -498,7 +498,7 @@ className="overflow-y-auto"
 
       </motion.button>}
 
-   <motion.button
+{mcps &&   <motion.button
       {...animationPropsHome} 
       key="semester"
       style={{borderWidth:1}}
@@ -509,7 +509,7 @@ className="overflow-y-auto"
           <HiArrowCircleRight/>
       </div>
 
-    </motion.button>
+    </motion.button>}
 
 {/*
     <motion.button
