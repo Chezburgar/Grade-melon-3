@@ -254,7 +254,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 											} border-b dark:bg-gray-${
 												schedule.today.main.length % 2 == 0 ? 900 : 800
 											} dark:border-gray-700 font-bold pl-3 text-lg `}
-											key={schedule.today.main.length} colSpan={4}>{schedule.conClasses.conName}:</td>
+											key={schedule.today.main.length} colSpan={5}>{schedule.conClasses.conName}:</td>
 									</tr>
 								)}
 
@@ -273,7 +273,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 									>
 										<th
 											scope="row"
-											className="py-4 pl-6 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+											className="py-4 pconcurrentl-6 font-medium text-gray-900 whitespace-nowrap dark:text-white"
 										>
 										{start+" - "+end}
 										</th>

@@ -194,8 +194,6 @@ if(rounding.percent){
 	grade=Number(grade.toFixed(rounding.percentPlaces))
 
 }
-	
-console.log(gradingScale)
 
 if(!gradingScale){
 	if (grade >= 89.5) {
@@ -385,7 +383,6 @@ function util(cache:Cache){
 //this fills in an empty finals, like handles the NaN or null courseIndexes and allat.
 function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cmp=false):CourseSettings{
 	//I high key do not remember how often this runs lmao
-	console.log("re-evaluation of fianls")
 
 	var settings=structuredClone(raw_settings)
  
@@ -424,7 +421,6 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
 		//tho
 		if(settings[identifier].finals.isSemester==undefined){
 			const realPeriods=getRealMarkingPeriods(cache[0].periods)
-			console.log(realPeriods,"real periods")
 			var count=0;
 			for(let realPeriod of realPeriods){
 				if(cache[realPeriod.index].courses.findIndex(course=>course.courseID.substring(0,course.courseID.length-1)==identifier)!=-1){

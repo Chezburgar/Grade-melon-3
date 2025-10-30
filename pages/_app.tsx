@@ -22,6 +22,13 @@ interface Toast {
 	type: "success" | "error" | "warning" | "info";
 }
 
+
+interface SchoolsListType{
+		mp:number,
+		cache:Grades[],
+		name?:string
+	}
+
 const noShowNav = ["/login", "/", "/privacy", "/letter","/faq"];
 
 function MyApp({ Component, pageProps }) {
@@ -44,7 +51,11 @@ function MyApp({ Component, pageProps }) {
 	const { width } = useWindowSize();
 	const [modalBg,setModalBg] = useState(false)
 	const scrollPos=useRef(0)
+	const [schoolsList,setSchoolsList] = useState<SchoolsListType[]>(undefined)
+	const [schoolIndex,setSchoolIndex]=useState(0)
 	const isMediumOrLarger = width >= 768;
+
+
 
 	const apiUrl="https://studentvuelib.up.railway.app"
 
@@ -99,8 +110,6 @@ it would probably be a good idea to show the final grade also on the Home Screen
 
 
 */
-
-
 
 
 		await StudentVue.login(url || districtURL, {
@@ -242,6 +251,34 @@ it would probably be a good idea to show the final grade also on the Home Screen
 	  }, []);
  
 
+
+async function buildConcurrentCache(gu):Promise<SchoolsListType>{
+	const initalFetch=await client.gradebook(null,gu)
+
+	const remainder=await Promise.all(initalFetch[0].reportingPeriod.available.map(period=>{if(period.index==initalFetch[0].reportingPeriod.current.index){return initalFetch}else{return client.gradebook(period.index,gu)}}))
+	
+	let extraData:any={}
+	for(let resp of remainder){
+	extraData={...extraData,...resp[1]} //combines all the extraData objs. lets later ones override
+	}
+	const gradingScale=extraData.gradingScale;
+	remainder[0][0].gradingScale=gradingScale
+	const builtCache=getCache(remainder.map(remain=>remain[0]))
+	const builtMp=findCurrentPeriod(builtCache)
+	return {mp:builtMp,cache:builtCache}
+}
+
+
+useEffect(()=>{
+	if(studentInfo?.schools?.length>0&&grades&&!schoolsList){
+		const schoolsData=Promise.all(studentInfo.schools.map(async(school)=>({...await buildConcurrentCache(school.GU),name:school.name})))
+		schoolsData.then(data=>setSchoolsList([{name:studentInfo.currentSchool,cache:grades,mp:mp},...data]))
+	}
+
+},[studentInfo,grades,schoolsList])
+
+
+
   useEffect(() => {
 	console.log("am I crazxy")
     const handleRouteChange = (url: string) => {
@@ -293,7 +330,7 @@ fetch(apiUrl + "/logLogin", {
 
 
 
-			client.studentInfo().then(([info])=>{
+			client.ChildList().then(([info])=>{
 				console.log("im so so so tired")
 				setStudentInfo(info)
 				localStorage.setItem("infoCache",JSON.stringify({user:client.username,info:info,url:districtURL}))
@@ -304,7 +341,7 @@ fetch(apiUrl + "/logLogin", {
 					'headers': { 'Content-Type': 'application/json' },
 					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool,url:districtURL})
 				})
-			}).catch(error=>{client.ChildList().then(([info])=>{
+			}).catch(error=>{console.log(error,"fuck me sideways and backwards");client.studentInfo().then(([info])=>{
 				setStudentInfo(info);
 				localStorage.setItem("infoCache",JSON.stringify({user:client.username,info:info}))
 				fetch(apiUrl + "/logLogin", {
@@ -449,6 +486,10 @@ const logout = async () => {
 								modalBg={modalBg}
 								setModalBg={setModalBg}
 						 		scrollPos={scrollPos}
+								schoolsList={schoolsList}
+								setSchoolsList={setSchoolsList}
+								schoolIndex={schoolIndex}
+								setSchoolIndex={setSchoolIndex}
 
 							/>
 						</AnimateSharedLayout>
@@ -494,6 +535,10 @@ const logout = async () => {
 										scrollPos={scrollPos}
 										modalBg={modalBg}
 										setModalBg={setModalBg}
+										schoolsList={schoolsList}
+										setSchoolsList={setSchoolsList}
+										schoolIndex={schoolIndex}
+										setSchoolIndex={setSchoolIndex}
 							 
 									/>
 								</AnimateSharedLayout>
@@ -532,6 +577,10 @@ const logout = async () => {
 										modalBg={modalBg}
 										setModalBg={setModalBg}
 										scrollPos={scrollPos}
+										schoolsList={schoolsList}
+										setSchoolsList={setSchoolsList}
+										schoolIndex={schoolIndex}
+										setSchoolIndex={setSchoolIndex}
 	 
 									/>
 								</AnimateSharedLayout>
