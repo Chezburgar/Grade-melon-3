@@ -71,7 +71,7 @@ interface GlobalSettings{
 }
 
 type Settings = {
-	mode:"automatic" | "manual"
+	mode:"mcps" | "other"
 } & {
   default: CourseSettings;
 } & {
@@ -406,7 +406,7 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
  
 	//console.log("I want a perfect body",settings)
 
-	if(settings.mode=="manual"){
+	if(false){
 		//we let them control but also we FORCe them to control all my precious
 		var id=Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(identifier))]
 		//we handle nothing actually. kys.
@@ -531,7 +531,7 @@ function getRealMarkingPeriods(periods:Grades["periods"],isMCPS:boolean=true){
 
 
 function templateFinals(mode,periods):Finals{
-      if(mode=="automatic"){
+      if(mode=="mcps"){
 			let mps=getRealMarkingPeriods(periods).map(mp=>mp.index)
 			let weight=1/mps.length
 			let categories:Category[]=mps.map(mp=>({mp:mp,courseIndex:NaN,weight:weight,type:"course"}))
@@ -540,7 +540,7 @@ function templateFinals(mode,periods):Finals{
 		}
 
 	else{
-		return {show:false,categories:[],isSemester:false,semesters:[]}
+		return {show:true,categories:[],isSemester:false,semesters:[]}
 	}
   
 
@@ -598,7 +598,7 @@ function getCache(books:Gradebook[]):Cache{
 	for(let grades of gradesCache){
 		grades.settings=settings
 		for(let course of grades.courses as Course[]){
-			const id = settings.mode=="mcps" ? course.identifier : Object.keys(settings)[Object.keys(settings).findIndex(key=>key.includes(course.identifier))]
+			const id = course.identifier
 			if(settings[id]==undefined){
 				course.settings=initalizeFinals2(gradesCache,settings,course.identifier)
 				//this one is finna be special cause categories is unique in that it won't have a global
@@ -675,7 +675,7 @@ const parseGrades = (grades: Gradebook,override?:Settings): Grades => {
 
 			courses: grades.courses.map(({ title, period, room, staff, marks,courseID }, i) => {
 				if(courseID.at(-1)=="X"){courseID=courseID.substring(0,courseID.length-1);console.log("through the wire,",courseID)}
-				let identifier=settings.mode=="manual" ? (ReplaceUnderscores(stripParens(title))+period+staff.name) : courseID.substring(0,courseID.length-1)
+				let identifier= false ? (ReplaceUnderscores(stripParens(title))+period+staff.name) : courseID.substring(0,courseID.length-1)
 				const courseSettings=settings[identifier] ? settings[identifier] : structuredClone(settings.default)
 		//this is a dumb hotfix but we ARE not refactoring again. why i let some settings be global and finals not be global and now the default and reset system is fucked to hell. 
 			if(!courseSettings.letterScale||!courseSettings.rounding){courseSettings.rounding=settings.default.rounding;courseSettings.letterScale=settings.default.letterScale}

@@ -52,7 +52,7 @@ export default function Login({
 
         if(districtURL!="https://md-mcps-psv.edupoint.com"&&districtURL!=undefined){
 								console.log("kill me bro",districtURL)
-								window.location.assign("https://old.grademelon.org");
+							//	window.location.assign("https://old.grademelon.org");
 
 									}
 

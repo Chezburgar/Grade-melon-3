@@ -52,8 +52,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     const [viewStack,setViewStack] = useState(["finals"])
     const [kill,setKill]=useState(undefined)
     const [virtual,setVirtual]=useState(structuredClone(course))
-    console.log("GOD I AM SO FUCKING TIRED OF THIS FUCKING SHIT",cacheCopy[mp].courses[index].settings.finals.semesters[0].categories[0].weight,cache[mp].courses[index].settings.finals.semesters[0].categories[0].weight)
-    const currentSemesterIndex=course.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>category.courseIndex==index&&category.mp==mp))
+ const currentSemesterIndex=course.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>category.courseIndex==index&&category.mp==mp))
      
 
 
@@ -93,7 +92,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     
             //this is so so so so dumb
     function wasIncluded(cat){
-   return course.settings.finals.semesters[currentSemesterIndex].categories.some(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&category.type==cat.type)
+   return course.settings.finals.semesters[currentSemesterIndex]?.categories.some(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&category.type==cat.type)
     }
 
 

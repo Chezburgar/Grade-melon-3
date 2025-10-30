@@ -466,11 +466,6 @@ className="overflow-y-auto"
       className="flex flex-col gap-4"
     >
     <React.Fragment key="dont fw me twin">
-      {index !=-1 && (
-        <div style={{alignItems:"center"}} className="flex gap-2">
-        <p className="dark:text-white">Is Semester Course?</p>
-          <input type="checkbox" onChange={()=>{setFinals(toggleSemester(settings.default,{...course.settings,finals:finals},grades,course.identifier)["finals"]);setModify(!modify)}} checked={finals.isSemester}/>
-      </div>)}
       <motion.button 
       {...animationPropsHome}
       key="letter"
@@ -865,7 +860,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         <tr className="dark:bg-slate-700">
           <th style={{textAlign:"center"}} className="py-2 dark:text-white">Type</th>
           <th style={{textAlign:"center"}} className="py-2 dark:text-white">Marking Period</th>
-          {settings.mode=="manual" ||modify && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
+          {(settings.mode!="mcps" ||modify) && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
           <th style={{textAlign:"center"}} className="py-2 pr-4 md:pr-0 dark:text-white">Weight</th>
           {isMediumOrLarger && <th style={{textAlign:"center"}} className="py-2 dark:text-white"></th>}
         </tr>
@@ -922,7 +917,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           </td>
 
 
-{settings.mode=="manual"||modify  && <td
+{(settings.mode!="mcps"||modify ) && <td
             style={{textAlign:"center"}}
           >
          
@@ -1000,7 +995,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
    {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
-        <td colSpan={settings.mode=="manual"||modify ? 3 : 4}>
+        <td colSpan={(settings.mode!="mcps"||modify) ? 3 : 4}>
            <button
                 onClick={() => {deleteFinalCategory(i)}}
                 disabled={finals.isSemester}
@@ -1098,7 +1093,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
         <tr className="dark:bg-slate-700">
           <th style={{textAlign:"center"}} className="py-2 dark:text-white">Type</th>
           <th style={{textAlign:"center"}} className="py-2 dark:text-white">Marking Period</th>
-          {settings.mode=="manual"||modify && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
+          {(settings.mode!="mcps"||modify) && <th style={{textAlign:"center"}} className="py-2 dark:text-white">Course</th>}
           <th style={{textAlign:"center"}} className="py-2 pr-4 md:pr-0 dark:text-white">Weight</th>
           {isMediumOrLarger && <th style={{textAlign:"center"}} className="py-2 dark:text-white"></th>}
         </tr>
@@ -1153,7 +1148,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
           </td>
 
 
-{settings.mode=="manual"||modify  && <td
+{(settings.mode!="mcps"||modify)  && <td
             style={{textAlign:"center"}}
           >
          
@@ -1226,7 +1221,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
    {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
-        <td colSpan={settings.mode=="manual" ? 3 : 4}>
+        <td colSpan={settings.mode!="mcps" ? 3 : 4}>
            <button
                 onClick={() => {deleteSemesterCategory(j,i)}}
                 className="
@@ -1388,7 +1383,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
 
    {!isMediumOrLarger  && <tr className={i % 2 === 0 ? "bg-neutral-100 dark:bg-gray-900" : "dark:bg-gray-800"}>
-        <td colSpan={settings.mode=="manual" ? 3 : 4}>
+        <td colSpan={settings.mode!="mcps" ? 3 : 4}>
            <button
                 onClick={() => {deleteFinalCategory(i)}}
                 className="
