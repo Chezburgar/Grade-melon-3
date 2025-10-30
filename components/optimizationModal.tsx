@@ -1,5 +1,5 @@
 import React, {useState,useEffect} from "react";
-import {calcFinal, genTable,Course, Finals, Cache,simplifyWeights, letterGrade, letterGradeColor,solveSystemMinSum, ordinalSuffix} from "../utils/grades"
+import {calcFinal, genTable,Course, Finals, Cache,simplifyWeights, letterGrade, letterGradeColor,solveSystemMinSum, ordinalSuffix, Settings, Category} from "../utils/grades"
 import {Modal} from "flowbite-react"
 import QuarterField from "./QuarterField";
 import ExamField from "./ExamField";
@@ -52,7 +52,20 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     const [viewStack,setViewStack] = useState(["finals"])
     const [kill,setKill]=useState(undefined)
     const [virtual,setVirtual]=useState(structuredClone(course))
- const currentSemesterIndex=course.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>category.courseIndex==index&&category.mp==mp))
+    
+
+    const interimWiseComparison = (cat1:Category,cat2:Category) => {
+									cat1=structuredClone(cat1)
+									cat2=structuredClone(cat2)
+									if(cache[0].periods[cat1.mp].name.toLowerCase().includes("interim")){
+										cat1.mp+=1
+									}
+									if(cache[0].periods[cat2.mp].name.toLowerCase().includes("interim")){
+										cat2.mp+=1
+									}
+									return cat1.mp==cat2.mp
+								}
+    const currentSemesterIndex=course.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>interimWiseComparison(category,{mp:mp,courseIndex:index,weight:0,type:"course"})))
      
 
 
@@ -70,8 +83,6 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
 
 //what should this even do if finals is disabled chat lmoa
 
-
-//need to come up with a proper way of handling interim grades...
 
     const finalGrade:Score=!course?.settings?.finals.isSemester ? calcFinal(course?.settings.finals.categories,cacheCopy) : undefined
     
@@ -92,7 +103,8 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     
             //this is so so so so dumb
     function wasIncluded(cat){
-   return course.settings.finals.semesters[currentSemesterIndex]?.categories.some(category=>category.courseIndex==cat.courseIndex&&category.mp==cat.mp&&category.type==cat.type)
+        //retard this'll eject interims.
+   return course.settings.finals.semesters[currentSemesterIndex]?.categories.some(category=>interimWiseComparison(category,cat))
     }
 
 
