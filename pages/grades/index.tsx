@@ -86,10 +86,10 @@ function switchSchool(increment){
         return(
 
             <div className="">
-                <div className="flex justify-between flex-shrink px-5 md:px-11">
-                    <button className="dark:text-white text-lg" onClick={()=>switchSchool(-1)}><HiArrowCircleLeft size={25}/></button>
-                    <p className="dark:text-white font-semibold">{schoolsList[schoolIndex].name}</p>
-                    <button className="dark:text-white text-lg" onClick={()=>switchSchool(1)}><HiArrowCircleRight size={25}/></button>
+                <div className="flex justify-between flex-shrink px-5 md:px-11 pt-1 md:-mb-5">
+                    <button disabled={schoolIndex==0} className="dark:text-white disabled:opacity-50 disabled:dark:opacity-50 text-lg" onClick={()=>switchSchool(-1)}><HiArrowCircleLeft size={25}/></button>
+                    <p className="dark:text-white font-semibold truncate text-ellipsis">{schoolsList[schoolIndex].name}</p>
+                    <button disabled={schoolIndex==schoolsList.length-1} className="dark:text-white disabled:opacity-50 disabled:dark:opacity-50 text-lg" onClick={()=>switchSchool(1)}><HiArrowCircleRight size={25}/></button>
                 </div>
 
     
