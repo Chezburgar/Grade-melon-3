@@ -87,48 +87,7 @@ export default function Grades({
 
 	useEffect(() => {
 		try {
-			if (!grades && client) {
-				//setLoading(true);
-				try {
-					getGradebooks(client,null,null).then(raws=>{
-						
-						setGrades(getCache(raws))
-						setMP(findCurrentPeriod(getCache(raws)))
-						setLoading(false)
-					})				
 
-
-
-
-
-
-
-
-
-
-					/*
-					client.gradebook().then(([res,extra]) => {
-						res.gradingScale=extra?.gradingScale
-						let parsedGrades = parseGrades(res);
-						//once again, let there be bullshit. temp.
-						//let g = parseAllGrades(res) or smthn idfk
-						console.log("checker",parsedGrades)
-						console.log(res);
-						//setGrades(g);
-						//@ts-ignore
-						setGrades(getCache(killMe))
-						console.log(parsedGrades)
-						setMP(findCurrentPeriod(getCache(killMe)));
-						setLoading(false);
-						
-					});
-					*/
-				} catch (err) {
-					console.log(err);
-					createError(err.message);
-					setLoading(false);
-				}
-			}
 		} catch {
 			if (localStorage.getItem("remember") === "false") {
 				console.log("womp womp")

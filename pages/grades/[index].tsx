@@ -129,7 +129,7 @@ export default function Grades({
 		try {
 			if (!grades&&client&&ad!==undefined) {
 				//oh my fucking god just fucking stop for fucks sake
-
+					//these conditions will never be true????
 									getGradebooks(client,null,null).then(raws=>{
 										setGrades(getCache(raws))
 										setMP(findCurrentPeriod(getCache(raws)))

@@ -159,7 +159,9 @@ it would probably be a good idea to show the final grade also on the Home Screen
 
 				//let g=parseGrades(gradebook[]) or smthn so its a list of them or whatever. 
 
+				extraData.gradingScale.mode=fetchedClient.district=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx" ? "mcps" : undefined
 				res.responses[0][0].gradingScale=extraData.gradingScale;
+				
 				setGrades(getCache(res.responses.map(resp=>resp[0])));
 				setMP(findCurrentPeriod(getCache(res.responses.map(resp=>resp[0]))));
 
