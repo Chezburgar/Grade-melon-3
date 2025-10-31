@@ -273,7 +273,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 									>
 										<th
 											scope="row"
-											className="py-4 pconcurrentl-6 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+											className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white"
 										>
 										{start+" - "+end}
 										</th>
