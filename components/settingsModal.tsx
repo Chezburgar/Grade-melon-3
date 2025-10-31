@@ -290,6 +290,7 @@ async function saveNew(){
     const tempGrades=await saveAndApply(tempSettings)
     if(tempGrades){
       const ham=index!=-1 ? tempGrades[period].courses[index].settings : tempSettings.default
+      localStorage.removeItem("xmlCache")
       setLetterScale(ham.letterScale)
       setRounding(ham.rounding)
       setFinals(ham.finals)

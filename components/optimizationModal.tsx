@@ -103,9 +103,14 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     
             //this is so so so so dumb
     function wasIncluded(cat){
-        //retard this'll eject interims.
-   return course.settings.finals.semesters[currentSemesterIndex]?.categories.some(category=>interimWiseComparison(category,cat))
-    }
+     if(cache[0].settings.mode=="mcps"){
+   return course.settings.finals.semesters[currentSemesterIndex]?.categories.some(category=>interimWiseComparison(category,cat)[0])
+     }
+     else{
+        return true
+     }
+
+}
 
 
     
