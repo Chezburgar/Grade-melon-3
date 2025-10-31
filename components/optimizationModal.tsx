@@ -63,14 +63,14 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
 									if(cache[0].periods[cat2.mp].name.toLowerCase().includes("interim")){
 										cat2.mp+=1
 									}
-									return cat1.mp==cat2.mp
+									return [cat1.mp==cat2.mp,cat1.mp>=cat2.mp,cat1.mp<=cat2.mp]
 								}
-    const currentSemesterIndex=course.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>interimWiseComparison(category,{mp:mp,courseIndex:index,weight:0,type:"course"})))
+    const currentSemesterIndex=course.settings.finals.semesters.findIndex(semester=>semester.categories.some(category=>interimWiseComparison(category,{mp:mp,courseIndex:index,weight:0,type:"course"})[0]))
      
 
 
     function reset(){
-        setOptimizeProps({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined})
+        setOptimizeProps({desiredGrade:undefined})
         setVirtual(structuredClone(course))
         setCacheCopy(structuredClone(cache))
 
@@ -103,6 +103,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
     
             //this is so so so so dumb
     function wasIncluded(cat){
+        
      if(cache[0].settings.mode=="mcps"){
    return course.settings.finals.semesters[currentSemesterIndex]?.categories.some(category=>interimWiseComparison(category,cat)[0])
      }
@@ -111,7 +112,6 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
      }
 
 }
-
 
     
     
@@ -200,7 +200,7 @@ TODO:
                 else{
                     //@ts-ignore
                     //if it has a real value, and it's not from the custom bs from a sovled one, then and only then, add it
-                    if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom){
+                    if(!Number.isNaN(cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw)&&!cacheCopy[cat.mp].courses[cat.courseIndex].grade.custom&!interimWiseComparison(cat,{courseIndex:index,mp:mp,weight:0,type:"course"})[1]){
                         (cat as any).raw=semester.categories[catIndex].weight*cacheCopy[cat.mp].courses[cat.courseIndex].grade.raw
                         known+=(cat as any).raw
                         row[i]=0
@@ -245,7 +245,7 @@ TODO:
             if(!Number.isNaN(cat.courseIndex)){
                 const existing=cacheCopy[cat.mp].courses[cat.courseIndex].grade
                 //@ts-ignore
-                if((Number.isNaN(existing.raw)||existing.custom)){
+                if((Number.isNaN(existing.raw)||existing.custom||interimWiseComparison(cat,{courseIndex:index,mp:mp,weight:0,type:"course"})[1])){
                 temp[cat.mp].courses[cat.courseIndex].grade=newGrade
                 }
             }else{
