@@ -70,7 +70,7 @@ export default function OptimizationModal({showModal,setShowModal,mp,index,cache
 
 
     function reset(){
-        setOptimizeProps({desiredGrade:!course?.settings.finals.isSemester ? course.settings.letterScale[0][1][0] : undefined})
+        setOptimizeProps({desiredGrade:undefined})
         setVirtual(structuredClone(course))
         setCacheCopy(structuredClone(cache))
 
