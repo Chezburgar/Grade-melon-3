@@ -335,7 +335,7 @@ export default function Grades({
 		}
 
 		const part2=()=>client
-			.gradebook(p)
+			.gradebook(p,schoolsList ? schoolsList[schoolIndex].gu : null)
 						.then(([res,extra]) => {
 							res.gradingScale=extra?.gradingScale
 				
