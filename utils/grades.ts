@@ -425,7 +425,7 @@ function initalizeFinals2(cache:Cache,raw_settings:Settings,identifier:string,cm
 		//THIS ONLY MAKES SENSE TO KEEP IF it turns out we get ALLLLLL classes data at the start of the year
 		//otherwise, no real way to know if a class is semester-long or not. bollocks. prob via the webapi
 		//tho
-		if(settings[identifier].finals.isSemester==undefined){
+		if(settings[identifier].finals?.isSemester==undefined){
 			const realPeriods=getRealMarkingPeriods(cache[0].periods)
 			var count=0;
 			for(let realPeriod of realPeriods){
