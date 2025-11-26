@@ -269,7 +269,7 @@ export default function Login({
 								</p>
 
 								<p className="text-center text-sm dark:text-gray-100">
-									Still won't work? Try re-setting your password{" "}
+									{"Still won't work? Try re-setting your password "}
 									<a
 										target="blank"
 										href={districtURL+"/PXP2_Password_Help.aspx"}
