@@ -254,6 +254,9 @@ export default function Login({
 								)}
 							</button>
 							{trouble && (
+								<div
+								className="flex-col space-y-2"
+								>
 								<p className="text-center text-sm dark:text-gray-100">
 									Having trouble logging in? Make sure you can login{" "}
 									<a
@@ -264,6 +267,18 @@ export default function Login({
 										here
 									</a>
 								</p>
+
+								<p className="text-center text-sm dark:text-gray-100">
+									Still won't work? Try re-setting your password{" "}
+									<a
+										target="blank"
+										href={districtURL+"/PXP2_Password_Help.aspx"}
+										className="text-primary-500"
+									>
+										here
+									</a>
+								</p>
+							</div>
 							)}
 						</form>
 					</div>
