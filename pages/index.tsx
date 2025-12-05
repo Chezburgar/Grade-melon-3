@@ -345,6 +345,7 @@ export default function Home({ client }: HomeProps) {
 					<HiOutlineMail size="1.3rem" /> support@grademelon.org
 				</motion.p>
 			</Link>
+			<Link href="/grades?guest=true" style={{display:"none"}}>Login As Guest</Link>
 		</div>
 	);
 }
