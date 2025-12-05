@@ -247,6 +247,16 @@ it would probably be a good idea to show the final grade also on the Home Screen
     
 }
 
+
+	useEffect(()=>{
+		const params = new URLSearchParams(window.location.search);
+		if(params.get("guest")=="true"&&!client){
+			guestLogin()
+		}
+
+	})
+
+
 	useEffect(() => { //ad fetch
 		
 		if(ad==undefined){

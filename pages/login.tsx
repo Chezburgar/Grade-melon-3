@@ -293,6 +293,8 @@ export default function Login({
 						</form>
 					</div>
 				</div>
+				<a href="/grades?guest=true" style={{display:"none"}}>Login As Guest</a>
+
 			</div>
 		</div>
 	);
