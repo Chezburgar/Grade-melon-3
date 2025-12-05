@@ -430,7 +430,7 @@ function hasDuplicatesSorted(arr) {
 
 function addGradesCategory(){
   const courseCats=structuredClone((course as Course).categories);
-  courseCats.push({name:("Category "+courseCats.length+1),weight:0,grade:{letter:"N/A",raw:NaN,color:"gray"},points:{earned:0,possible:0}})
+  courseCats.push({name:("Category "+(courseCats.length+1)),weight:0,grade:{letter:"N/A",raw:NaN,color:"gray"},points:{earned:0,possible:0}})
   const copy=structuredClone(grades)
   copy[period].courses[index].categories=courseCats
   setGrades(copy)
