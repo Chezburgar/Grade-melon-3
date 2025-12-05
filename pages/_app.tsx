@@ -378,6 +378,9 @@ fetch(apiUrl + "/logLogin", {
 	},[client])
 
 	useEffect(() => {
+				const params = new URLSearchParams(window.location.search);
+		const guest=params.get("guest")=="true"&&!client
+
 		var refURL: string="";
 		async function doLogin(){
 			await login(Cookies.get("username"),Cookies.get("password"),true,districtURL,true)}
@@ -394,7 +397,7 @@ fetch(apiUrl + "/logLogin", {
 		if(client===undefined&&Cookies.get("username")!=undefined&&Cookies.get("password")!=undefined&&districtURL!==undefined){
 			doLogin();
 			
-		}else{if(client===undefined&&(!noShowNav.includes(router.pathname)||router.pathname=="/")&&!refURL){console.log("SHIT FUCK");router.push("/login")}}
+		}else{if(client===undefined&&(!noShowNav.includes(router.pathname)||router.pathname=="/")&&!refURL&&!guest){console.log("SHIT FUCK");router.push("/login")}}
 	}, [client,districtURL]);
 
 	function createError(message:string){
