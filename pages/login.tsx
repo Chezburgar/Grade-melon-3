@@ -7,6 +7,7 @@ import StudentVue from "studentvue";
 import Script from "next/script";
 
 import Cookies from "js-cookie";
+import Link from "next/link";
 
 interface LoginProps {
 	districtURL: string;
@@ -293,7 +294,7 @@ export default function Login({
 						</form>
 					</div>
 				</div>
-				<a href="/grades?guest=true" style={{display:"none"}}>Login As Guest</a>
+				<Link href="/grades?guest=true" style={{display:"none"}}>Login As Guest</Link>
 
 			</div>
 		</div>
