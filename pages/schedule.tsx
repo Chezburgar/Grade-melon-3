@@ -17,6 +17,16 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 	const [today,setToday]=useState<boolean>(true);
 
 	function update(e){
+		if(client.guest){
+			if(e.target.value=="today"){setToday(true);setTerm("today")}
+			else{
+				setToday(false)
+				setTerm(parseInt(e.target.value))
+			}
+			return
+		}
+
+
 		console.log(e.target.value)
 		if(e.target.value=="today"){setToday(true);setTerm("today")}else{
 		delete client.loadedSchedule;

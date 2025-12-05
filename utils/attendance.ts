@@ -17,6 +17,9 @@ interface Attendance {
 	absences: Absense[];
 }
 
+
+
+
 const chartOptions = {
 	elements: {
 		bar: {

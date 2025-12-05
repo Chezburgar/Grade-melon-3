@@ -199,8 +199,12 @@ async function setSettings(url, userHash,encrypted,passHash,settings){
 
 async function saveAndApply(tempSettings){
   console.log("these are our theortetical temp settings",tempSettings)
-  const result=await setSettings(client.district,client.username,client.encrypted,client.password,tempSettings)
-
+  //@ts-expect-error
+  if(!client.guest){
+    var result=await setSettings(client.district,client.username,client.encrypted,client.password,tempSettings)
+  }else{
+    result={status:true}
+  }
   if(result.status){
 
   const tempGrades=structuredClone(grades);

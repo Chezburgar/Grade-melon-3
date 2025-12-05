@@ -21,7 +21,7 @@ import SettingsModal from "../../components/settingsModal"
 import StudentVue from "studentvue";
 import {getGradebooks} from "../../utils/soap"
 import { HiArrowCircleLeft, HiArrowCircleRight } from "react-icons/hi";
-
+import {grades as sample}	 from "../../utils/sample"
 
 interface GradesProps {
 	client: Awaited<ReturnType<typeof StudentVue.login>>["client"];
@@ -97,6 +97,13 @@ export default function Grades({
 
 	function update(p: number,getFresh=false){
 		console.log(p);
+		//@ts-expect-error	
+		if(client.guest){
+			const m = structuredClone(grades)
+			m[mp] = sample[mp]
+			setGrades(m)
+
+			return}
 		setLoading(true);
 
 		if(getFresh){

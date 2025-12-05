@@ -13,6 +13,7 @@ interface LoginProps {
 	setDistrictURL: any;
 	client: any;
 	login: (username: string, password: string, save: boolean) => any;
+	guestLogin: ()=>void;
 	setToasts: any;
 	loading: boolean;
 	createError:(message:string)=>void;
@@ -32,7 +33,7 @@ export default function Login({
 	setDistrictURL,
 	setToasts,
 	loading,
-	createError,setDistricts,districts
+	createError,setDistricts,districts,guestLogin
 }: LoginProps) {
 	const router = useRouter();
 	const [username, setUsername] = useState("");
@@ -61,6 +62,11 @@ export default function Login({
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		if(username==""&&password==""){
+			guestLogin();
+			return
+		}
+
 		let success = await login(username, password, checkbox);
 		if (!success) {
 			setTrouble(true);
@@ -162,9 +168,12 @@ export default function Login({
 			<div className="flex flex-col items-center justify-center pb-6 py-8 px-6 mx-auto md:pt-28 lg:pb-0">
 				<div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
 					<div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+			 
 						<h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
 							Sign in to your account
 						</h1>
+			
+				 
 						<form className="space-y-4 md:space-y-6">
 							<div>
 								<label
@@ -246,7 +255,7 @@ export default function Login({
 								type="submit"
 								className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 p-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
 							>
-								Sign in
+								{(username==""&&password=="") ? "Sign in as Guest" : "Sign in"}
 								{loading && (
 									<div className="pl-4 inline-block">
 										<Spinner color="warning" />
@@ -280,6 +289,7 @@ export default function Login({
 								</p>
 							</div>
 							)}
+					 		 
 						</form>
 					</div>
 				</div>

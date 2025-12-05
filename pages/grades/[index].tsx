@@ -31,7 +31,7 @@ import CustomAd from "../../components/customAd";
 import SettingsModal from "../../components/settingsModal"
 import {getGradebooks} from "../../utils/soap"
 import OptimizationModal from "../../components/optimizationModal";
-
+import {grades as sample} from "../../utils/sample"
 
 
 interface GradesProps {
@@ -302,6 +302,13 @@ export default function Grades({
 	};
 
 	function update(p: number,getFresh=false){
+		if(client.guest){
+			const m = structuredClone(grades)
+			m[mp]=sample[mp]
+			setGrades(m)
+			return
+		}
+		setLoading(true);
 		const identifier=course.identifier
 		console.log(p);
 		setLoading(true);

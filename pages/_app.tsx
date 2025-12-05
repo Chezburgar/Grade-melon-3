@@ -17,6 +17,7 @@ import { Analytics } from "@vercel/analytics/react";
 import allDistricts from "../lib/districts";
 import { springConfig,reducedMotionConfig } from "../utils/motionConfig";
 import { SchoolsListType } from "../utils/grades";
+import {grades as sample,studentInfo as info,document,schedule,attendance} from "../utils/sample"
 
 interface Toast {
 	title: string;
@@ -54,6 +55,18 @@ function MyApp({ Component, pageProps }) {
 
 
 	const apiUrl="https://studentvuelib.up.railway.app"
+
+
+	function guestLogin(){
+		//@ts-expect-error
+		setClient({guest:true,loadedAttendance:attendance,loadedSchedule:schedule,loadedDocuments:[{file:{date:new Date(),type:"Sample"},comment:"Sample Document",get:()=>{return [{base64:document}]	}}]})
+		setGrades(sample)
+		setStudentInfo(info)
+		setMP(0);
+		if(router.pathname=="/"||router.pathname=="/login"){router.push("/grades")}
+	}
+
+
 
 	const login = async (
 		username: string,
@@ -423,12 +436,12 @@ const logout = async () => {
 				<title>Grade Melon</title>
 	{ad	&& <link rel="preload" as="image" href={ad.image} />}	
          <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YWWBKH03T"></script>
-
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4194284530688181"/>
           <script
             dangerouslySetInnerHTML={{
               __html: `
                 window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
+                function gtag(){dataLayer.push(arguments);}	
                 gtag('js', new Date());
                 gtag('config', 'G-3YWWBKH03T');
               `,
@@ -491,6 +504,7 @@ const logout = async () => {
 								setSchoolsList={setSchoolsList}
 								schoolIndex={schoolIndex}
 								setSchoolIndex={setSchoolIndex}
+								guestLogin={guestLogin}
 
 							/>
 						</AnimateSharedLayout>
@@ -540,7 +554,7 @@ const logout = async () => {
 										setSchoolsList={setSchoolsList}
 										schoolIndex={schoolIndex}
 										setSchoolIndex={setSchoolIndex}
-							 
+							 			guestLogin={guestLogin}
 									/>
 								</AnimateSharedLayout>
 								</MotionConfig>
@@ -582,7 +596,7 @@ const logout = async () => {
 										setSchoolsList={setSchoolsList}
 										schoolIndex={schoolIndex}
 										setSchoolIndex={setSchoolIndex}
-	 
+										guestLogin={guestLogin}
 									/>
 								</AnimateSharedLayout>
 								</MotionConfig>
