@@ -294,7 +294,7 @@ export default function Login({
 						</form>
 					</div>
 				</div>
-				<Link href="/grades?guest=true" style={{display:"none"}}>Login As Guest</Link>
+				<Link href="/guest" style={{display:"none"}}>Login As Guest</Link>
 
 			</div>
 		</div>

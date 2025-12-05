@@ -24,13 +24,14 @@ interface NavProps {
 	settingsModal:boolean;
 	setSettingsModal:(b:boolean)=>void
 	setModalBg:(b:boolean)=>void
+	client:any
 
 }
 
 export default function SideBar({ studentInfo, logout,	ad,
 	setAd,
 	setTime,
-	timestamp,settingsModal,setSettingsModal,setModalBg
+	timestamp,settingsModal,setSettingsModal,setModalBg,client
 	 }: NavProps) {
 	const router = useRouter();
 
@@ -51,7 +52,7 @@ export default function SideBar({ studentInfo, logout,	ad,
 						</li>
 						<li>
 							<Link
-								href="/grades"
+								href={client.guest ? "/guest" : "/grades"}
 								className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
 							>
 								<AiOutlineBook className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
@@ -99,7 +100,7 @@ export default function SideBar({ studentInfo, logout,	ad,
 							</a>
 						</li>
 					</ul>
-					{(router.pathname === "/grades" || router.pathname.includes("/grades") ) && (
+					{(router.pathname === "/grades" || router.pathname.includes("/grades") || router.pathname ==="/guest" || router.pathname.includes("/guest") ) && (
 						<ul className="pt-4 mt-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
 							<li>
 								<div

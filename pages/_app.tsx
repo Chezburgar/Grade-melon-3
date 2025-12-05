@@ -63,7 +63,7 @@ function MyApp({ Component, pageProps }) {
 		setGrades(sample)
 		setStudentInfo(info)
 		setMP(0);
-		if(router.pathname=="/"||router.pathname=="/login"){router.push("/grades")}
+		if(router.pathname=="/"||router.pathname=="/login"){router.push("/guest")}
 	}
 
 
@@ -528,6 +528,7 @@ const logout = async () => {
 						<div className="pb-16 md:pb-0">
 							<div className="flex overflow-x-auto">
 								<SideBar 						
+										client={client}
 										timestamp={timestamp}
 										setTime={setTime}
 										ad={ad}
@@ -614,7 +615,7 @@ const logout = async () => {
 								</AnimateSharedLayout>
 								</MotionConfig>
 								<div className="px-4 fixed bottom-5 w-full">
-									<MobileBar />
+									<MobileBar client={client} />
 								</div>
 								{modalBg && <div style={{opacity:0.1}} className="fixed inset-0 bg-gray-500 z-0"></div>}
 							</div>

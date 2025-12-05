@@ -176,7 +176,7 @@ const grades = ( [
           ]
         }
       },
-      "mode": "mcps"
+      "mode": "other"
     },
     "gpa": 0,
     "wgpa": 0,
@@ -211,20 +211,7 @@ const grades = ( [
             ],
             "isSemester": false,
             "semesters": [
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 1, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 3, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              },
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 5, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 7, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              }
+             
             ]
           }
         },
@@ -313,7 +300,7 @@ const grades = ( [
           ]
         }
       },
-      "mode": "mcps"
+      "mode": "other"
     },
     "gpa": 0,
     "wgpa": 0,
@@ -348,20 +335,7 @@ const grades = ( [
             ],
             "isSemester": false,
             "semesters": [
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 1, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 3, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              },
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 5, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 7, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              }
+             
             ]
           }
         },
@@ -450,7 +424,7 @@ const grades = ( [
           ]
         }
       },
-      "mode": "mcps"
+      "mode": "other"
     },
     "gpa": 0,
     "wgpa": 0,
@@ -485,20 +459,7 @@ const grades = ( [
             ],
             "isSemester": false,
             "semesters": [
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 1, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 3, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              },
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 5, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 7, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              }
+             
             ]
           }
         },
@@ -587,7 +548,7 @@ const grades = ( [
           ]
         }
       },
-      "mode": "mcps"
+      "mode": "other"
     },
     "gpa": 0,
     "wgpa": 0,
@@ -622,20 +583,7 @@ const grades = ( [
             ],
             "isSemester": false,
             "semesters": [
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 1, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 3, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              },
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 5, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 7, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              }
+             
             ]
           }
         },
@@ -724,7 +672,7 @@ const grades = ( [
           ]
         }
       },
-      "mode": "mcps"
+      "mode": "other"
     },
     "gpa": 0,
     "wgpa": 0,
@@ -759,20 +707,7 @@ const grades = ( [
             ],
             "isSemester": false,
             "semesters": [
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 1, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 3, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              },
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 5, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 7, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              }
+             
             ]
           }
         },
@@ -861,7 +796,7 @@ const grades = ( [
           ]
         }
       },
-      "mode": "mcps"
+      "mode": "other"
     },
     "gpa": 0,
     "wgpa": 0,
@@ -896,20 +831,7 @@ const grades = ( [
             ],
             "isSemester": false,
             "semesters": [
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 1, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 3, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              },
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 5, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 7, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              }
+             
             ]
           }
         },
@@ -998,7 +920,7 @@ const grades = ( [
           ]
         }
       },
-      "mode": "mcps"
+      "mode": "other"
     },
     "gpa": 0,
     "wgpa": 0,
@@ -1033,20 +955,7 @@ const grades = ( [
             ],
             "isSemester": false,
             "semesters": [
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 1, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 3, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              },
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 5, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 7, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              }
+             
             ]
           }
         },
@@ -1135,7 +1044,7 @@ const grades = ( [
           ]
         }
       },
-      "mode": "mcps"
+      "mode": "other"
     },
     "gpa": 0,
     "wgpa": 0,
@@ -1170,20 +1079,7 @@ const grades = ( [
             ],
             "isSemester": false,
             "semesters": [
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 1, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 3, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              },
-              {
-                "show": true,
-                "categories": [
-                  {"mp": 5, "courseIndex": 0, "weight": 0.5, "type": "course"},
-                  {"mp": 7, "courseIndex": 0, "weight": 0.5, "type": "course"}
-                ]
-              }
+             
             ]
           }
         },

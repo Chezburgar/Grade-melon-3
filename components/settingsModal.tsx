@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from "react";
 import {Modal} from "flowbite-react"
 import { HiOutlineTrash,HiArrowCircleRight,HiArrowCircleLeft, HiArrowCircleDown } from "react-icons/hi";
-import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse, toggleSemester, ordinalSuffix} from "../utils/grades";
+import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse, toggleSemester, ordinalSuffix, Course} from "../utils/grades";
 import {colorShit} from "./colors"
 import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2,Finals} from "../utils/grades"
 import GradeField from "./GradeField";
@@ -428,9 +428,21 @@ function hasDuplicatesSorted(arr) {
 }
 
 
-
-
+function addGradesCategory(){
+  const courseCats=structuredClone((course as Course).categories);
+  courseCats.push({name:("Category "+courseCats.length+1),weight:0,grade:{letter:"N/A",raw:NaN,color:"gray"},points:{earned:0,possible:0}})
+  const copy=structuredClone(grades)
+  copy[period].courses[index].categories=courseCats
+  setGrades(copy)
+}
  
+function deleteCourseCategory(i){
+  const x = structuredClone(grades)
+  const z = x[period].courses[index];
+  (z as Course).assignments=(z as Course).assignments.filter(assignment=>assignment.category!=(z as Course).categories[i].name);
+  (z as Course).categories.splice(i,1)
+  setGrades(x)
+}
 
 return(
 <div>
@@ -511,7 +523,9 @@ className="overflow-y-auto"
 
     </motion.button>}
 
-{/*
+{
+//@ts-expect-error
+(client.guest && index!=-1) &&
     <motion.button
       {...animationPropsHome} 
       key="cats"
@@ -520,12 +534,12 @@ className="overflow-y-auto"
       className="dark:hover:bg-gray-800 bg-neutral-50 hover:bg-neutral-100 w-full dark:bg-[#2d3847] rounded-lg border-gray-400 dark:border-gray-500 text-lg text-left dark:text-white p-2 font-semibold">
       
         <div className="flex justify-between items-center">
-          Categories and Quarter Exams
+          Categories
         <HiArrowCircleRight/>
         </div>
 
     </motion.button>
-*/}  
+}  
   </React.Fragment>
   </motion.div>}
 
@@ -1287,10 +1301,10 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
             <p>Back</p>
           </div>
         </button>
-        {false && <p className="dark:text-white text-xl font-bold">Categories and Quarter Exams</p>}
+        {false && <p className="dark:text-white text-xl font-bold">Categories</p>}
       </div>
 
-      {true && <p className="dark:text-white text-lg font-semibold mb-2">Categories and Quarter Exams</p>}
+      {true && <p className="dark:text-white text-lg font-semibold mb-2">Categories</p>}
 
     
       <div className="flex flex-col relative gap-1 w-fit">
@@ -1352,10 +1366,16 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
               setKill([i,e.target.value.replaceAll("%","")])
             }}
             onBlur={(e)=>{
-           
+           //this is being re-worked to only serve the Guest page so womp womp it was deprecated before anyway
               let temp=structuredClone(finals)
               temp.categories[i].weight=parseFloat(e.target.value.replaceAll("%",""))/100
               setFinals(temp)
+
+              const fuck=structuredClone(grades)
+            
+              fuck[period].courses[index].categories[i].weight=parseFloat(e.target.value.replaceAll("%",""))/100
+              fuck[period].courses[index]=reCalculateCourse(fuck[period].courses[index])
+              setGrades(fuck)
               setKill([NaN,""])
 
             }}
@@ -1367,7 +1387,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
 
   {true && <td>
             <button
-              onClick={() => {deleteFinalCategory(i)}}
+              onClick={() => {deleteCourseCategory(i)}}
               className="
                   flex items-center gap-1
                   rounded-lg bg-primary-500
@@ -1413,6 +1433,7 @@ onToggle={()=>setAdvancedOpen(!advancedOpen)}
       </tbody>
     </table>
       </div>
+        <button className="p-2 px-2 mt-2 -ml-1.5 text-sm bg-primary-500 dark:bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onClick={addGradesCategory}>Add+</button>
     </motion.div>
     </>
   }

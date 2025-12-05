@@ -8,8 +8,9 @@ import { IoDocumentTextOutline } from "react-icons/io5";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-export default function MobileBar() {
+export default function MobileBar({client}:any) {
 	const router = useRouter();
+
 
 	return (
 		<div className="border border-gray-200 shadow-lg dark:border-gray-700 rounded-lg">
@@ -32,7 +33,7 @@ export default function MobileBar() {
 				</li>
 				<li className="w-full">
 					<Link
-						href="/grades"
+						href={client.guest ? "/guest" : "/grades"}
 						className={`flex justify-center p-4 w-full bg-${
 							router.pathname.includes("/grades") ? "gray-200" : "white"
 						} hover:text-gray-700 hover:bg-gray-200 focus:outline-none dark:hover:text-white dark:bg-gray-${
