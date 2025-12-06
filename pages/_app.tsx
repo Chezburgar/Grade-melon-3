@@ -449,7 +449,7 @@ const logout = async () => {
 				<title>Grade Melon</title>
 	{ad	&& <link rel="preload" as="image" href={ad.image} />}	
          <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YWWBKH03T"></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4194284530688181"/>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3837623952720969"/>
           <script
             dangerouslySetInnerHTML={{
               __html: `
