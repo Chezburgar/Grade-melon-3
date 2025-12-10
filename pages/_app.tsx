@@ -379,7 +379,7 @@ fetch(apiUrl + "/logLogin", {
 
 	useEffect(() => {
 				const params = new URLSearchParams(window.location.search);
-		const guest=params.get("guest")=="true"&&!client
+		const guest=params.get("guest")=="true"&&!client||router.pathname.includes("guest")
 
 		var refURL: string="";
 		async function doLogin(){

@@ -75,7 +75,7 @@ export default function Grades({
 	const isMediumOrLarger = width >= 768;
 
 	useEffect(()=>{
-		setModalBg(showGuestModal)
+		setModalBg(true)
 
 	},[showGuestModal])
 
