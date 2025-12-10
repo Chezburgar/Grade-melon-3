@@ -74,6 +74,12 @@ export default function Grades({
 	const mcps=client?.district=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"
 	const isMediumOrLarger = width >= 768;
 
+	useEffect(()=>{
+		setModalBg(showGuestModal)
+
+	},[showGuestModal])
+
+
 	useEffect(() => {
 		if(localStorage.getItem("guestModal")!="true"){
 			setShowGuestModal(true)
