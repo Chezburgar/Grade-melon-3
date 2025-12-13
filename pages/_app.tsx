@@ -335,11 +335,7 @@ useEffect(()=>{
 					setStudentInfo(cache.info);
 
 //log login
-fetch(apiUrl + "/logLogin", {
-	'method': 'POST',
-	'headers': { 'Content-Type': 'application/json' },
-	'body': JSON.stringify({ 'username': client.username,'schoolName':cache.info.currentSchool,url:districtURL})
-})
+ 
 
 					return
 
@@ -357,19 +353,11 @@ fetch(apiUrl + "/logLogin", {
 				localStorage.setItem("infoCache",JSON.stringify({user:client.username,info:info,url:districtURL}))
 
 
-				fetch(apiUrl + "/logLogin", {
-					'method': 'POST',
-					'headers': { 'Content-Type': 'application/json' },
-					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool,url:districtURL})
-				})
+ 
 			}).catch(error=>{console.log(error,"fuck me sideways and backwards");client.studentInfo().then(([info])=>{
 				setStudentInfo(info);
 				localStorage.setItem("infoCache",JSON.stringify({user:client.username,info:info}))
-				fetch(apiUrl + "/logLogin", {
-					'method': 'POST',
-					'headers': { 'Content-Type': 'application/json' },
-					'body': JSON.stringify({ 'username': client.username,'schoolName':info.currentSchool,url:districtURL})
-				})
+ 
 
 			}).catch()
 		
