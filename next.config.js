@@ -8,6 +8,7 @@ const withPwa = require("next-pwa")({
 /** @type {import('next').NextConfig} */
 const nextConfig = withPwa({
   output: "export",
+  basePath: "/Grade-melon-3",
   reactStrictMode: true,
   swcMinify: false,
 
