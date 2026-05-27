@@ -8,7 +8,7 @@ import {
 } from "react-icons/ai";
 import { FiLogOut } from "react-icons/fi";
 import { IoDocumentTextOutline } from "react-icons/io5";
-import { BsGear, BsTable } from "react-icons/bs";
+import { BsGear, BsTable, BsPalette } from "react-icons/bs";
 import { TbLayoutGrid } from "react-icons/tb";
 import { BsQuestionLg } from "react-icons/bs";
 import Link from "next/link";
@@ -88,6 +88,15 @@ export default function SideBar({ studentInfo, logout,	ad,
 								<span className="flex-1 ml-3 whitespace-nowrap">
 									FAQ & Info
 								</span>
+							</Link>
+						</li>
+						<li>
+							<Link
+								href="/settings"
+								className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+							>
+								<BsPalette className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+								<span className="flex-1 ml-3 whitespace-nowrap">Appearance</span>
 							</Link>
 						</li>
 						<li>

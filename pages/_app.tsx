@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/globals.css";
+import { ThemeProvider } from "../context/ThemeContext";
 import StudentVue, { Client } from "studentvue";
 import { useRouter } from "next/router";
 import { Flowbite, Toast, useTheme } from "flowbite-react";
@@ -431,10 +432,11 @@ const logout = async () => {
 	// }, []);
 
 	return (
+		<ThemeProvider>
 		<Flowbite>
 			<Analytics/>
 			<Head>
-				<title>Grade Melon</title>
+				<title>Chezburger Grades</title>
 	{ad	&& <link rel="preload" as="image" href={ad.image} />}	
          <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YWWBKH03T"></script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3837623952720969"/>
@@ -612,6 +614,7 @@ const logout = async () => {
 				</div>
 			</div>
 		</Flowbite>
+		</ThemeProvider>
 	);
 }
 

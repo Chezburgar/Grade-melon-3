@@ -2,7 +2,7 @@ import React, { useState, useEffect,useRef } from "react";
 import { DarkThemeToggle } from "flowbite-react";
 import Link from "next/link";
 import { FiLogOut } from "react-icons/fi";
-import { BsQuestionLg } from "react-icons/bs";
+import { BsQuestionLg, BsGear } from "react-icons/bs";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { MdOutlinePrivacyTip } from "react-icons/md";
 import Cookies from "js-cookie";
@@ -150,15 +150,18 @@ try{
 				<div className="flex flex-wrap justify-between items-center">
 					<Link href={client ? "/grades" : "/"} className="flex items-center">
 						<img
-							src="/assets/logo.png"
+							src="/assets/hamburger-logo.svg"
 							className="mr-3 h-6 sm:h-9"
-							alt="Grade Melon Logo"
+							alt="Chezburger Grades Logo"
 						/>
 						<span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
-							Grade Melon
+							Chezburger Grades
 						</span>
 					</Link>
 					<div className="flex items-center md:order-2 gap-2">
+							<Link href="/settings" title="Appearance Settings" className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 transition-colors">
+								<BsGear size="1.15rem" />
+							</Link>
 							<div>
 								<DarkModeToggle />
 							</div>
