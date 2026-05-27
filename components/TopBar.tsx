@@ -149,11 +149,27 @@ try{
 			<nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800 relative z-10">
 				<div className="flex flex-wrap justify-between items-center">
 					<Link href={client ? "/grades" : "/"} className="flex items-center">
-						<img
-							src="/assets/hamburger-logo.svg"
-							className="mr-3 h-6 sm:h-9"
-							alt="Chezburger Grades Logo"
-						/>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 80 68"
+							className="mr-3 h-6 sm:h-9 w-auto drop-shadow-sm"
+							aria-label="Chezburger Grades Logo"
+							role="img"
+						>
+							<path d="M8 32 C8 14 18 8 40 8 C62 8 72 14 72 32 L72 34 L8 34 Z" fill="#F5A623" />
+							<path d="M14 26 C16 16 26 11 40 11 C52 11 61 15 64 22" stroke="#FFD066" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+							<ellipse cx="26" cy="18" rx="5" ry="3" fill="#D4810A" transform="rotate(-18 26 18)" />
+							<ellipse cx="40" cy="13" rx="5" ry="3" fill="#D4810A" />
+							<ellipse cx="54" cy="18" rx="5" ry="3" fill="#D4810A" transform="rotate(18 54 18)" />
+							<rect x="6" y="32" width="68" height="6" rx="3" fill="#D97706" />
+							<path d="M4 38 Q14 34 24 38 Q34 42 44 38 Q54 34 64 38 Q70 40 76 38 L76 43 Q70 45 64 41 Q54 37 44 41 Q34 45 24 41 Q14 37 4 43 Z" fill="#4ADE80" />
+							<rect x="5" y="43" width="70" height="7" rx="3" fill="#F87171" />
+							<path d="M3 44 L77 44 L74 52 L6 52 Z" fill="#FCD34D" opacity="0.9" />
+							<rect x="5" y="50" width="70" height="10" rx="4" fill="#7C3A1E" />
+							<rect x="5" y="50" width="70" height="4" rx="2" fill="#9A4A28" />
+							<rect x="6" y="60" width="68" height="8" rx="5" fill="#F5A623" />
+							<ellipse cx="40" cy="68" rx="34" ry="4" fill="#D97706" />
+						</svg>
 						<span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
 							Chezburger Grades
 						</span>

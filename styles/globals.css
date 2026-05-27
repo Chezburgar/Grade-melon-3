@@ -8,11 +8,116 @@
 
 
 
-/* custom highlight */
+/* custom highlight — picks up active theme primary */
 ::selection {
-  background-color: #f43f5e;
+  background-color: var(--primary-500, #f43f5e);
   color: #ffffff;
 }
+
+/* ============================================================
+   THEME SURFACE TINTING — overrides Tailwind gray utilities so
+   the chosen theme bleeds across the entire app (page bg,
+   cards, sidebars, modals, top bar). Specificity bumped with
+   `html` prefix so these win over the bare `.bg-gray-X`
+   utilities Tailwind emits.
+   ============================================================ */
+
+/* Page background gradient (light mode) */
+html body {
+  background:
+    radial-gradient(1200px 600px at 0% 0%,
+      hsl(var(--th-h, 0) var(--th-s-light, 0%) 92% / 0.55), transparent 60%),
+    radial-gradient(1000px 500px at 100% 100%,
+      hsl(var(--th-h, 0) var(--th-s-light, 0%) 88% / 0.45), transparent 60%),
+    hsl(var(--th-h, 0) var(--th-s-light, 0%) 97%);
+  background-attachment: fixed;
+}
+
+html.dark body {
+  background:
+    radial-gradient(1200px 600px at 0% 0%,
+      hsl(var(--th-h, 0) var(--th-s-dark, 0%) 18% / 0.7), transparent 60%),
+    radial-gradient(1000px 500px at 100% 100%,
+      hsl(var(--th-h, 0) var(--th-s-dark, 0%) 14% / 0.65), transparent 60%),
+    hsl(var(--th-h, 0) var(--th-s-dark, 0%) 8%);
+  background-attachment: fixed;
+}
+
+/* Light surfaces — re-tint the grays */
+html .bg-gray-50  { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 97%) !important; }
+html .bg-gray-100 { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 94%) !important; }
+html .bg-gray-200 { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 88%) !important; }
+
+/* Cards / white surfaces get a very subtle tint */
+html .bg-white {
+  background-color: hsl(var(--th-h, 0) calc(var(--th-s-light, 0%) / 2) 99%) !important;
+}
+
+/* Dark surfaces — re-tint the dark grays */
+html.dark .dark\:bg-gray-900,
+.dark html .dark\:bg-gray-900,
+.dark .dark\:bg-gray-900 {
+  background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 9%) !important;
+}
+html.dark .dark\:bg-gray-800,
+.dark html .dark\:bg-gray-800,
+.dark .dark\:bg-gray-800 {
+  background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 15%) !important;
+}
+html.dark .dark\:bg-gray-700,
+.dark html .dark\:bg-gray-700,
+.dark .dark\:bg-gray-700 {
+  background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 22%) !important;
+}
+html.dark .dark\:bg-gray-600,
+.dark .dark\:bg-gray-600 {
+  background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 30%) !important;
+}
+
+/* Top bar — keep the tint but add a thin accent border underneath */
+html nav.bg-white {
+  background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 99% / 0.92) !important;
+  backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid hsl(var(--th-h, 0) var(--th-s-light, 0%) 80%);
+}
+html.dark nav.dark\:bg-gray-800 {
+  background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 13% / 0.88) !important;
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid hsl(var(--th-h, 0) var(--th-s-dark, 0%) 25%);
+}
+
+/* Tinted borders */
+html .border-gray-200 { border-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 86%) !important; }
+html .border-gray-300 { border-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 78%) !important; }
+html.dark .dark\:border-gray-700,
+.dark .dark\:border-gray-700 { border-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 25%) !important; }
+html.dark .dark\:border-gray-600,
+.dark .dark\:border-gray-600 { border-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 32%) !important; }
+html.dark .dark\:border-gray-500,
+.dark .dark\:border-gray-500 { border-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 40%) !important; }
+
+/* Theme-shaped corners — sidebar, cards, modal, buttons */
+html aside,
+html .rounded-lg {
+  border-radius: var(--theme-radius, 0.5rem);
+}
+
+/* Accent glow on primary buttons */
+html .bg-primary-500,
+html .bg-primary-600 {
+  box-shadow: 0 4px 14px -4px hsl(var(--th-h, 0) var(--th-s-light, 50%) 50% / 0.45);
+}
+html.dark .bg-primary-500,
+html.dark .bg-primary-600 {
+  box-shadow: 0 4px 14px -4px hsl(var(--th-h, 0) var(--th-s-dark, 50%) 50% / 0.55);
+}
+
+/* Smooth color transitions when switching themes */
+html, body, nav, aside, div, button, a, span, p, h1, h2, h3, h4, table, td, th, input, select, textarea {
+  transition: background-color 200ms ease, border-color 200ms ease, color 150ms ease;
+}
+.reduce-motion html, .reduce-motion body, .reduce-motion * { transition: none !important; }
+
 
 /* prevent blue highlight on click */
 @media (max-width: 768px) {
