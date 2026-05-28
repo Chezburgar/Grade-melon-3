@@ -105,6 +105,12 @@ interface Course {
 	categories: {
 		name: string;
 		weight: number;
+		/** When true this category is EXTRA: its weight is added on top of
+		 *  the normal 100% scale instead of being normalized into it.
+		 *  e.g. a 10% additive category makes the course out of 110%. */
+		additive?: boolean;
+		/** Marks a user-created category (vs. one from the school gradebook). */
+		custom?: boolean;
 		grade: {
 			letter: string;
 			raw: number;
@@ -940,26 +946,35 @@ function reCalculateAll(grades:Grades,settings:Settings){
 function calculateGrade(course: Course): Course{
 	const gradingScale=course.settings;
 	const places=gradingScale.rounding.percent===true ? gradingScale.rounding.percentPlaces : (gradingScale.rounding.percent===false ? false : 2)
+
+	// --- Base grade: normal (non-additive) categories, normalized to 100% ---
 	let currWeight = 0;
 	let trueCategories = course.categories.filter((c) => {
-		if (!isNaN(c.grade.raw)) {
+		if (!isNaN(c.grade.raw) && !c.additive) {
 			currWeight += c.weight;
 			return true;
 		}
 		return false;
 	});
-	course.grade.raw = places!==false ? parseFloat(
-		trueCategories
-			.reduce((a, b) => {
-				return a + b.grade.raw * (b.weight / currWeight);
-			}, 0)
-			.toFixed(places)
-	) :trueCategories
-			.reduce((a, b) => {
-				return a + b.grade.raw * (b.weight / currWeight);
-			}, 0) ;
+	let base = currWeight > 0
+		? trueCategories.reduce((a, b) => a + b.grade.raw * (b.weight / currWeight), 0)
+		: 0;
 
-	if (trueCategories.length === 0) {
+	// --- Additive (extra) categories: added on top WITHOUT normalizing, so
+	//     a 10%-weight additive category lifts the scale to 110%. ---
+	let additiveCategories = course.categories.filter(
+		(c) => c.additive && !isNaN(c.grade.raw)
+	);
+	let additiveBonus = additiveCategories.reduce(
+		(a, b) => a + b.grade.raw * b.weight,
+		0
+	);
+
+	let total = base + additiveBonus;
+
+	course.grade.raw = places !== false ? parseFloat(total.toFixed(places)) : total;
+
+	if (trueCategories.length === 0 && additiveCategories.length === 0) {
 		course.grade.raw = NaN;
 	}
 	course.grade.letter = letterGrade(course.grade.raw,gradingScale);
@@ -992,6 +1007,60 @@ const addAssignment = (course: Course,uuid=crypto.randomUUID()): Course => {
 	return course;
 };
 
+
+// ── Custom additive ("extra") categories ─────────────────────────────
+// Lets a student model an extra graded component (e.g. "District
+// Assessment" worth 10%) that adds on top of the normal 100% scale.
+
+const addCustomCategory = (
+	course: Course,
+	name: string = "Extra Category",
+	weight: number = 0.1
+): Course => {
+	course.categories.push({
+		name,
+		weight,
+		additive: true,
+		custom: true,
+		grade: { letter: "N/A", raw: NaN, color: "gray" },
+		points: { earned: 0, possible: 0 },
+	});
+	course = calculateGrade(course);
+	return course;
+};
+
+const deleteCustomCategory = (course: Course, categoryIndex: number): Course => {
+	const catName = course.categories[categoryIndex].name;
+	// Drop any assignments that lived in this category.
+	course.assignments = course.assignments.filter((a) => a.category !== catName);
+	course.categories.splice(categoryIndex, 1);
+	course = calculateGrade(course);
+	return course;
+};
+
+const updateCustomCategoryWeight = (
+	course: Course,
+	categoryIndex: number,
+	weight: number
+): Course => {
+	course.categories[categoryIndex].weight = isNaN(weight) ? 0 : weight;
+	course = calculateGrade(course);
+	return course;
+};
+
+const updateCustomCategoryName = (
+	course: Course,
+	categoryIndex: number,
+	name: string
+): Course => {
+	const oldName = course.categories[categoryIndex].name;
+	course.categories[categoryIndex].name = name;
+	course.assignments.forEach((a) => {
+		if (a.category === oldName) a.category = name;
+	});
+	course = calculateGrade(course);
+	return course;
+};
 
 const calculateGPA = (grades: Grades): Grades => {
 	grades.gpa =
@@ -1515,6 +1584,7 @@ export {
 	calculateGPA,
 	updateGPA,
 	abbreviate,
-	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals2
+	reCalculateCourse,reCalculateAll,letterGradeColor,letterGrade,getCache,simplifyWeights,initalizeFinals2,
+	addCustomCategory,deleteCustomCategory,updateCustomCategoryWeight,updateCustomCategoryName
 };
 export type { Category, SchoolsListType,Grades, Assignment, Course,Settings,Cache,CourseSettings,GlobalSettings,Finals,SolveSystemParams};

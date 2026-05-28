@@ -43,35 +43,52 @@ html.dark body {
   background-attachment: fixed;
 }
 
-/* Light surfaces — re-tint the grays */
-html .bg-gray-50  { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 97%) !important; }
-html .bg-gray-100 { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 94%) !important; }
-html .bg-gray-200 { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 88%) !important; }
+/* Light surfaces — re-tint the grays.
+   NOTE: form controls (input/textarea/select) are excluded so the tint
+   can't override an input's own bg-transparent/bg-white and clobber its
+   text contrast (this caused invisible text when typing in dark mode). */
+html .bg-gray-50:not(input):not(textarea):not(select)  { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 97%) !important; }
+html .bg-gray-100:not(input):not(textarea):not(select) { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 94%) !important; }
+html .bg-gray-200:not(input):not(textarea):not(select) { background-color: hsl(var(--th-h, 0) var(--th-s-light, 0%) 88%) !important; }
 
 /* Cards / white surfaces get a very subtle tint */
-html .bg-white {
+html .bg-white:not(input):not(textarea):not(select) {
   background-color: hsl(var(--th-h, 0) calc(var(--th-s-light, 0%) / 2) 99%) !important;
 }
 
-/* Dark surfaces — re-tint the dark grays */
-html.dark .dark\:bg-gray-900,
-.dark html .dark\:bg-gray-900,
-.dark .dark\:bg-gray-900 {
+/* Dark surfaces — re-tint the dark grays (form controls excluded) */
+html.dark .dark\:bg-gray-900:not(input):not(textarea):not(select),
+.dark .dark\:bg-gray-900:not(input):not(textarea):not(select) {
   background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 9%) !important;
 }
-html.dark .dark\:bg-gray-800,
-.dark html .dark\:bg-gray-800,
-.dark .dark\:bg-gray-800 {
+html.dark .dark\:bg-gray-800:not(input):not(textarea):not(select),
+.dark .dark\:bg-gray-800:not(input):not(textarea):not(select) {
   background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 15%) !important;
 }
-html.dark .dark\:bg-gray-700,
-.dark html .dark\:bg-gray-700,
-.dark .dark\:bg-gray-700 {
+html.dark .dark\:bg-gray-700:not(input):not(textarea):not(select),
+.dark .dark\:bg-gray-700:not(input):not(textarea):not(select) {
   background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 22%) !important;
 }
-html.dark .dark\:bg-gray-600,
-.dark .dark\:bg-gray-600 {
+html.dark .dark\:bg-gray-600:not(input):not(textarea):not(select),
+.dark .dark\:bg-gray-600:not(input):not(textarea):not(select) {
   background-color: hsl(var(--th-h, 0) var(--th-s-dark, 0%) 30%) !important;
+}
+
+/* ── FORM CONTROL READABILITY SAFETY NET ──────────────────────
+   Guarantee typed text is always legible regardless of theme tint. */
+html.dark input:not([type="color"]):not([type="checkbox"]):not([type="radio"]),
+html.dark textarea,
+html.dark select {
+  color: #f3f4f6;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #9ca3af;
+}
+html input.bg-transparent,
+html textarea.bg-transparent,
+html select.bg-transparent {
+  background-color: transparent !important;
 }
 
 /* Top bar — keep the tint but add a thin accent border underneath */

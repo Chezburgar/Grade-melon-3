@@ -14,7 +14,11 @@ import {
 	abbreviate,
 	letterGradeColor,letterGrade,Cache,
 	findCurrentPeriod,
-	SchoolsListType
+	SchoolsListType,
+	addCustomCategory,
+	deleteCustomCategory,
+	updateCustomCategoryWeight,
+	updateCustomCategoryName
 } from "../../utils/grades";
 import GradeField from "../../components/GradeField";
 import CategoryField from "../../components/CategoryField";
@@ -385,6 +389,39 @@ export default function Grades({
 		
 	};
 
+	// ── Custom additive ("extra") category handlers ──────────────
+	const addCategory = () => {
+		let tempCache = structuredClone(grades);
+		tempCache[mp].courses[index] = addCustomCategory(tempCache[mp].courses[index]);
+		setGrades(tempCache);
+	};
+
+	const delCategory = (i: number) => {
+		let tempCache = structuredClone(grades);
+		tempCache[mp].courses[index] = deleteCustomCategory(tempCache[mp].courses[index], i);
+		setGrades(tempCache);
+	};
+
+	const changeCatWeight = (i: number, percent: number) => {
+		let tempCache = structuredClone(grades);
+		tempCache[mp].courses[index] = updateCustomCategoryWeight(
+			tempCache[mp].courses[index],
+			i,
+			(isNaN(percent) ? 0 : percent) / 100
+		);
+		setGrades(tempCache);
+	};
+
+	const changeCatName = (i: number, val: string) => {
+		let tempCache = structuredClone(grades);
+		tempCache[mp].courses[index] = updateCustomCategoryName(
+			tempCache[mp].courses[index],
+			i,
+			val || "Extra Category"
+		);
+		setGrades(tempCache);
+	};
+
 	const editTitle=()=>{
 		setIsEditing(true);
 	}
@@ -599,7 +636,7 @@ export default function Grades({
 					</div>}
 
 			
-					{course?.categories.map(({ name, grade, points }, i) => (
+					{course?.categories.map(({ name, grade, points, additive, weight }, i) => (
 						<div
 							key={i}
 							className="mt-2 md:mt-3 w-full bg-gray-200 rounded-full dark:bg-gray-700 relative"
@@ -610,12 +647,81 @@ export default function Grades({
 								style={{ width: `${grade.raw < 100 ? grade.raw : 100}%`,backgroundColor:(grade.color.includes("#") && grade.color)}}
 							>
 								<p className="absolute">
-									{name} ({!isNaN(grade.raw) ? `${grade.raw}%` : "N/A"}) -{" "}
+									{name}{additive && ` (+${Math.round(weight*100)}% extra)`} ({!isNaN(grade.raw) ? `${grade.raw}%` : "N/A"}) -{" "}
 									{Math.floor(points.earned*100)/100}/{Math.floor(points.possible*100)/100}
 								</p>
 							</div>
 						</div>
 					))}
+
+					{/* ── Extra (additive) categories manager ───────────────── */}
+					{(() => {
+						const customCats = course.categories
+							.map((c, i) => ({ ...c, i }))
+							.filter((c) => c.custom);
+						const additiveTotal = course.categories
+							.filter((c) => c.additive)
+							.reduce((a, b) => a + (b.weight || 0), 0);
+						const scale = Math.round((1 + additiveTotal) * 100);
+						return (
+							<div className="mt-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3">
+								<div className="flex items-center justify-between gap-2">
+									<div>
+										<p className="font-semibold dark:text-white text-sm">Extra Categories</p>
+										<p className="text-xs text-gray-500 dark:text-gray-400 max-w-md">
+											Add a graded component on top of the normal scale (e.g. a District
+											Assessment worth +10%). Assign assignments to it below.
+										</p>
+									</div>
+									<button
+										type="button"
+										onClick={addCategory}
+										className="shrink-0 bg-primary-500 hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700 text-white text-sm font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-800"
+									>
+										+ Add
+									</button>
+								</div>
+
+								{customCats.length > 0 && (
+									<div className="mt-3 space-y-2">
+										{customCats.map((cat) => (
+											<div key={cat.i} className="flex items-center gap-2">
+												<input
+													type="text"
+													defaultValue={cat.name}
+													onBlur={(e) => changeCatName(cat.i, e.target.value)}
+													className="flex-1 min-w-0 text-sm rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 dark:text-white p-2 focus:ring-primary-500 focus:border-primary-500"
+													placeholder="Category name"
+												/>
+												<div className="flex items-center gap-1 shrink-0">
+													<span className="text-sm text-gray-400">+</span>
+													<input
+														type="number"
+														min={0}
+														defaultValue={Math.round(cat.weight * 100)}
+														onBlur={(e) => changeCatWeight(cat.i, parseFloat(e.target.value))}
+														className="hide-spinner w-16 text-sm text-center rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 dark:text-white p-2 focus:ring-primary-500 focus:border-primary-500"
+													/>
+													<span className="text-sm text-gray-500 dark:text-gray-400">%</span>
+												</div>
+												<button
+													type="button"
+													onClick={() => delCategory(cat.i)}
+													className="shrink-0 rounded-lg bg-primary-500 dark:bg-primary-600 hover:bg-primary-600 dark:hover:bg-primary-700 text-white p-2 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-800"
+													aria-label="Delete category"
+												>
+													<HiOutlineTrash size="1.1rem" />
+												</button>
+											</div>
+										))}
+										<p className="text-xs text-gray-500 dark:text-gray-400 pt-1">
+											Grade is now out of <span className="font-semibold text-primary-500">{scale}%</span>
+										</p>
+									</div>
+								)}
+							</div>
+						);
+					})()}
 
 					<div className="flex gap-2 mt-5 w-full">
 						<button
