@@ -960,30 +960,28 @@ function calculateGrade(course: Course): Course{
 		? trueCategories.reduce((a, b) => a + b.grade.raw * (b.weight / currWeight), 0)
 		: 0;
 
-	// --- Additive (extra) categories: added on top WITHOUT normalizing, so
-	//     a 10%-weight additive category lifts the scale to 110%. ---
-	let additiveCategories = course.categories.filter(
+	// --- Extra ("additive") categories ---
+	// Each graded extra category is WEIGHTED INTO the total: it claims its
+	// own weight (e.g. 10%) of the final grade while the normal coursework
+	// keeps the remaining share (e.g. 90%). So 80.74% coursework + a 100%
+	// score on a 10% extra category => 80.74*0.9 + 100*0.1 = 82.67%.
+	// No 100% cap — in-category extra credit (earned > possible) can still
+	// legitimately push a grade above 100%.
+	let gradedAdditive = course.categories.filter(
 		(c) => c.additive && !isNaN(c.grade.raw)
 	);
-	let additiveBonus = additiveCategories.reduce(
+	let extraWeight = gradedAdditive.reduce((a, b) => a + b.weight, 0);
+	let normalShare = Math.max(0, 1 - extraWeight);
+	let extraContribution = gradedAdditive.reduce(
 		(a, b) => a + b.grade.raw * b.weight,
 		0
 	);
 
-	let total = base + additiveBonus;
-
-	// Extra (additive) categories expand the scale (e.g. a +10% category
-	// makes the course out of 110%) but the actual reported grade is capped
-	// at 100% — the bonus can lift a lower grade toward a perfect score, it
-	// just can't push you past 100%.
-	const hasAdditive = course.categories.some((c) => c.additive);
-	if (hasAdditive) {
-		total = Math.min(total, 100);
-	}
+	let total = base * normalShare + extraContribution;
 
 	course.grade.raw = places !== false ? parseFloat(total.toFixed(places)) : total;
 
-	if (trueCategories.length === 0 && additiveCategories.length === 0) {
+	if (trueCategories.length === 0 && gradedAdditive.length === 0) {
 		course.grade.raw = NaN;
 	}
 	course.grade.letter = letterGrade(course.grade.raw,gradingScale);

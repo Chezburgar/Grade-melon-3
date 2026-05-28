@@ -651,7 +651,7 @@ export default function Grades({
 								style={{ width: `${grade.raw < 100 ? grade.raw : 100}%`,backgroundColor:(grade.color.includes("#") && grade.color)}}
 							>
 								<p className="absolute">
-									{name}{additive && ` (+${Math.round(weight*100)}% extra)`} ({!isNaN(grade.raw) ? `${grade.raw}%` : "N/A"}) -{" "}
+									{name}{additive && ` (worth ${Math.round(weight*100)}%)`} ({!isNaN(grade.raw) ? `${grade.raw}%` : "N/A"}) -{" "}
 									{Math.floor(points.earned*100)/100}/{Math.floor(points.possible*100)/100}
 								</p>
 							</div>
@@ -666,15 +666,16 @@ export default function Grades({
 						const additiveTotal = course.categories
 							.filter((c) => c.additive)
 							.reduce((a, b) => a + (b.weight || 0), 0);
-						const scale = Math.round((1 + additiveTotal) * 100);
+						const extraPercent = Math.round(additiveTotal * 100);
+						const coursePercent = Math.max(0, 100 - extraPercent);
 						return (
 							<div className="mt-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3">
 								<div className="flex items-center justify-between gap-2">
 									<div>
 										<p className="font-semibold dark:text-white text-sm">Extra Categories</p>
 										<p className="text-xs text-gray-500 dark:text-gray-400 max-w-md">
-											Add a graded component on top of the normal scale (e.g. a District
-											Assessment worth +10%). Assign assignments to it below.
+											Add a weighted graded component (e.g. a District Assessment worth
+											10% of your grade). Assign assignments to it below.
 										</p>
 									</div>
 									<button
@@ -698,7 +699,7 @@ export default function Grades({
 													placeholder="Category name"
 												/>
 												<div className="flex items-center gap-1 shrink-0">
-													<span className="text-sm text-gray-400">+</span>
+													<span className="text-xs text-gray-400">worth</span>
 													<input
 														type="number"
 														min={0}
@@ -719,7 +720,7 @@ export default function Grades({
 											</div>
 										))}
 										<p className="text-xs text-gray-500 dark:text-gray-400 pt-1">
-											On a <span className="font-semibold text-primary-500">{scale}%</span> scale &mdash; your reported grade is still capped at 100%.
+											Weighted into your grade: coursework <span className="font-semibold text-primary-500">{coursePercent}%</span>, extra <span className="font-semibold text-primary-500">{extraPercent}%</span>.
 										</p>
 									</div>
 								)}
