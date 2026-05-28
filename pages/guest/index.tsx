@@ -264,7 +264,7 @@ export default function Grades({
 		<motion.div 
 		className="p-5 md:p-10 md:flex-1">
 			<Head>
-				<title>Gradebook - Grade Melon</title>
+				<title>Gradebook - Chezburger Grades</title>
 			</Head>
 			<GuestModal showModal={showGuestModal} setShowModal={setShowGuestModal}/>
 			{

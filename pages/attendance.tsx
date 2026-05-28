@@ -67,7 +67,7 @@ export default function Attendance({ client,createError}: AttendanceProps) {
 	return (
 		<div className="flex-1 p-5 md:p-10">
 			<Head>
-				<title>Attendance - Grade Melon</title>
+				<title>Attendance - Chezburger Grades</title>
 			</Head>
 			{loading ? (
 				<div className="flex justify-center">

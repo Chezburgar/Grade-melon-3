@@ -67,7 +67,7 @@ export default function Schedule({ client,createError }: ScheduleProps) {
 	return (
 		<div className="p-5 md:p-10 h-full flex-1">
 			<Head>
-				<title>Schedule - Grade Melon</title>
+				<title>Schedule - Chezburger Grades</title>
 			</Head>
 			{loading ? (
 				<div className="flex justify-center">

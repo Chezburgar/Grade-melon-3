@@ -10,6 +10,7 @@ import { IoDocumentTextOutline } from "react-icons/io5";
 import { FiMoon } from "react-icons/fi";
 import { BsGraphUp } from "react-icons/bs";
 import { motion } from "framer-motion";
+import { asset } from "../utils/path";
 
 interface HomeProps {
 	client: any;
@@ -60,7 +61,7 @@ export default function Home({ client }: HomeProps) {
 	return (
 		<div className="text-left px-9 sm:px-12 md:px-24 lg:px-36 xl:px-48 py-5 md:py-10 overflow-hidden">
 			<Head>
-				<title>Grade Melon</title>
+				<title>Chezburger Grades</title>
 			</Head>
 
 			<div className="grid max-w-screen-xl py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12 lg:max-w-none lg:space-x-8 lg:items-center">
@@ -71,7 +72,7 @@ export default function Home({ client }: HomeProps) {
 						transition={{ duration: 0.5 }}
 						className="max-w-2xl mb-4 text-5xl font-bold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white"
 					>
-						Grade Melon
+						Chezburger Grades
 					</motion.h1>
 					<motion.p
 						initial={{ x: 0, opacity: 0 }}
@@ -87,7 +88,7 @@ export default function Home({ client }: HomeProps) {
 						transition={{ delay: 0.2, duration: 0.5 }}
 						className="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400"
 					>
-						Grade Melon is an all new third party alternative
+						Chezburger Grades is an all new third party alternative
 						to help you stay in control of your grades. It allows any student
 						using to login to check their schedule and
 						calculate their grades.
@@ -119,7 +120,7 @@ export default function Home({ client }: HomeProps) {
 						animate={{ y: 0, opacity: 1 }}
 						transition={{ delay: 0.3, duration: 0.5 }}
 						className="h-96 w-full"
-						src="/assets/herolight.svg"
+						src={asset("/assets/herolight.svg")}
 						alt="mockup"
 					/>
 				</div>
@@ -129,7 +130,7 @@ export default function Home({ client }: HomeProps) {
 						animate={{ y: 0, opacity: 1 }}
 						transition={{ delay: 0.3, duration: 0.5 }}
 						className="h-96 w-full"
-						src="/assets/hero.svg"
+						src={asset("/assets/hero.svg")}
 						alt="mockup"
 					/>
 				</div>
@@ -190,7 +191,7 @@ export default function Home({ client }: HomeProps) {
 						transition={{ delay: 1.2, duration: 0.5 }}
 						className="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400"
 					>
-						Grade Melon is almost completely open source! You can find the source code
+						Chezburger Grades is almost completely open source! You can find the source code
 						on our Github. We are commited to maintain transparency with our
 						users.
 					</motion.p>
@@ -213,7 +214,7 @@ export default function Home({ client }: HomeProps) {
 					animate={{ y: 0, opacity: 1 }}
 					transition={{ delay: 0.2, duration: 0.5 }}
 					className="h-96 w-full hidden lg:block dark:hidden"
-					src="/assets/opensourcelight.svg"
+					src={asset("/assets/opensourcelight.svg")}
 					alt="Open Source"
 				/>
 				<motion.img
@@ -221,7 +222,7 @@ export default function Home({ client }: HomeProps) {
 					animate={{ y: 0, opacity: 1 }}
 					transition={{ delay: 0.2, duration: 0.5 }}
 					className="h-96 w-full hidden lg:dark:block"
-					src="/assets/opensource.svg"
+					src={asset("/assets/opensource.svg")}
 					alt="Open Source"
 				/>
 			</div>

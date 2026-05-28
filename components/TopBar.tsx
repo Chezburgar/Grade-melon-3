@@ -8,6 +8,7 @@ import { MdOutlinePrivacyTip } from "react-icons/md";
 import Cookies from "js-cookie";
 import dynamic from "next/dynamic";
 import {useRouter} from "next/router";
+import { asset } from "../utils/path";
 
 interface TopBarProps {
 	studentInfo: any;
@@ -205,7 +206,7 @@ try{
 											src={
 												studentInfo?.photo
 													? `data:image/png;base64,${studentInfo.photo}`
-													: "/assets/default-avatar.svg"
+													: asset("/assets/default-avatar.svg")
 											}
 											alt="User Icon"
 										/>
@@ -257,7 +258,7 @@ try{
 				{!advertiseBrowser && partner && (
 					<div ref={elementRef} className={`w-full bg-primary-11 px-4 py-3 text-white bg-opacity-90`}>
 						<p className="text-center text-sm font-medium flex gap-2 justify-center items-center">
-							<img src="/assets/partner.webp" alt="" />
+							<img src={asset("/assets/partner.webp")} alt="" />
 							<Link
 								onClick={closePartner}
 								href="https://klinn.works/"
@@ -277,7 +278,7 @@ try{
 					<div className="w-full bg-primary-600 px-4 py-3 text-white bg-opacity-90">
 						<p className="text-center text-sm font-medium flex gap-2 justify-center">
 							<span>
-								Want to use Grade Melon as an app?
+								Want to use Chezburger Grades as an app?
 								<Link
 									onClick={() => setAdvertisePWA(false)}
 									className="underline decoration-2 pl-1"

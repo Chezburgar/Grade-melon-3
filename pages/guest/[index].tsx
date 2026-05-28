@@ -505,7 +505,7 @@ export default function Grades({
 		className="p-5 md:p-10 flex-1 h-screen">
 			<Head>
 				<title>
-					{course ? `${course?.name} - Grade Melon` : "Grade Melon"}
+					{course ? `${course?.name} - Chezburger Grades` : "Chezburger Grades"}
 				</title>
 			</Head>
 

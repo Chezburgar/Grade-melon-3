@@ -116,7 +116,7 @@ export default function Documents({ client,createError }: DocumentsProps) {
 	return (
 		<div className="p-5 md:p-10 h-full flex-1">
 			<Head>
-				<title>Documents - Grade Melon</title>
+				<title>Documents - Chezburger Grades</title>
 			</Head>
 			{loading ? (
 				<div className="flex justify-center">
