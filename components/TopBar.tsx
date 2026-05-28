@@ -176,8 +176,9 @@ try{
 						</span>
 					</Link>
 					<div className="flex items-center md:order-2 gap-2">
-							<Link href="/settings" title="Appearance Settings" className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 transition-colors">
+							<Link href="/settings" title="Customize" className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 transition-colors">
 								<BsGear size="1.15rem" />
+								<span className="hidden sm:inline">Customize</span>
 							</Link>
 							<div>
 								<DarkModeToggle />

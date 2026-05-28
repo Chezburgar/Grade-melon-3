@@ -3,7 +3,15 @@ import Cookies from "js-cookie";
 
 export default function DarkModeToggle(){
   const [isDarkMode, setIsDarkMode] = useState(
-    () =>  ((Cookies.get("theme")=="light"||Cookies.get("theme")=="dark")? (Cookies.get("theme")=="dark") : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches))
+    // Default to dark mode when no explicit preference is set, since the
+    // themes are designed to shine in dark mode. Respect an explicit
+    // user choice (light or dark cookie) if one exists.
+    () => {
+      const pref = Cookies.get("theme");
+      if (pref === "light") return false;
+      if (pref === "dark") return true;
+      return true;
+    }
   );
 
  

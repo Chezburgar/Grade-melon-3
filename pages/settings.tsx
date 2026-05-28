@@ -121,7 +121,7 @@ export default function Settings() {
   return (
     <>
       <Head>
-        <title>Settings — Chezburger Grades</title>
+        <title>Customize — Chezburger Grades</title>
       </Head>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -133,9 +133,9 @@ export default function Settings() {
           }}
         >
           <div className="relative z-10 text-white">
-            <h1 className="text-3xl font-bold drop-shadow">Appearance</h1>
+            <h1 className="text-3xl font-bold drop-shadow">Customize</h1>
             <p className="mt-1 opacity-95 drop-shadow-sm">
-              Pick from <span className="font-bold">{THEMES.length} themes</span> and customize every detail.
+              Pick from <span className="font-bold">{THEMES.length} themes</span> and tweak every detail to your taste.
             </p>
           </div>
           {/* Decorative bubbles */}
