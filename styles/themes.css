@@ -564,6 +564,120 @@
 }
 
 /* ============================================================
+   NEW THEMES (51-60)
+   ============================================================ */
+
+/* 51. Champagne — Metallic & Luxurious (a richer, golder gold) */
+[data-theme="champagne"] {
+  --primary-50:  #fdfaf0;  --primary-100: #faf2d7;  --primary-200: #f3e2a8;
+  --primary-300: #ebcf76;  --primary-400: #ddb649;  --primary-500: #c9a227;
+  --primary-600: #a8841d;  --primary-700: #836717;  --primary-800: #67521a;
+  --primary-900: #443615;  --primary-11:  #b8860b;
+  --th-h: 44;  --th-s-light: 58%; --th-s-dark: 35%;
+  --th-accent: linear-gradient(135deg, #f6e4a3, #c9a227 55%, #8a6d14);
+  --theme-radius: 0.625rem;
+}
+
+/* 52. Bronze — Forged & Warm */
+[data-theme="bronze"] {
+  --primary-50:  #fbf6ef;  --primary-100: #f4e7d3;  --primary-200: #e8cba4;
+  --primary-300: #d6a86f;  --primary-400: #c08544;  --primary-500: #a06a30;
+  --primary-600: #835527;  --primary-700: #694420;  --primary-800: #51351b;
+  --primary-900: #382413;  --primary-11:  #8b5a2b;
+  --th-h: 30;  --th-s-light: 48%; --th-s-dark: 33%;
+  --th-accent: linear-gradient(135deg, #d6a86f, #694420);
+  --theme-radius: 0.375rem;
+}
+
+/* 53. Rose Gold — Soft & Refined */
+[data-theme="rosegold"] {
+  --primary-50:  #fdf6f3;  --primary-100: #fae8e1;  --primary-200: #f4d0c4;
+  --primary-300: #ecb09e;  --primary-400: #e08e76;  --primary-500: #c97a5f;
+  --primary-600: #ab6149;  --primary-700: #8b4d3a;  --primary-800: #6f3e30;
+  --primary-900: #4d2a20;  --primary-11:  #b76e79;
+  --th-h: 14;  --th-s-light: 55%; --th-s-dark: 35%;
+  --th-accent: linear-gradient(135deg, #f4d0c4, #b76e79 55%, #8b4d3a);
+  --theme-radius: 0.75rem;
+}
+
+/* 54. Obsidian — Pure & Sleek */
+[data-theme="obsidian"] {
+  --primary-50:  #f4f4f5;  --primary-100: #e4e4e7;  --primary-200: #d4d4d8;
+  --primary-300: #a1a1aa;  --primary-400: #52525b;  --primary-500: #27272a;
+  --primary-600: #18181b;  --primary-700: #0f0f11;  --primary-800: #09090b;
+  --primary-900: #000000;  --primary-11:  #818cf8;
+  --th-h: 240; --th-s-light: 6%;  --th-s-dark: 8%;
+  --th-accent: linear-gradient(135deg, #3f3f46, #000000);
+  --theme-radius: 0.25rem;
+}
+
+/* 55. Sand — Warm & Neutral */
+[data-theme="sand"] {
+  --primary-50:  #faf7f0;  --primary-100: #f2ebdc;  --primary-200: #e6d8bd;
+  --primary-300: #d6bf94;  --primary-400: #c4a36c;  --primary-500: #a8854a;
+  --primary-600: #8a6c3b;  --primary-700: #6d5530;  --primary-800: #544228;
+  --primary-900: #3a2e1d;  --primary-11:  #b45309;
+  --th-h: 38;  --th-s-light: 35%; --th-s-dark: 25%;
+  --th-accent: linear-gradient(135deg, #e6d8bd, #8a6c3b);
+  --theme-radius: 0.625rem;
+}
+
+/* 56. Emerald — Deep Jewel Green */
+[data-theme="emerald"] {
+  --primary-50:  #ecfdf5;  --primary-100: #d1fae5;  --primary-200: #a7f3d0;
+  --primary-300: #6ee7b7;  --primary-400: #34d399;  --primary-500: #059669;
+  --primary-600: #047857;  --primary-700: #065f46;  --primary-800: #064e3b;
+  --primary-900: #022c22;  --primary-11:  #10b981;
+  --th-h: 152; --th-s-light: 58%; --th-s-dark: 42%;
+  --th-accent: linear-gradient(135deg, #6ee7b7, #065f46);
+  --theme-radius: 0.625rem;
+}
+
+/* 57. Blossom — Soft & Sweet */
+[data-theme="blossom"] {
+  --primary-50:  #fdf2f6;  --primary-100: #fce7ef;  --primary-200: #fad1e1;
+  --primary-300: #f7b3cd;  --primary-400: #f48fb6;  --primary-500: #ed6ca0;
+  --primary-600: #d94e85;  --primary-700: #b83b6c;  --primary-800: #932f57;
+  --primary-900: #6d2342;  --primary-11:  #f9a8d4;
+  --th-h: 335; --th-s-light: 60%; --th-s-dark: 42%;
+  --th-accent: linear-gradient(135deg, #fad1e1, #ed6ca0);
+  --theme-radius: 1rem;
+}
+
+/* 58. Orchid — Vivid & Exotic */
+[data-theme="orchid"] {
+  --primary-50:  #fbf4ff;  --primary-100: #f5e6fe;  --primary-200: #ecccfd;
+  --primary-300: #dfa6fa;  --primary-400: #cd76f3;  --primary-500: #b94fe4;
+  --primary-600: #a134c9;  --primary-700: #8527a3;  --primary-800: #6c2184;
+  --primary-900: #4d1860;  --primary-11:  #d946ef;
+  --th-h: 285; --th-s-light: 60%; --th-s-dark: 46%;
+  --th-accent: linear-gradient(135deg, #dfa6fa, #8527a3);
+  --theme-radius: 0.625rem;
+}
+
+/* 59. Lagoon — Cool & Tropical */
+[data-theme="lagoon"] {
+  --primary-50:  #effcfb;  --primary-100: #cef9f4;  --primary-200: #9ef0ea;
+  --primary-300: #5fe0db;  --primary-400: #2cc5c4;  --primary-500: #11a3a6;
+  --primary-600: #0c8488;  --primary-700: #10696d;  --primary-800: #135457;
+  --primary-900: #133a3d;  --primary-11:  #0891b2;
+  --th-h: 182; --th-s-light: 58%; --th-s-dark: 40%;
+  --th-accent: linear-gradient(135deg, #5fe0db, #10696d);
+  --theme-radius: 0.875rem;
+}
+
+/* 60. Sunflower — Bright & Cheerful */
+[data-theme="sunflower"] {
+  --primary-50:  #fffced;  --primary-100: #fff6c9;  --primary-200: #ffec92;
+  --primary-300: #ffdc52;  --primary-400: #ffc61f;  --primary-500: #f0a500;
+  --primary-600: #cc8400;  --primary-700: #a36100;  --primary-800: #854d0e;
+  --primary-900: #6b3e12;  --primary-11:  #f59e0b;
+  --th-h: 45;  --th-s-light: 75%; --th-s-dark: 48%;
+  --th-accent: linear-gradient(135deg, #ffdc52, #cc8400);
+  --theme-radius: 0.5rem;
+}
+
+/* ============================================================
    ADVANCED CUSTOMIZATION — global knobs (applied via attributes)
    ============================================================ */
 

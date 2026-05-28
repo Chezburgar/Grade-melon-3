@@ -10,7 +10,10 @@ export type ThemeName =
   | "ruby" | "cherry" | "sky" | "aqua" | "pumpkin"
   | "mocha" | "galaxy" | "aurora" | "tropical" | "cyberpunk"
   | "volcano" | "bubblegum" | "honeydew" | "plum" | "ember"
-  | "frost" | "cosmic" | "lemon" | "wine" | "sahara";
+  | "frost" | "cosmic" | "lemon" | "wine" | "sahara"
+  // ---- new themes (51-60) ----
+  | "champagne" | "bronze" | "rosegold" | "obsidian" | "sand"
+  | "emerald" | "blossom" | "orchid" | "lagoon" | "sunflower";
 
 export interface ThemeConfig {
   name: ThemeName;
@@ -86,6 +89,17 @@ export const THEMES: ThemeConfig[] = [
   { name: "lemon",      label: "Lemon",      description: "Bright & Zesty",          primary: "#eab308", primaryLight: "#fef08a", primaryDark: "#a16207", hue: 50,  satLight: 75, satDark: 50, accent: "linear-gradient(135deg, #fef08a, #a16207)",            textOnPrimary: "#333" },
   { name: "wine",       label: "Wine",       description: "Mature & Refined",        primary: "#831843", primaryLight: "#fda4af", primaryDark: "#4c0519", hue: 340, satLight: 50, satDark: 42, accent: "linear-gradient(135deg, #f472b6, #4c0519)",            textOnPrimary: "#fff" },
   { name: "sahara",     label: "Sahara",     description: "Sun-baked Sands",         primary: "#ca8a04", primaryLight: "#fde68a", primaryDark: "#854d0e", hue: 35,  satLight: 55, satDark: 38, accent: "linear-gradient(135deg, #fde68a, #854d0e)",            textOnPrimary: "#fff" },
+  // ---- NEW THEMES (51-60) ----
+  { name: "champagne",  label: "Champagne",  description: "Metallic & Luxurious",    primary: "#c9a227", primaryLight: "#ebcf76", primaryDark: "#836717", hue: 44,  satLight: 58, satDark: 35, accent: "linear-gradient(135deg, #f6e4a3, #c9a227 55%, #8a6d14)", textOnPrimary: "#fff" },
+  { name: "bronze",     label: "Bronze",     description: "Forged & Warm",           primary: "#a06a30", primaryLight: "#d6a86f", primaryDark: "#694420", hue: 30,  satLight: 48, satDark: 33, accent: "linear-gradient(135deg, #d6a86f, #694420)",            textOnPrimary: "#fff" },
+  { name: "rosegold",   label: "Rose Gold",  description: "Soft & Refined",          primary: "#c97a5f", primaryLight: "#ecb09e", primaryDark: "#8b4d3a", hue: 14,  satLight: 55, satDark: 35, accent: "linear-gradient(135deg, #f4d0c4, #b76e79 55%, #8b4d3a)", textOnPrimary: "#fff" },
+  { name: "obsidian",   label: "Obsidian",   description: "Pure & Sleek",            primary: "#27272a", primaryLight: "#52525b", primaryDark: "#09090b", hue: 240, satLight: 6,  satDark: 8,  accent: "linear-gradient(135deg, #3f3f46, #000000)",            textOnPrimary: "#fff" },
+  { name: "sand",       label: "Sand",       description: "Warm & Neutral",          primary: "#a8854a", primaryLight: "#d6bf94", primaryDark: "#6d5530", hue: 38,  satLight: 35, satDark: 25, accent: "linear-gradient(135deg, #e6d8bd, #8a6c3b)",            textOnPrimary: "#fff" },
+  { name: "emerald",    label: "Emerald",    description: "Deep Jewel Green",        primary: "#059669", primaryLight: "#6ee7b7", primaryDark: "#065f46", hue: 152, satLight: 58, satDark: 42, accent: "linear-gradient(135deg, #6ee7b7, #065f46)",            textOnPrimary: "#fff" },
+  { name: "blossom",    label: "Blossom",    description: "Soft & Sweet",            primary: "#ed6ca0", primaryLight: "#f7b3cd", primaryDark: "#b83b6c", hue: 335, satLight: 60, satDark: 42, accent: "linear-gradient(135deg, #fad1e1, #ed6ca0)",            textOnPrimary: "#fff" },
+  { name: "orchid",     label: "Orchid",     description: "Vivid & Exotic",          primary: "#b94fe4", primaryLight: "#dfa6fa", primaryDark: "#8527a3", hue: 285, satLight: 60, satDark: 46, accent: "linear-gradient(135deg, #dfa6fa, #8527a3)",            textOnPrimary: "#fff" },
+  { name: "lagoon",     label: "Lagoon",     description: "Cool & Tropical",         primary: "#11a3a6", primaryLight: "#5fe0db", primaryDark: "#10696d", hue: 182, satLight: 58, satDark: 40, accent: "linear-gradient(135deg, #5fe0db, #10696d)",            textOnPrimary: "#fff" },
+  { name: "sunflower",  label: "Sunflower",  description: "Bright & Cheerful",       primary: "#f0a500", primaryLight: "#ffdc52", primaryDark: "#a36100", hue: 45,  satLight: 75, satDark: 48, accent: "linear-gradient(135deg, #ffdc52, #cc8400)",            textOnPrimary: "#333" },
 ];
 
 export interface ThemeSettings {
