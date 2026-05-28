@@ -972,6 +972,15 @@ function calculateGrade(course: Course): Course{
 
 	let total = base + additiveBonus;
 
+	// Extra (additive) categories expand the scale (e.g. a +10% category
+	// makes the course out of 110%) but the actual reported grade is capped
+	// at 100% — the bonus can lift a lower grade toward a perfect score, it
+	// just can't push you past 100%.
+	const hasAdditive = course.categories.some((c) => c.additive);
+	if (hasAdditive) {
+		total = Math.min(total, 100);
+	}
+
 	course.grade.raw = places !== false ? parseFloat(total.toFixed(places)) : total;
 
 	if (trueCategories.length === 0 && additiveCategories.length === 0) {

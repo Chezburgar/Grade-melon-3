@@ -719,7 +719,7 @@ export default function Grades({
 											</div>
 										))}
 										<p className="text-xs text-gray-500 dark:text-gray-400 pt-1">
-											Grade is now out of <span className="font-semibold text-primary-500">{scale}%</span>
+											On a <span className="font-semibold text-primary-500">{scale}%</span> scale &mdash; your reported grade is still capped at 100%.
 										</p>
 									</div>
 								)}
