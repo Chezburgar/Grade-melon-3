@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/globals.css";
 import { ThemeProvider } from "../context/ThemeContext";
-import StudentVue, { Client } from "studentvue";
+import StudentVue from "../lib/studentvue";
 import { useRouter } from "next/router";
 import { Flowbite, Toast, useTheme } from "flowbite-react";
 import Topbar from "../components/TopBar";
@@ -78,50 +78,9 @@ function MyApp({ Component, pageProps }) {
 	) => {
 		await setLoading(true);
 
-		const encryptedPass=getCourseSettings(username,password,encrypted,url);
-/*
-you'd do it it in parallel
-
-wherever you do a setGrades()
-you'd also do in tandem, a setGradesCache() so they continously match up
-could add a flag to see if it's changed so that you know if you need to refetch it upon a refresh
-
-could cause some eroneous re-renders.
-
-but actually it could work.
-
-
-may be neater to reFactor grades obj to BE gradesCache and then create a seperate index prop to control which
-one is the "active" one rather than maintain a whole "active" version as its own prop which is what grades effectively becomes now
-
-refactor would be annoying as hell though. okay I'll do seperate for now and refactor later prob.
-
-
-
-
-Also:
-
-the settings modal is inconsitent. finals settings update live, letterScale and rounding don't
-also the weights don't automagically change respectively yet
-also exams / general full functionality and saving doesn't exist as a practical matter yet
-
-
-the animation is janky now that there can be instantaneous switching
-
-it's annoying and unuintuitive that switching from one marking period to the next on the same class
-has no regard for moving classes, though, that was also how the og worked
-
-optimization modal not done yet
-
-
-it would probably be a good idea to show the final grade also on the Home Screen grades cards/table 
-
-
-
-
-*/
-
-
+		/* the new JSON API authenticates with the plaintext password (Basic auth
+		   at AttemptLogin, Bearer token afterwards) and re-logs-in itself when
+		   its cached session expires — the cookie below stores the plaintext */
 		await StudentVue.login(url || districtURL, {
 			username: username,
 			password: password,
@@ -146,12 +105,7 @@ it would probably be a good idea to show the final grade also on the Home Screen
 				if (save) {
 					localStorage.setItem("remember", "true");
 					Cookies.set("username",username,{expires:7,secure:false,sameSite:"Lax"})
-					let myTemp;
-					if(!encrypted){
-						myTemp=await encryptedPass;
-					}
-					else{myTemp=password}
-				Cookies.set("password",myTemp,{expires:7})
+					Cookies.set("password",password,{expires:7})
 
 
 				} else {
@@ -372,7 +326,7 @@ useEffect(()=>{
 
 		var refURL: string="";
 		async function doLogin(){
-			await login(Cookies.get("username"),Cookies.get("password"),true,districtURL,true)}
+			await login(Cookies.get("username"),Cookies.get("password"),true,districtURL,false)}
 		if(Cookies.get("districtURL")!=undefined&&districtURL==undefined){
 			console.log("RELEASE ME")
 			let cookieDistrict=JSON.parse(Cookies.get("districtURL"));

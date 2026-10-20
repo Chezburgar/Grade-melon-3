@@ -1,4 +1,4 @@
-import { Gradebook } from "studentvue";
+import { Gradebook } from "../lib/studentvue";
 
 
 interface Assignment {

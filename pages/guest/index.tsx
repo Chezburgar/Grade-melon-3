@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 import CustomAd from "../../components/customAd";
 import { BsGearWideConnected } from "react-icons/bs";
 import SettingsModal from "../../components/settingsModal"
-import StudentVue from "studentvue";
+import StudentVue from "../../lib/studentvue";
 import {getGradebooks} from "../../utils/soap"
 import { HiArrowCircleLeft, HiArrowCircleRight } from "react-icons/hi";
 import {grades as sample}	 from "../../utils/sample"

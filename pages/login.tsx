@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Modal, Spinner } from "flowbite-react";
 import { BiSearchAlt } from "react-icons/bi";
 import Head from "next/head";
-import StudentVue from "studentvue";
+import StudentVue from "../lib/studentvue";
 import Script from "next/script";
 
 import Cookies from "js-cookie";

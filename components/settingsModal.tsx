@@ -5,7 +5,7 @@ import { reCalculateAll,parseGrades,letterGradeColor, reCalculateCourse, toggleS
 import {colorShit} from "./colors"
 import {Settings,Grades,parseDate,Cache,CourseSettings,templateFinals,GlobalSettings,simplifyWeights,initalizeFinals2,Finals} from "../utils/grades"
 import GradeField from "./GradeField";
-import StudentVue from "studentvue";
+import StudentVue from "../lib/studentvue";
 import { AnimatePresence,motion } from "framer-motion";
 
 
