@@ -187,6 +187,8 @@ const publicProxies = [
 
 let workingProxy: string | null = null; // remember what worked to avoid re-probing
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 async function proxiedFetch(url: string, init: RequestInit = {}) {
 	const attempts: { name: string; fetch: Function }[] = [];
 	// 1. user-configured relay (highest priority)
@@ -207,22 +209,46 @@ async function proxiedFetch(url: string, init: RequestInit = {}) {
 
 	let lastErr: any = null;
 	for (const attempt of attempts) {
-		try {
-			const res = await attempt.fetch(url, init);
-			workingProxy = attempt.name;
-			return res;
-		} catch (e) {
-			if (attempt.name === "direct") {
-				lastErr = new Error(
-					"The district server blocked the direct browser request (CORS) — retrying through a relay…"
-				);
-				continue;
+		// two tries per relay: workers occasionally drop a request cold
+		for (let tryN = 0; tryN < 2; tryN++) {
+			try {
+				const res = await attempt.fetch(url, init);
+				workingProxy = attempt.name;
+				return res;
+			} catch (e) {
+				lastErr = e;
+				if (tryN === 0) await sleep(350);
 			}
-			lastErr = e;
+		}
+		if (attempt.name === "direct" && !workingProxy) {
+			lastErr = new Error(
+				"The district server blocked the direct browser request (CORS) — retrying through a relay…"
+			);
 		}
 	}
 	if (workingProxy) workingProxy = null;
 	throw lastErr || new Error("No relay could reach the StudentVUE server.");
+}
+
+/* Run tasks with limited concurrency — a full parallel burst of period
+   requests can trip relay/Synergy rate limits, which reads back as random
+   login failures. */
+async function pool<T>(items: T[], limit: number, fn: (item: T) => Promise<any>) {
+	const results: any[] = new Array(items.length);
+	let next = 0;
+	const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+		while (true) {
+			const i = next++;
+			if (i >= items.length) return;
+			try {
+				results[i] = { ok: true, value: await fn(items[i]) };
+			} catch (e) {
+				results[i] = { ok: false, error: e };
+			}
+		}
+	});
+	await Promise.all(workers);
+	return results;
 }
 
 /* ---------- Errors ---------- */
@@ -244,6 +270,7 @@ export class UnauthorizedError extends Error {
    and reused across reloads instead of signing in every time. */
 const SESSION_KEY = "chezburger.session.v2";
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
+const GB_CACHE_KEY = "chezburger.gbcache.v1";
 
 function saveSession(client: Client) {
 	try {
@@ -968,10 +995,13 @@ export class Client {
 			);
 		}
 		if (data && data.error) {
-			throw new ApiError(
-				data.error.message || "Unknown API error",
-				String(data.error.code ?? "")
-			);
+			const code = String(data.error.code ?? "");
+			/* Synergy returns HTTP 200 with a JSON error body — an auth
+			   failure carries code "401"/"403" inside the body, not as the
+			   HTTP status. Surface those as UnauthorizedError so the token
+			   refresh / re-login logic in #data actually triggers. */
+			if (code === "401" || code === "403") throw new UnauthorizedError();
+			throw new ApiError(data.error.message || "Unknown API error", code);
 		}
 		return data;
 	}
@@ -1001,8 +1031,8 @@ export class Client {
 		throw new UnauthorizedError();
 	}
 
-	/* JSON first (with token refresh), permanent SOAP fallback when a district
-	   has no JSON API (error codes 2100/400). */
+	/* JSON first (with token refresh and full re-login fallback), permanent
+	   SOAP fallback when a district has no JSON API (error codes 2100/400). */
 	async #data(
 		method: string,
 		request: any,
@@ -1013,8 +1043,17 @@ export class Client {
 			return await this.#json(method, request);
 		} catch (e: any) {
 			if (e instanceof UnauthorizedError) {
+				// 1. try the refresh token
 				try {
 					await this.#refreshToken();
+					return await this.#json(method, request);
+				} catch {
+					/* fall through */
+				}
+				// 2. refresh failed — full re-login with the stored password
+				//    (mirrors MangoGrade's silent remembered-login)
+				try {
+					await this.attemptLogin();
 					return await this.#json(method, request);
 				} catch {
 					throw new UnauthorizedError();
@@ -1080,11 +1119,43 @@ export class Client {
 
 	/* -- data methods (old-library surface) -- */
 
+	/* Persistent per-period gradebook cache (like the old xmlCache): fresh
+	   fetches update it, and stale entries are served when a re-fetch fails
+	   so a flaky relay can never blank the gradebook. */
+	#gbCacheKey(index: number | null, orgYearGu: string | null) {
+		return `${this.hostUrl}|${this.username}|${index ?? "cur"}|${orgYearGu || ""}`;
+	}
+	#gbCacheRead(key: string): { at: number; gb: any } | null {
+		try {
+			const all = JSON.parse(localStorage.getItem(GB_CACHE_KEY) || "{}");
+			return all[key] || null;
+		} catch {
+			return null;
+		}
+	}
+	#gbCacheWrite(key: string, gb: any) {
+		try {
+			const all = JSON.parse(localStorage.getItem(GB_CACHE_KEY) || "{}");
+			all[key] = { at: Date.now(), gb };
+			localStorage.setItem(GB_CACHE_KEY, JSON.stringify(all));
+		} catch {
+			/* storage full/unavailable — cache is best-effort */
+		}
+	}
+
 	async gradebook(
 		reportingPeriodIndex: number | null = null,
 		orgYearGu: string | null = null,
 		fresh: boolean = true
 	): Promise<[any, any]> {
+		const cacheKey = this.#gbCacheKey(reportingPeriodIndex, orgYearGu);
+		if (!fresh) {
+			const cached = this.#gbCacheRead(cacheKey);
+			// serve cached copies up to a day old without a round-trip
+			if (cached && Date.now() - cached.at < 24 * 60 * 60 * 1000) {
+				return [cached.gb, { gradingScale: cached.gb.gradingScale, token: this.token, cached: true }];
+			}
+		}
 		const req = {
 			reportPeriod:
 				reportingPeriodIndex !== null && reportingPeriodIndex !== undefined
@@ -1113,6 +1184,7 @@ export class Client {
 		const gb = gradebookToOld(raw, reportingPeriodIndex as any);
 		const extra = { gradingScale: defaultGradingScale(), token: this.token };
 		gb.gradingScale = extra.gradingScale;
+		this.#gbCacheWrite(cacheKey, gb);
 		// last-resort diagnostics: open DevTools console and inspect/copy
 		// window.__chezDebug if a course still looks wrong
 		try {
@@ -1129,9 +1201,15 @@ export class Client {
 		return [gb, extra];
 	}
 
-	/* Fetch every reporting period's gradebook in parallel and return them as
-	   [Gradebook, extra][] — the same array the old login() produced, minus
-	   the redundant round-trips. Reuses a cached session when possible. */
+	/* Fetch every reporting period's gradebook and return them as
+	   [Gradebook, extra][] — the same array the old login() produced.
+	   Order of operations, tuned for both speed and reliability:
+	   1. reuse the cached token session (no login round-trip), re-authing
+	      silently with the stored password if it expired;
+	   2. fetch the current period fresh; other periods in a limited
+	      concurrency pool (a full parallel burst trips rate limits);
+	   3. on a period failure, retry, then fall back to the persistent
+	      cache rather than failing the whole login. */
 	async getAllGradebooks(): Promise<[any, any][]> {
 		const session = this.#loadSession();
 		if (session) {
@@ -1141,14 +1219,11 @@ export class Client {
 		}
 		let initial: [any, any];
 		try {
-			initial = await this.gradebook(null);
+			initial = await this.gradebook(null, null, true);
 		} catch (e: any) {
-			if (
-				e instanceof UnauthorizedError ||
-				/invalid|password|credential|expired/i.test(e?.message || "")
-			) {
+			if (e instanceof UnauthorizedError || /invalid|password|credential|expired/i.test(e?.message || "")) {
 				await this.attemptLogin();
-				initial = await this.gradebook(null);
+				initial = await this.gradebook(null, null, true);
 			} else {
 				throw e;
 			}
@@ -1158,9 +1233,31 @@ export class Client {
 		const others = (initial[0].reportingPeriod.available || []).filter(
 			(p: any) => p.index !== currentIdx
 		);
-		const rest = await Promise.all(
-			others.map((p: any) => this.gradebook(p.index))
-		);
+		const pooled = await pool(others, 4, async (p: any) => {
+			try {
+				return await this.gradebook(p.index, null, false);
+			} catch (e: any) {
+				if (e instanceof UnauthorizedError) throw e; // auth is handled above
+				// one retry for transient relay/network failures
+				await sleep(600);
+				return await this.gradebook(p.index, null, false);
+			}
+		});
+		const rest: [any, any][] = [];
+		for (let i = 0; i < others.length; i++) {
+			const r = pooled[i];
+			if (r && r.ok) {
+				rest.push(r.value);
+				continue;
+			}
+			// stale cache beats a hole in the gradebook
+			const cached = this.#gbCacheRead(this.#gbCacheKey(others[i].index, null));
+			if (cached) {
+				rest.push([cached.gb, { gradingScale: cached.gb.gradingScale, token: this.token, cached: true }]);
+			} else {
+				console.warn("gradebook fetch failed for period", others[i].index, r?.error || r);
+			}
+		}
 		// prefetch student info in the background so _app's ChildList() hits
 		// the cache immediately
 		this.ChildList().catch(() => {});
