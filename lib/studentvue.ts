@@ -373,18 +373,49 @@ function parseSummary(summary: any) {
 }
 
 function assignmentToOld(a: any) {
-	const point = pickNum(a.point, a.scoreCalValue, a.Point);
-	const pointPossible = pickNum(
-		a.pointPossible,
-		a.scoreMaxValue,
-		a.PointPossible
-	);
-	let pointsStr: string;
-	if (point !== null && pointPossible !== null)
-		pointsStr = `${point}/${pointPossible}`;
-	else if (pointPossible !== null)
-		pointsStr = `${pointPossible} Points Possible`;
-	else pointsStr = String(a.points ?? a.Points ?? "0/0");
+	/* Score extraction mirrors ojjyMelon's live-verified chain: numeric
+	   point fields first, then the "e / p" points string, then
+	   "N Points Possible", then displayScore's "e out of p". */
+	let earned = pickNum(a.point, a.scoreCalValue, a.Point);
+	let possible = pickNum(a.pointPossible, a.scoreMaxValue, a.PointPossible);
+	if (earned === null || possible === null) {
+		const pts = String(a.points ?? a.Points ?? "").trim();
+		const slash = pts.match(/^(-?[\d.]+)\s*\/\s*(-?[\d.]+)$/);
+		if (slash) {
+			if (earned === null) earned = parseFloat(slash[1]);
+			if (possible === null) possible = parseFloat(slash[2]);
+		} else {
+			if (possible === null) {
+				const maxOnly = pts.match(/^(-?[\d.]+)\s*Points?\s*Possible$/i);
+				if (maxOnly) possible = parseFloat(maxOnly[1]);
+			}
+			if (earned === null || possible === null) {
+				const outOf = String(a.displayScore ?? a.DisplayScore ?? "").match(
+					/(-?[\d.]+)\s*out of\s*(-?[\d.]+)/i
+				);
+				if (outOf) {
+					if (earned === null) earned = parseFloat(outOf[1]);
+					if (possible === null) possible = parseFloat(outOf[2]);
+				}
+			}
+			if (earned === null && possible === null) {
+				const s = pickNum(a.score, a.Score);
+				if (s !== null && String(a.scoreType ?? a.ScoreType ?? "") === "Raw Score")
+					earned = s;
+			}
+		}
+	}
+	/* Old-library points strings: "e / p", "N Points Possible". When nothing
+	   is knowable keep the server string verbatim — parsePoints yields NaN
+	   for non-numeric input, which excludes the assignment from category
+	   sums exactly like the old pipeline did. */
+	let pointsStr = String(a.points ?? a.Points ?? "").trim();
+	if (earned !== null && possible !== null) pointsStr = `${earned} / ${possible}`;
+	else if (possible !== null) pointsStr = `${possible} Points Possible`;
+
+	let notes = decodeEntities(String(a.notes ?? a.Notes ?? ""));
+	// the app compares this string exactly to exclude not-for-grading work
+	if (/not\s*for\s*grading/i.test(notes)) notes = "(Not For Grading)";
 
 	return {
 		gradebookId: String(a.gradebookID ?? a.gradebookId ?? a.GradebookID ?? ""),
@@ -399,7 +430,7 @@ function assignmentToOld(a: any) {
 			value: a.score ?? a.Score ?? a.displayScore ?? "Not Graded",
 		},
 		points: pointsStr,
-		notes: decodeEntities(String(a.notes ?? a.Notes ?? "")),
+		notes: notes,
 		teacherId: String(a.teacherID ?? a.TeacherID ?? ""),
 		description: decodeEntities(dec(a.measureDescription ?? a.MeasureDescription ?? "")),
 		hasDropbox: false,
@@ -451,21 +482,33 @@ function gradebookToOld(raw: any, requestedIndex: number | null): any {
 		})();
 
 	const courses = (raw.courses || []).map((c: any, i: number) => {
-		const mark = (c.marks || [])[0] || null;
+		// pick the first mark that actually carries assignments — some
+		// deployments return an empty placeholder mark first
+		const marksArr: any[] = c.marks || [];
+		const mark =
+			marksArr.find(
+				(m: any) => m && Array.isArray(m.assignments) && m.assignments.length > 0
+			) ??
+			marksArr.find((m: any) => m && Array.isArray(m.assignments)) ??
+			marksArr[0] ??
+			null;
 		const marks = mark
 			? [
 					{
 						name: mark.markName ?? mark.name ?? "",
-						calculatedScore: {
-							string:
+						calculatedScore: (() => {
+							const string =
 								mark.calculatedScoreString ??
 								mark.calculatedScore?.string ??
-								"N/A",
-							raw: num(
-								mark.calculatedScoreRaw ??
-									mark.calculatedScore?.raw
-							),
-						},
+								"N/A";
+							let raw = num(mark.calculatedScoreRaw ?? mark.calculatedScore?.raw);
+							if (isNaN(raw)) {
+								// some deployments only send "89.73% (B)"-style strings
+								const mNum = String(string).match(/-?\d+(?:\.\d+)?/);
+								if (mNum) raw = parseFloat(mNum[0]);
+							}
+							return { string, raw };
+						})(),
 						weightedCategories: parseSummary(
 							mark.gradeCalculationSummary
 						),
@@ -1070,6 +1113,19 @@ export class Client {
 		const gb = gradebookToOld(raw, reportingPeriodIndex as any);
 		const extra = { gradingScale: defaultGradingScale(), token: this.token };
 		gb.gradingScale = extra.gradingScale;
+		// last-resort diagnostics: open DevTools console and inspect/copy
+		// window.__chezDebug if a course still looks wrong
+		try {
+			(window as any).__chezDebug = {
+				at: new Date().toISOString(),
+				mode: this.mode,
+				requestedPeriod: reportingPeriodIndex,
+				raw,
+				mapped: gb,
+			};
+		} catch {
+			/* ignore */
+		}
 		return [gb, extra];
 	}
 
